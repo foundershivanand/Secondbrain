@@ -1,0 +1,19 @@
+{
+  "name": "second-brain-api",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker Backend for Personal Second Brain",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:local": "wrangler d1 execute second_brain --local --file=./schema.sql",
+    "db:remote": "wrangler d1 execute second_brain --remote --file=./schema.sql",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241230.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.100.0"
+  }
+}

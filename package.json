@@ -1,0 +1,27 @@
+{
+  "name": "second-brain",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal Second Brain - Compressed Knowledge, Hierarchical Retrieval, Provenance & Lineage",
+  "scripts": {
+    "dev:api": "cd api && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "build:web": "cd web && npm run build",
+    "typecheck": "cd api && npm run typecheck",
+    "db:init:local": "cd api && npx wrangler d1 execute second_brain --local --file=./schema.sql",
+    "db:init:remote": "cd api && npx wrangler d1 execute second_brain --remote --file=./schema.sql",
+    "seed": "node scripts/seed-demo.mjs",
+    "sync:vault": "node scripts/sync-vault.mjs"
+  },
+  "keywords": [
+    "second-brain",
+    "obsidian",
+    "cloudflare-workers",
+    "cloudflare-d1",
+    "gemini",
+    "knowledge-graph",
+    "pwa"
+  ],
+  "author": "",
+  "license": "MIT"
+}

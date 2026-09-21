@@ -1,0 +1,18 @@
+name = "second-brain-api"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "second_brain"
+database_id = "second-brain-db-id"
+
+# Nightly Memory Consolidation Agent trigger (2:00 AM UTC daily)
+[triggers]
+crons = ["0 2 * * *"]
+
+[vars]
+ENVIRONMENT = "development"
+VAULT_NAME = "second-brain-vault"

@@ -1,0 +1,125 @@
+import { Env } from '../config';
+import { Database } from '../db';
+import { callGemini, cleanAndParseJson } from './gemini';
+import { MEMORY_CONSOLIDATION_PROMPT } from './prompts';
+
+export interface ConsolidationDecision {
+  candidate_id: string;
+  decision: 'PROMOTE' | 'REJECT' | 'UPDATE_EXISTING' | 'MERGE';
+  updated_content?: string;
+  target_memory_id?: string;
+  reasoning: string;
+  importance?: number;
+  confidence?: number;
+}
+
+export interface ConsolidationReport {
+  totalEvaluated: number;
+  promotedCount: number;
+  rejectedCount: number;
+  mergedCount: number;
+  decisions: ConsolidationDecision[];
+  timestamp: string;
+}
+
+export async function runMemoryConsolidationAgent(
+  env: Env,
+  db: Database
+): Promise<ConsolidationReport> {
+  const candidates = await db.listMemories('CANDIDATE');
+
+  if (candidates.length === 0) {
+    return {
+      totalEvaluated: 0,
+      promotedCount: 0,
+      rejectedCount: 0,
+      mergedCount: 0,
+      decisions: [],
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  const existingDurable = await db.getDurableMemories(50);
+
+  const promptInput = `CANDIDATE MEMORIES TO EVALUATE:
+${JSON.stringify(
+  candidates.map((c) => ({
+    id: c.id,
+    content: c.content,
+    evidence: c.evidence,
+    importance: c.importance,
+    confidence: c.confidence,
+  })),
+  null,
+  2
+)}
+
+CURRENT ACTIVE DURABLE MEMORIES (FOR CONFLICT/DUPLICATE CHECKING):
+${JSON.stringify(
+  existingDurable.map((d) => ({
+    id: d.id,
+    content: d.content,
+    importance: d.importance,
+  })),
+  null,
+  2
+)}`;
+
+  try {
+    const rawResult = await callGemini(
+      env,
+      [{ text: promptInput }],
+      MEMORY_CONSOLIDATION_PROMPT,
+      true
+    );
+
+    const decisions = cleanAndParseJson<ConsolidationDecision[]>(rawResult);
+
+    let promotedCount = 0;
+    let rejectedCount = 0;
+    let mergedCount = 0;
+
+    for (const d of decisions) {
+      if (d.decision === 'PROMOTE') {
+        await db.updateMemoryStatus(d.candidate_id, 'DURABLE', d.updated_content);
+        promotedCount++;
+      } else if (d.decision === 'REJECT') {
+        await db.updateMemoryStatus(d.candidate_id, 'REJECTED');
+        rejectedCount++;
+      } else if (d.decision === 'MERGE' || d.decision === 'UPDATE_EXISTING') {
+        if (d.target_memory_id && d.updated_content) {
+          await db.updateMemoryStatus(d.target_memory_id, 'DURABLE', d.updated_content);
+        }
+        await db.updateMemoryStatus(d.candidate_id, 'SUPERSEDED');
+        mergedCount++;
+      }
+    }
+
+    return {
+      totalEvaluated: candidates.length,
+      promotedCount,
+      rejectedCount,
+      mergedCount,
+      decisions,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error('Memory consolidation agent failed:', err);
+    // Fallback heuristic if AI call fails: promote items with importance >= 8
+    let fallbackPromoted = 0;
+    for (const c of candidates) {
+      if (c.importance >= 8) {
+        await db.updateMemoryStatus(c.id, 'DURABLE');
+        fallbackPromoted++;
+      }
+    }
+    return {
+      totalEvaluated: candidates.length,
+      promotedCount: fallbackPromoted,
+      rejectedCount: 0,
+      mergedCount: 0,
+      decisions: [],
+      timestamp: new Date().toISOString(),
+    };
+  }
+}

@@ -1,0 +1,202 @@
+import {
+  BrainStats,
+  ChatResponse,
+  KnowledgeRecord,
+  MemoryRecord,
+  SourceRecord,
+  RelationshipRecord,
+} from '../types';
+
+function getApiBaseUrl(): string {
+  const custom = localStorage.getItem('sb_api_endpoint');
+  if (custom && custom.trim()) return custom.replace(/\/+$/, '');
+  return ''; // Default uses relative /api proxied to Worker
+}
+
+function getAuthHeader(): Record<string, string> {
+  const token = localStorage.getItem('sb_auth_token');
+  if (token) return { Authorization: `Bearer ${token}` };
+  return {};
+}
+
+export const api = {
+  async getHealth() {
+    const res = await fetch(`${getApiBaseUrl()}/api/health`, {
+      headers: getAuthHeader(),
+    });
+    return res.json();
+  },
+
+  async getStats(): Promise<BrainStats> {
+    const res = await fetch(`${getApiBaseUrl()}/api/stats`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch stats');
+    return res.json();
+  },
+
+  async capture(payload: {
+    source_type?: string;
+    text?: string;
+    url?: string;
+    raw_storage?: string;
+    raw_url?: string;
+    user_note?: string;
+    importance?: number;
+    base64_data?: string;
+    mime_type?: string;
+  }) {
+    const res = await fetch(`${getApiBaseUrl()}/api/capture`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Capture failed' }));
+      throw new Error(err.error || 'Capture failed');
+    }
+    return res.json();
+  },
+
+  async chat(query: string): Promise<ChatResponse> {
+    const res = await fetch(`${getApiBaseUrl()}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Chat failed' }));
+      throw new Error(err.error || 'Chat failed');
+    }
+    return res.json();
+  },
+
+  async search(q: string) {
+    const res = await fetch(`${getApiBaseUrl()}/api/search?q=${encodeURIComponent(q)}`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Search failed');
+    return res.json();
+  },
+
+  async getKnowledgeList(topic?: string): Promise<{ items: KnowledgeRecord[]; count: number }> {
+    const url = topic
+      ? `${getApiBaseUrl()}/api/knowledge?topic=${encodeURIComponent(topic)}`
+      : `${getApiBaseUrl()}/api/knowledge`;
+    const res = await fetch(url, { headers: getAuthHeader() });
+    if (!res.ok) throw new Error('Failed to fetch knowledge list');
+    return res.json();
+  },
+
+  async getKnowledgeDetail(id: string): Promise<KnowledgeRecord> {
+    const res = await fetch(`${getApiBaseUrl()}/api/knowledge/${id}`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch knowledge note');
+    return res.json();
+  },
+
+  async deleteKnowledge(id: string) {
+    const res = await fetch(`${getApiBaseUrl()}/api/knowledge/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeader(),
+    });
+    return res.json();
+  },
+
+  async getSourcesList(): Promise<{ sources: SourceRecord[]; count: number }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/sources`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch sources');
+    return res.json();
+  },
+
+  async getMemoriesList(status?: string): Promise<{ memories: MemoryRecord[]; count: number }> {
+    const url = status
+      ? `${getApiBaseUrl()}/api/memories?status=${status}`
+      : `${getApiBaseUrl()}/api/memories`;
+    const res = await fetch(url, { headers: getAuthHeader() });
+    if (!res.ok) throw new Error('Failed to fetch memories');
+    return res.json();
+  },
+
+  async promoteMemory(id: string) {
+    const res = await fetch(`${getApiBaseUrl()}/api/memories/${id}/promote`, {
+      method: 'POST',
+      headers: getAuthHeader(),
+    });
+    return res.json();
+  },
+
+  async rejectMemory(id: string) {
+    const res = await fetch(`${getApiBaseUrl()}/api/memories/${id}/reject`, {
+      method: 'POST',
+      headers: getAuthHeader(),
+    });
+    return res.json();
+  },
+
+  async runConsolidation() {
+    const res = await fetch(`${getApiBaseUrl()}/api/memories/consolidate`, {
+      method: 'POST',
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Consolidation failed' }));
+      throw new Error(err.error || 'Consolidation failed');
+    }
+    return res.json();
+  },
+
+  async getJobs() {
+    const res = await fetch(`${getApiBaseUrl()}/api/sources/jobs`, {
+      headers: getAuthHeader(),
+    });
+    return res.json();
+  },
+
+  async importChatExport(conversations: any) {
+    const res = await fetch(`${getApiBaseUrl()}/api/import/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(conversations),
+    });
+    if (!res.ok) throw new Error('Chat import failed');
+    return res.json();
+  },
+
+  async importYoutubeHistory(history: any) {
+    const res = await fetch(`${getApiBaseUrl()}/api/import/youtube-history`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(history),
+    });
+    if (!res.ok) throw new Error('YouTube import failed');
+    return res.json();
+  },
+
+  async exportVaultManifest() {
+    const res = await fetch(`${getApiBaseUrl()}/api/export/vault`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Vault export failed');
+    return res.json();
+  },
+
+  getMarkdownDownloadUrl(id: string): string {
+    return `${getApiBaseUrl()}/api/export/markdown/${id}`;
+  },
+};

@@ -33,6 +33,7 @@ export async function handleCapture(request: Request, env: Env, db: Database): P
         mimeType: body.mime_type,
         fileSize: body.file_size,
         base64Data: body.base64_data,
+        fileUri: body.file_uri,
         title: body.title,
         userNote: body.user_note || body.why_saved,
         importance: body.importance ? Number(body.importance) : 5,

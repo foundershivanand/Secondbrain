@@ -12,7 +12,8 @@
     "db:init:remote": "cd api && npx wrangler d1 execute second_brain --remote --file=./schema.sql",
     "seed": "node scripts/seed-demo.mjs",
     "sync:vault": "node scripts/sync-vault.mjs",
-    "scan:raw": "node scripts/scan-raw-storage.mjs"
+    "scan:raw": "node scripts/scan-raw-storage.mjs",
+    "terabox:import": "node scripts/terabox-importer.mjs"
   },
   "keywords": [
     "second-brain",

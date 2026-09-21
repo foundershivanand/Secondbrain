@@ -131,6 +131,7 @@ export async function extractKnowledgeWithGemini(
     url?: string;
     mimeType?: string;
     base64Data?: string;
+    fileUri?: string;
     sourceType?: string;
     userNote?: string;
   }
@@ -142,7 +143,14 @@ export async function extractKnowledgeWithGemini(
   if (content.userNote) promptInstruction += `User Note / Context: ${content.userNote}\n`;
   promptInstruction += `\nAnalyze the following source material:\n`;
 
-  if (content.base64Data && content.mimeType) {
+  if (content.fileUri && content.mimeType) {
+    parts.push({
+      file_data: {
+        mime_type: content.mimeType,
+        file_uri: content.fileUri,
+      },
+    });
+  } else if (content.base64Data && content.mimeType) {
     parts.push({
       inline_data: {
         mime_type: content.mimeType,

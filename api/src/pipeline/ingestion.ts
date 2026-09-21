@@ -26,6 +26,7 @@ export interface IngestionInput {
   mimeType?: string;
   fileSize?: number;
   base64Data?: string;
+  fileUri?: string;
   title?: string;
   userNote?: string;   // Explicit user thought
   importance?: number;
@@ -149,6 +150,7 @@ export async function processIngestion(
       url: input.url || input.rawUrl,
       mimeType: input.mimeType,
       base64Data: input.base64Data,
+      fileUri: input.fileUri,
       sourceType: input.sourceType,
       userNote: input.userNote,
     });

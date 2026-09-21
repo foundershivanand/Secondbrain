@@ -95,6 +95,24 @@ ${JSON.stringify(
       }
     }
 
+    // Refresh Brain State with newly consolidated insights (Section 56)
+    try {
+      const brainState = await db.getBrainState();
+      if (brainState && promotedCount > 0) {
+        const newlyPromoted = decisions
+          .filter((d) => d.decision === 'PROMOTE')
+          .map((d) => d.updated_content || d.reasoning);
+        
+        brainState.recent_learning = Array.from(
+          new Set([...newlyPromoted.slice(0, 3), ...(brainState.recent_learning || [])])
+        ).slice(0, 8);
+
+        await db.updateBrainState(brainState);
+      }
+    } catch (e) {
+      console.error('Failed to sync brain state after consolidation:', e);
+    }
+
     return {
       totalEvaluated: candidates.length,
       promotedCount,

@@ -5,6 +5,7 @@ import {
   KnowledgeRecord,
   ExtractionResult,
   SourceType,
+  IngestionPriority,
 } from '../types';
 import { extractKnowledgeWithGemini } from '../ai/gemini';
 import { generateObsidianMarkdown } from './markdown';
@@ -15,15 +16,19 @@ export interface IngestionInput {
   sourceType: SourceType;
   text?: string;
   url?: string;
-  rawStorage?: string; // 'telegram', 'gdrive', 'terabox', 'discord', 'local'
+  rawStorage?: string; // 'terabox', 'google_drive', 'telegram', 'discord', 'web', 'local'
+  rawId?: string;      // RAW-XXXXXX pointer
   rawFileId?: string;
+  rawMessageId?: string;
+  channelId?: string;
   rawUrl?: string;
   mimeType?: string;
   fileSize?: number;
   base64Data?: string;
   title?: string;
-  userNote?: string;
+  userNote?: string;   // Explicit user thought
   importance?: number;
+  priority?: IngestionPriority; // 'P0', 'P1', 'P2', 'P3', 'P4'
 }
 
 export interface IngestionResult {
@@ -44,17 +49,17 @@ export async function processIngestion(
   const rawIdNum = Math.floor(100000 + Math.random() * 900000);
   const sourceId = `SRC-${rawIdNum}`;
   const knowledgeId = `KN-${rawIdNum}`;
+  const rawId = input.rawId || `RAW-${rawIdNum}`;
 
   // 1. Content Sanitization & Deduplication Hash
   const cleanText = input.text ? sanitizeUntrustedInput(input.text) : '';
-  const hashPayload = `${input.sourceType}:${input.url || ''}:${cleanText.slice(0, 500)}`;
+  const hashPayload = `${input.sourceType}:${input.url || input.rawUrl || ''}:${cleanText.slice(0, 500)}`;
   const contentHash = await sha256(hashPayload);
 
   // Check for duplicate source
   const existingSource = await db.getSourceByHash(contentHash);
   if (existingSource && existingSource.status === 'DONE') {
-    // If already processed, retrieve existing knowledge note
-    const existingKnowledge = await db.listKnowledge(1, 0);
+    const existingKnowledge = await db.listKnowledge(50, 0);
     const matched = existingKnowledge.find((k) => k.source_id === existingSource.id);
     if (matched) {
       const markdown = generateObsidianMarkdown(
@@ -70,6 +75,7 @@ export async function processIngestion(
             confidence: a.confidence,
           })),
           insights: JSON.parse(matched.insights || '[]'),
+          my_thought: matched.my_thought || undefined,
           actions: JSON.parse(matched.actionable_items || '[]'),
           topics: JSON.parse(matched.topics || '[]'),
           entities: JSON.parse(matched.entities || '[]'),
@@ -91,6 +97,7 @@ export async function processIngestion(
           key_information: JSON.parse(matched.key_information || '[]'),
           atomic_knowledge: [],
           insights: JSON.parse(matched.insights || '[]'),
+          my_thought: matched.my_thought || undefined,
           actions: JSON.parse(matched.actionable_items || '[]'),
           topics: JSON.parse(matched.topics || '[]'),
           entities: JSON.parse(matched.entities || '[]'),
@@ -105,14 +112,17 @@ export async function processIngestion(
     }
   }
 
-  // 2. Register Source in D1 (STATUS: RECEIVED)
+  // 2. Register Source Pointer in D1 (STATUS: RECEIVED)
   const sourceRecord: SourceRecord = {
     id: sourceId,
+    raw_id: rawId,
     source_type: input.sourceType,
     title: input.title || (input.url ? `Link: ${input.url}` : cleanText.slice(0, 40)) || 'Unprocessed Input',
     original_url: input.url || null,
     raw_storage: input.rawStorage || (input.url ? 'web' : 'local'),
     raw_file_id: input.rawFileId || null,
+    raw_message_id: input.rawMessageId || null,
+    channel_id: input.channelId || null,
     raw_url: input.rawUrl || input.url || null,
     mime_type: input.mimeType || 'text/plain',
     file_size: input.fileSize || (input.text ? input.text.length : 0),
@@ -121,6 +131,7 @@ export async function processIngestion(
     status: 'RECEIVED',
     content_hash: contentHash,
     importance: input.importance || 5,
+    priority: input.priority || 'P1',
     created_at: now,
   };
 
@@ -134,17 +145,22 @@ export async function processIngestion(
     // 4. Run Gemini Structured Extraction
     const extraction = await extractKnowledgeWithGemini(env, {
       text: cleanText,
-      url: input.url,
+      url: input.url || input.rawUrl,
       mimeType: input.mimeType,
       base64Data: input.base64Data,
       sourceType: input.sourceType,
       userNote: input.userNote,
     });
 
+    // Ensure user's explicit thought is preserved
+    if (input.userNote && !extraction.my_thought) {
+      extraction.my_thought = input.userNote;
+    }
+
     // 5. Update status -> ANALYZING
     await db.updateSourceStatus(sourceId, 'ANALYZING', null, extraction.title);
 
-    // 6. Generate Obsidian Markdown
+    // 6. Generate Obsidian Markdown Note (Matching Section 46)
     const markdown = generateObsidianMarkdown(knowledgeId, extraction, sourceRecord);
     const markdownPath = `${markdown.folder}/${markdown.filename}`;
 
@@ -157,6 +173,7 @@ export async function processIngestion(
       core_idea: extraction.core_idea || '',
       key_information: JSON.stringify(extraction.key_information || []),
       insights: JSON.stringify(extraction.insights || []),
+      my_thought: extraction.my_thought || input.userNote || null,
       actionable_items: JSON.stringify(extraction.actions || []),
       topics: JSON.stringify(extraction.topics || []),
       entities: JSON.stringify(extraction.entities || []),
@@ -187,7 +204,19 @@ export async function processIngestion(
       }
     }
 
-    // 9. Store Relationships
+    // 9. Store User Thought as a distinct atomic concept if provided
+    if (extraction.my_thought) {
+      await db.createAtomicKnowledge({
+        id: `AK-${rawIdNum}-UT`,
+        knowledge_id: knowledgeId,
+        statement: extraction.my_thought,
+        concept_type: 'USER_THOUGHT',
+        confidence: 1.0,
+        created_at: now,
+      });
+    }
+
+    // 10. Store Relationships
     if (extraction.relationships && extraction.relationships.length > 0) {
       for (let i = 0; i < extraction.relationships.length; i++) {
         const rel = extraction.relationships[i];
@@ -202,7 +231,7 @@ export async function processIngestion(
       }
     }
 
-    // 10. Store Candidate Memories (M4 layer candidates)
+    // 11. Store Candidate Memories (M4 layer candidates)
     if (extraction.candidate_memories && extraction.candidate_memories.length > 0) {
       for (let i = 0; i < extraction.candidate_memories.length; i++) {
         const cm = extraction.candidate_memories[i];
@@ -213,6 +242,8 @@ export async function processIngestion(
           evidence: `${extraction.title} (${sourceId})`,
           confidence: 0.9,
           importance: cm.importance || 8,
+          repetition_count: 1,
+          memory_score: (cm.importance || 8) * 0.9,
           status: 'CANDIDATE',
           created_at: now,
           updated_at: now,
@@ -220,7 +251,7 @@ export async function processIngestion(
       }
     }
 
-    // 11. Complete Source (STATUS: DONE)
+    // 12. Complete Source (STATUS: DONE)
     const processedAt = new Date().toISOString();
     await db.updateSourceStatus(sourceId, 'DONE', processedAt, extraction.title);
     if (jobId) await db.updateJobStatus(jobId, 'COMPLETED');

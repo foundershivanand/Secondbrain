@@ -1,10 +1,12 @@
 import {
   BrainStats,
+  BrainState,
   ChatResponse,
   KnowledgeRecord,
   MemoryRecord,
   SourceRecord,
   RelationshipRecord,
+  MapOfContentRecord,
 } from '../types';
 
 function getApiBaseUrl(): string {
@@ -35,14 +37,40 @@ export const api = {
     return res.json();
   },
 
+  async getBrainState(): Promise<BrainState> {
+    const res = await fetch(`${getApiBaseUrl()}/api/brain-state`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch brain state');
+    return res.json();
+  },
+
+  async updateBrainState(state: BrainState): Promise<{ success: boolean }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/brain-state`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(state),
+    });
+    if (!res.ok) throw new Error('Failed to update brain state');
+    return res.json();
+  },
+
   async capture(payload: {
     source_type?: string;
     text?: string;
     url?: string;
     raw_storage?: string;
+    raw_id?: string;
+    raw_file_id?: string;
+    raw_message_id?: string;
+    channel_id?: string;
     raw_url?: string;
     user_note?: string;
     importance?: number;
+    priority?: string;
     base64_data?: string;
     mime_type?: string;
   }) {
@@ -155,10 +183,40 @@ export const api = {
     return res.json();
   },
 
-  async getJobs() {
-    const res = await fetch(`${getApiBaseUrl()}/api/sources/jobs`, {
+  async getMOCs(): Promise<{ mocs: MapOfContentRecord[] }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/mocs`, {
       headers: getAuthHeader(),
     });
+    if (!res.ok) throw new Error('Failed to fetch MOCs');
+    return res.json();
+  },
+
+  async generateMOC(topic: string): Promise<{ success: boolean; moc: MapOfContentRecord }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/mocs`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify({ topic }),
+    });
+    if (!res.ok) throw new Error('Failed to generate MOC');
+    return res.json();
+  },
+
+  async importManifest(items: any[]): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/api/manifest/import`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(items),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Manifest import failed' }));
+      throw new Error(err.error || 'Manifest import failed');
+    }
     return res.json();
   },
 

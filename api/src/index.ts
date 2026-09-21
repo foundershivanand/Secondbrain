@@ -9,6 +9,9 @@ import { handleMemories } from './routes/memories';
 import { handleSources } from './routes/sources';
 import { handleImporters } from './routes/importers';
 import { handleExport } from './routes/export';
+import { handleBrainState } from './routes/brain-state';
+import { handleMOCs } from './routes/mocs';
+import { handleManifestImport } from './routes/manifest';
 import { runMemoryConsolidationAgent } from './ai/memory-agent';
 import { verifyAuth } from './utils/security';
 import { handleCorsPreflight, jsonResponse, errorResponse } from './utils/response';
@@ -88,6 +91,18 @@ export default {
       if (pathname.startsWith('/api/export')) {
         const pathParts = pathname.replace(/^\/api\/export\/?/, '').split('/').filter(Boolean);
         return await handleExport(request, db, pathParts);
+      }
+
+      if (pathname === '/api/brain-state') {
+        return await handleBrainState(request, db);
+      }
+
+      if (pathname.startsWith('/api/mocs')) {
+        return await handleMOCs(request, db);
+      }
+
+      if (pathname === '/api/manifest/import') {
+        return await handleManifestImport(request, env, db);
       }
 
       return errorResponse(`Endpoint not found: ${pathname}`, 404);

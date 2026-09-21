@@ -1,13 +1,16 @@
 -- Second Brain Database Schema (Cloudflare D1 SQLite)
 
--- 1. Sources: Raw inputs and pointers (Telegram, Drive, TeraBox, URLs, etc.)
+-- 1. Sources: Raw inputs, files, and pointers (Telegram, Drive, TeraBox, Discord, etc.)
 CREATE TABLE IF NOT EXISTS sources (
     id TEXT PRIMARY KEY,
+    raw_id TEXT,              -- RAW-XXXXXX pointer
     source_type TEXT NOT NULL,
     title TEXT,
     original_url TEXT,
-    raw_storage TEXT,
+    raw_storage TEXT,         -- 'terabox', 'gdrive', 'telegram', 'discord', 'web', 'local'
     raw_file_id TEXT,
+    raw_message_id TEXT,
+    channel_id TEXT,
     raw_url TEXT,
     mime_type TEXT,
     file_size INTEGER,
@@ -16,6 +19,7 @@ CREATE TABLE IF NOT EXISTS sources (
     status TEXT NOT NULL DEFAULT 'RECEIVED',
     content_hash TEXT,
     importance INTEGER DEFAULT 5,
+    priority TEXT DEFAULT 'P1', -- 'P0', 'P1', 'P2', 'P3', 'P4'
     created_at TEXT NOT NULL
 );
 
@@ -27,7 +31,8 @@ CREATE TABLE IF NOT EXISTS knowledge (
     knowledge_type TEXT NOT NULL,
     core_idea TEXT,
     key_information TEXT,     -- JSON array of strings
-    insights TEXT,            -- JSON array of strings
+    insights TEXT,            -- JSON array of strings (AI insights)
+    my_thought TEXT,          -- Explicit User Thoughts (Distinguished from AI)
     actionable_items TEXT,    -- JSON array of strings
     topics TEXT,              -- JSON array of strings
     entities TEXT,            -- JSON array of strings
@@ -42,12 +47,12 @@ CREATE TABLE IF NOT EXISTS knowledge (
     FOREIGN KEY(source_id) REFERENCES sources(id) ON DELETE SET NULL
 );
 
--- 3. Atomic Knowledge: Individual reusable ideas (M2 Layer)
+-- 3. Atomic Knowledge: Individual modular ideas (M2 Layer)
 CREATE TABLE IF NOT EXISTS atomic_knowledge (
     id TEXT PRIMARY KEY,
     knowledge_id TEXT NOT NULL,
     statement TEXT NOT NULL,
-    concept_type TEXT NOT NULL,
+    concept_type TEXT NOT NULL, -- 'CONCEPT', 'FACT', 'CLAIM', 'ACTION', 'INSIGHT', 'USER_THOUGHT', 'AI_SUGGESTION'
     confidence REAL,
     created_at TEXT NOT NULL,
     FOREIGN KEY(knowledge_id) REFERENCES knowledge(id) ON DELETE CASCADE
@@ -71,12 +76,14 @@ CREATE TABLE IF NOT EXISTS memories (
     evidence TEXT,
     confidence REAL,
     importance INTEGER,
+    repetition_count INTEGER DEFAULT 1,
+    memory_score REAL,
     status TEXT DEFAULT 'CANDIDATE', -- 'CANDIDATE', 'DURABLE', 'REJECTED', 'SUPERSEDED'
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
 
--- 6. Processing Jobs: Asynchronous ingestion job queue
+-- 6. Processing Jobs: Asynchronous ingestion queue
 CREATE TABLE IF NOT EXISTS processing_jobs (
     id TEXT PRIMARY KEY,
     source_id TEXT NOT NULL,
@@ -89,8 +96,29 @@ CREATE TABLE IF NOT EXISTS processing_jobs (
     completed_at TEXT
 );
 
+-- 7. Brain State: Compact current context (5–20 KB global understanding)
+CREATE TABLE IF NOT EXISTS brain_state (
+    key TEXT PRIMARY KEY,
+    data TEXT NOT NULL, -- JSON object
+    updated_at TEXT NOT NULL
+);
+
+-- 8. Maps of Content (MOCs): Topic-level index summaries (M3 Layer)
+CREATE TABLE IF NOT EXISTS mocs (
+    id TEXT PRIMARY KEY,
+    topic TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    summary TEXT,
+    linked_knowledge TEXT, -- JSON array of knowledge IDs
+    markdown_path TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 -- Indexes for lightning fast retrieval and indexing
 CREATE INDEX IF NOT EXISTS idx_sources_status ON sources(status);
+CREATE INDEX IF NOT EXISTS idx_sources_raw_id ON sources(raw_id);
+CREATE INDEX IF NOT EXISTS idx_sources_priority ON sources(priority);
 CREATE INDEX IF NOT EXISTS idx_sources_content_hash ON sources(content_hash);
 CREATE INDEX IF NOT EXISTS idx_knowledge_source_id ON knowledge(source_id);
 CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at);

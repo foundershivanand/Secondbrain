@@ -52,6 +52,11 @@ export function generateObsidianMarkdown(
     timestampsSection = `\n## Important Timestamps\n\n${tsLines}\n`;
   }
 
+  let myThoughtsSection = '';
+  if (extraction.my_thought) {
+    myThoughtsSection = `\n## My Thoughts\n\n${extraction.my_thought}\n`;
+  }
+
   let productIdeasSection = '';
   if (extraction.product_ideas && extraction.product_ideas.length > 0) {
     const ideas = extraction.product_ideas.map((p) => `- 💡 ${p}`).join('\n');
@@ -62,12 +67,15 @@ export function generateObsidianMarkdown(
 id: ${knowledgeId}
 type: knowledge
 source_type: ${extraction.source_type || 'text'}
+raw_id: ${source?.raw_id || 'RAW-POINTER'}
+storage: ${source?.raw_storage || 'web'}
+raw_url: "${source?.raw_url || source?.original_url || ''}"
 importance: ${extraction.candidate_memories?.[0]?.importance || 8}
 confidence: ${extraction.atomic_knowledge?.[0]?.confidence || 0.95}
 topics:
 ${yamlTopics}
 source_id: ${source?.id || 'SRC-MANUAL'}
-created_at: ${new Date().toISOString()}
+created: ${new Date().toISOString().slice(0, 10)}
 ---
 
 # ${extraction.title}
@@ -83,7 +91,7 @@ ${keyInfoBullets || '- No specific bullet points recorded.'}
 ## Atomic Knowledge
 
 ${atomicKnowledgeBlocks || 'No atomic knowledge blocks extracted.'}
-
+${timestampsSection}${myThoughtsSection}
 ## Insights
 
 ${insightsBullets || '- Direct knowledge capture.'}
@@ -91,8 +99,8 @@ ${insightsBullets || '- Direct knowledge capture.'}
 ## Actions
 
 ${actionsBullets || '- No immediate action required.'}
-${timestampsSection}${productIdeasSection}
-## Related Topics
+${productIdeasSection}
+## Related Knowledge
 
 ${relatedTopicWikiLinks || '- [[General]]'}
 
@@ -104,7 +112,7 @@ ${extraction.why_saved || 'Valuable insight for personal reference and knowledge
 
 ${extraction.what_changed || 'Refined understanding of this domain.'}
 
-## Original Source
+## Original
 
 ${rawSourceLink}
 `;

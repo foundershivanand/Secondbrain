@@ -5,6 +5,8 @@ import {
   KnowledgeRelationship,
   MemoryRecord,
   ProcessingJobRecord,
+  BrainState,
+  MapOfContentRecord,
 } from '../types';
 
 export class Database {
@@ -15,18 +17,21 @@ export class Database {
     await this.db
       .prepare(
         `INSERT INTO sources (
-          id, source_type, title, original_url, raw_storage, raw_file_id, raw_url,
+          id, raw_id, source_type, title, original_url, raw_storage, raw_file_id, raw_message_id, channel_id, raw_url,
           mime_type, file_size, captured_at, processed_at, status, content_hash,
-          importance, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          importance, priority, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         source.id,
+        source.raw_id || null,
         source.source_type,
         source.title,
         source.original_url,
         source.raw_storage,
         source.raw_file_id,
+        source.raw_message_id || null,
+        source.channel_id || null,
         source.raw_url,
         source.mime_type,
         source.file_size,
@@ -35,6 +40,7 @@ export class Database {
         source.status,
         source.content_hash,
         source.importance,
+        source.priority || 'P1',
         source.created_at
       )
       .run();
@@ -91,9 +97,9 @@ export class Database {
       .prepare(
         `INSERT INTO knowledge (
           id, source_id, title, knowledge_type, core_idea, key_information,
-          insights, actionable_items, topics, entities, tags, confidence,
+          insights, my_thought, actionable_items, topics, entities, tags, confidence,
           importance, why_saved, what_changed, markdown_path, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         k.id,
@@ -103,6 +109,7 @@ export class Database {
         k.core_idea,
         k.key_information,
         k.insights,
+        k.my_thought || null,
         k.actionable_items,
         k.topics,
         k.entities,
@@ -158,10 +165,10 @@ export class Database {
     const res = await this.db
       .prepare(
         `SELECT * FROM knowledge 
-         WHERE title LIKE ? OR core_idea LIKE ? OR topics LIKE ? OR key_information LIKE ?
+         WHERE title LIKE ? OR core_idea LIKE ? OR topics LIKE ? OR key_information LIKE ? OR my_thought LIKE ?
          ORDER BY importance DESC, created_at DESC LIMIT ?`
       )
-      .bind(pattern, pattern, pattern, pattern, limit)
+      .bind(pattern, pattern, pattern, pattern, pattern, limit)
       .all<KnowledgeRecord>();
     return res.results || [];
   }
@@ -230,10 +237,13 @@ export class Database {
 
   // --- MEMORIES ---
   async createMemory(m: MemoryRecord): Promise<void> {
+    const repetition = m.repetition_count || 1;
+    const score = m.importance * (m.confidence || 0.9) * repetition;
+
     await this.db
       .prepare(
-        `INSERT INTO memories (id, memory_type, content, evidence, confidence, importance, status, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO memories (id, memory_type, content, evidence, confidence, importance, repetition_count, memory_score, status, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         m.id,
@@ -242,6 +252,8 @@ export class Database {
         m.evidence,
         m.confidence,
         m.importance,
+        repetition,
+        score,
         m.status,
         m.created_at,
         m.updated_at
@@ -256,7 +268,7 @@ export class Database {
       query += ` WHERE status = ?`;
       params.push(status);
     }
-    query += ` ORDER BY importance DESC, created_at DESC`;
+    query += ` ORDER BY memory_score DESC, importance DESC, created_at DESC`;
     const res = await this.db.prepare(query).bind(...params).all<MemoryRecord>();
     return res.results || [];
   }
@@ -282,10 +294,57 @@ export class Database {
 
   async getDurableMemories(limit: number = 50): Promise<MemoryRecord[]> {
     const res = await this.db
-      .prepare(`SELECT * FROM memories WHERE status = 'DURABLE' ORDER BY importance DESC LIMIT ?`)
+      .prepare(`SELECT * FROM memories WHERE status = 'DURABLE' ORDER BY memory_score DESC, importance DESC LIMIT ?`)
       .bind(limit)
       .all<MemoryRecord>();
     return res.results || [];
+  }
+
+  // --- BRAIN STATE ---
+  async getBrainState(): Promise<BrainState | null> {
+    const record = await this.db
+      .prepare(`SELECT data FROM brain_state WHERE key = 'current'`)
+      .first<{ data: string }>();
+
+    if (!record) return null;
+    try {
+      return JSON.parse(record.data) as BrainState;
+    } catch {
+      return null;
+    }
+  }
+
+  async updateBrainState(state: BrainState): Promise<void> {
+    const now = new Date().toISOString();
+    await this.db
+      .prepare(`INSERT OR REPLACE INTO brain_state (key, data, updated_at) VALUES ('current', ?, ?)`)
+      .bind(JSON.stringify(state), now)
+      .run();
+  }
+
+  // --- MAPS OF CONTENT (MOCs) ---
+  async listMOCs(): Promise<MapOfContentRecord[]> {
+    const res = await this.db.prepare(`SELECT * FROM mocs ORDER BY updated_at DESC`).all<MapOfContentRecord>();
+    return res.results || [];
+  }
+
+  async createOrUpdateMOC(moc: MapOfContentRecord): Promise<void> {
+    await this.db
+      .prepare(
+        `INSERT OR REPLACE INTO mocs (id, topic, title, summary, linked_knowledge, markdown_path, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      )
+      .bind(
+        moc.id,
+        moc.topic,
+        moc.title,
+        moc.summary,
+        moc.linked_knowledge,
+        moc.markdown_path,
+        moc.created_at,
+        moc.updated_at
+      )
+      .run();
   }
 
   // --- PROCESSING JOBS ---
@@ -343,6 +402,7 @@ export class Database {
     memoriesCount: number;
     durableMemoriesCount: number;
     relationshipsCount: number;
+    mocsCount: number;
   }> {
     const s = await this.db.prepare(`SELECT COUNT(*) as count FROM sources`).first<{ count: number }>();
     const k = await this.db.prepare(`SELECT COUNT(*) as count FROM knowledge`).first<{ count: number }>();
@@ -350,6 +410,7 @@ export class Database {
     const m = await this.db.prepare(`SELECT COUNT(*) as count FROM memories`).first<{ count: number }>();
     const dm = await this.db.prepare(`SELECT COUNT(*) as count FROM memories WHERE status = 'DURABLE'`).first<{ count: number }>();
     const r = await this.db.prepare(`SELECT COUNT(*) as count FROM relationships`).first<{ count: number }>();
+    const mocs = await this.db.prepare(`SELECT COUNT(*) as count FROM mocs`).first<{ count: number }>();
 
     return {
       sourcesCount: s?.count || 0,
@@ -358,6 +419,7 @@ export class Database {
       memoriesCount: m?.count || 0,
       durableMemoriesCount: dm?.count || 0,
       relationshipsCount: r?.count || 0,
+      mocsCount: mocs?.count || 0,
     };
   }
 }

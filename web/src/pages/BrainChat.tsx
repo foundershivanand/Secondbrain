@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Send,
   Sparkles,
@@ -10,9 +10,12 @@ import {
   HelpCircle,
   Flame,
   ArrowRight,
+  AlertTriangle,
+  Target,
+  Compass,
 } from 'lucide-react';
 import { api } from '../services/api';
-import { ChatResponse, CitationSource } from '../types';
+import { ChatResponse, CitationSource, BrainState } from '../types';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -24,19 +27,24 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
   onNavigateTopic,
 }) => {
   const [inputQuery, setInputQuery] = useState('');
+  const [brainState, setBrainState] = useState<BrainState | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
       content:
-        '👋 Welcome to your Second Brain. I have synthesized your knowledge notes, atomic ideas, and durable memories.\n\nAsk me anything you have learned, or explore connections across your ideas.',
+        '👋 Welcome to your Personal Intelligence OS. I have loaded your current Brain State, atomic ideas, and long-term memory.\n\nAsk me anything you have learned, or trace how your beliefs have evolved over time.',
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    api.getBrainState().then((s) => setBrainState(s)).catch(() => {});
+  }, []);
+
   const samplePrompts = [
     'What have I learned about AI agent memory?',
+    'What is our stance on storing 100 GB in Obsidian vs raw pointers?',
     'What SaaS and product opportunities were identified?',
-    'Why did I transition to hierarchical retrieval?',
     'Show me the important timestamps for agent architectures',
   ];
 
@@ -73,8 +81,36 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
 
   return (
     <div className="flex flex-col h-[calc(100vh-5rem)] max-w-5xl mx-auto p-4 sm:p-6 space-y-4">
+      {/* Compact Brain State Banner (Section 32) */}
+      {brainState && (
+        <div className="glass-panel p-3 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center space-x-2">
+            <span className="p-1 rounded-lg bg-purple-600/30 text-purple-300">
+              <Target className="w-3.5 h-3.5" />
+            </span>
+            <span className="font-bold text-slate-200">Active Goals:</span>
+            <span className="text-purple-300 font-medium truncate max-w-md">
+              {brainState.current_goals?.[0] || 'Build Second Brain'}
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-3 text-[11px] text-slate-400">
+            <span>
+              Projects: <strong className="text-white">{brainState.active_projects?.length || 0}</strong>
+            </span>
+            <span>•</span>
+            <span>
+              Top Interest:{' '}
+              <strong className="text-purple-300">
+                {brainState.current_interests?.[0]?.topic || 'AI agents'}
+              </strong>
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Sample Question Chips */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
         <span className="text-xs font-bold text-purple-400 flex items-center space-x-1 shrink-0">
           <Flame className="w-3.5 h-3.5" />
           <span>Try:</span>
@@ -112,6 +148,27 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
               </div>
 
               <div className={`space-y-3 max-w-[85%] ${isUser ? 'items-end' : ''}`}>
+                {/* Conflict Detection Card (Section 59) */}
+                {msg.response?.conflict_detected && (
+                  <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-500/30 text-xs space-y-1.5 text-amber-200 animate-fade-in">
+                    <div className="flex items-center space-x-1.5 font-bold text-amber-400">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Belief Conflict Detected</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400">Prior Belief: </span>
+                      <span className="line-through text-slate-300">{msg.response.conflict_detected.prior_belief}</span>
+                    </div>
+                    <div>
+                      <span className="text-amber-300 font-semibold">New Evidence: </span>
+                      <span>{msg.response.conflict_detected.new_evidence}</span>
+                    </div>
+                    <div className="text-[11px] text-amber-400/90 italic">
+                      💡 {msg.response.conflict_detected.suggested_action}
+                    </div>
+                  </div>
+                )}
+
                 <div
                   className={`p-4 rounded-2xl text-sm leading-relaxed ${
                     isUser
@@ -122,7 +179,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                   <div className="whitespace-pre-wrap">{msg.content}</div>
                 </div>
 
-                {/* Sources & Provenance Citations (Section 19) */}
+                {/* Sources & Provenance Citations (Section 19 & 46) */}
                 {msg.response?.sources && msg.response.sources.length > 0 && (
                   <div className="glass-panel p-3.5 rounded-xl border border-slate-800/80 space-y-2 text-xs">
                     <div className="flex items-center space-x-1.5 text-purple-400 font-bold uppercase tracking-wider text-[10px]">
@@ -141,6 +198,11 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                               {src.source_type}
                             </span>
                           </div>
+                          {src.raw_id && (
+                            <div className="text-[10px] font-mono text-emerald-400">
+                              Pointer: {src.raw_id} ({src.raw_storage || 'cloud'})
+                            </div>
+                          )}
                           {src.timestamp && (
                             <div className="flex items-center space-x-1 text-[11px] text-amber-400 font-mono">
                               <Clock className="w-3 h-3" />
@@ -169,7 +231,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                   </div>
                 )}
 
-                {/* Related Topics & Memories Used */}
+                {/* Related Topics WikiLinks */}
                 {msg.response && (
                   <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
                     {msg.response.related_topics?.map((topic, i) => (
@@ -231,7 +293,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask your brain (e.g. What have I learned about AI agent memory?)..."
+            placeholder="Ask your brain (e.g. What did I learn about AI agent memory?)..."
             className="flex-1 bg-transparent px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
           />
           <button

@@ -4,19 +4,96 @@ import {
   HardDrive,
   ExternalLink,
   ShieldAlert,
-  FolderGit2,
-  Cloud,
   CheckCircle,
+  Upload,
+  Layers,
+  FileCode,
+  Loader2,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceRecord } from '../types';
 
 export const SourcesView: React.FC = () => {
   const [sources, setSources] = useState<SourceRecord[]>([]);
+  const [activeTab, setActiveTab] = useState<'catalog' | 'manifest'>('catalog');
+  const [manifestText, setManifestText] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importResult, setImportResult] = useState<any>(null);
+
+  const fetchSources = () => {
+    api.getSourcesList().then((res) => setSources(res.sources || []));
+  };
 
   useEffect(() => {
-    api.getSourcesList().then((res) => setSources(res.sources || []));
+    fetchSources();
   }, []);
+
+  const sampleManifest = [
+    {
+      raw_id: "RAW-019823",
+      filename: "ai-agents-memory-deep-dive.mp4",
+      storage: "google_drive",
+      url: "https://drive.google.com/file/d/1AbCdEfG_DriveFileId/view",
+      size: 450000000,
+      priority: "P0",
+      title: "AI Agent Memory Architecture",
+      summary: "Comprehensive lecture on RAG and decoupling storage from reasoning"
+    },
+    {
+      raw_id: "RAW-019824",
+      filename: "saas-onboarding-ux.png",
+      storage: "telegram",
+      url: "telegram://file/tg-file-98214",
+      message_id: "81923",
+      size: 1240000,
+      priority: "P1",
+      title: "Frictionless SaaS Onboarding UX Pattern",
+      summary: "Deferred authentication UI pattern"
+    },
+    {
+      raw_id: "RAW-019825",
+      filename: "decoupled-storage-whitepaper.pdf",
+      storage: "terabox",
+      url: "https://terabox.com/s/sample-paper",
+      size: 24000000,
+      priority: "P0",
+      title: "Decoupled Storage & Reasoning Whitepaper",
+      summary: "Architecture whitepaper for keeping database under 500 MB"
+    },
+    {
+      raw_id: "RAW-019826",
+      filename: "discord-customer-feedback.txt",
+      storage: "discord",
+      url: "https://discord.com/channels/123/456/789",
+      channel_id: "456",
+      message_id: "789",
+      priority: "P2",
+      title: "Community Pain Points on Context Bloat",
+      summary: "Pain points reported by developers running out of LLM context"
+    }
+  ];
+
+  const handleLoadSample = () => {
+    setManifestText(JSON.stringify(sampleManifest, null, 2));
+  };
+
+  const handleImportManifest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manifestText.trim()) return;
+
+    setIsImporting(true);
+    setImportResult(null);
+    try {
+      const parsed = JSON.parse(manifestText);
+      const res = await api.importManifest(parsed);
+      setImportResult(res);
+      fetchSources();
+    } catch (err: any) {
+      alert(`Manifest import failed: ${err.message}`);
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const storageStats = sources.reduce((acc, curr) => {
     const s = curr.raw_storage || 'web';
@@ -35,73 +112,163 @@ export const SourcesView: React.FC = () => {
         </div>
         <h1 className="text-xl sm:text-2xl font-black text-white mt-1 flex items-center space-x-2">
           <Database className="w-6 h-6 text-emerald-400" />
-          <span>Raw Storage Pointers & Sources</span>
+          <span>Raw Storage Pointers & Manifests</span>
         </h1>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Raw 100 GB+ media lives in TeraBox, Telegram, Google Drive, or YouTube. Your Second Brain stores only the compressed knowledge and pointers.
+          Raw 100 GB+ media lives in TeraBox, Google Drive, Telegram, or Discord. Your Second Brain stores only the compressed knowledge and pointers.
         </p>
       </div>
 
       {/* Architectural Guarantee Box */}
-      <div className="p-5 glass-panel rounded-2xl border border-emerald-500/30 bg-emerald-950/15 space-y-2">
-        <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs">
+      <div className="p-4 glass-panel rounded-2xl border border-emerald-500/30 bg-emerald-950/15 space-y-1.5 text-xs text-slate-300">
+        <div className="flex items-center space-x-2 text-emerald-400 font-bold">
           <CheckCircle className="w-4 h-4" />
           <span>The Zero-Bloat Principle</span>
         </div>
-        <p className="text-xs text-slate-300 leading-relaxed">
-          Your Cloudflare D1 database (limited to 500 MB on free tier) and your Obsidian vault stay ultra-lean and instant to search. When you need the original 4K video or 500-page PDF, the system resolves the pointer seamlessly.
+        <p>
+          Your Cloudflare D1 database (limited to 500 MB on free tier) and your Obsidian vault stay ultra-lean (under 100 MB). The manifest tracks file locations across external clouds without moving files or re-uploading gigabytes.
         </p>
       </div>
 
-      {/* Storage Breakdown */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {['telegram', 'terabox', 'gdrive', 'youtube', 'web', 'local'].map((storageKey) => (
-          <div key={storageKey} className="glass-panel p-4 rounded-xl border border-slate-800 text-center">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">{storageKey}</span>
-            <span className="text-lg font-black text-white font-mono">{storageStats[storageKey] || 0}</span>
-            <span className="text-[10px] text-slate-500 block">pointers</span>
+      {/* Tabs */}
+      <div className="flex items-center space-x-2 border-b border-slate-800 pb-2">
+        <button
+          onClick={() => setActiveTab('catalog')}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+            activeTab === 'catalog'
+              ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Layers className="w-4 h-4 text-purple-400" />
+          <span>Registered Pointers ({sources.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('manifest')}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+            activeTab === 'manifest'
+              ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
+              : 'text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <Upload className="w-4 h-4 text-emerald-400" />
+          <span>Progressive 100 GB Manifest Importer</span>
+        </button>
+      </div>
+
+      {activeTab === 'catalog' && (
+        <div className="space-y-5">
+          {/* Storage Breakdown */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {['google_drive', 'terabox', 'telegram', 'discord', 'local'].map((storageKey) => (
+              <div key={storageKey} className="glass-panel p-3.5 rounded-xl border border-slate-800 text-center">
+                <span className="text-[10px] uppercase font-bold text-slate-400 block truncate">{storageKey}</span>
+                <span className="text-lg font-black text-white font-mono">{storageStats[storageKey] || 0}</span>
+                <span className="text-[10px] text-slate-500 block">pointers</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Sources Table */}
-      <div className="space-y-3">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Registered Source Pointers ({sources.length})
-        </h3>
+          {/* Sources Table */}
+          <div className="space-y-2">
+            {sources.map((src) => (
+              <div
+                key={src.id}
+                className="glass-panel p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs"
+              >
+                <div className="flex items-center space-x-3 overflow-hidden">
+                  <span className="text-[10px] font-mono font-bold text-purple-400 shrink-0">
+                    {src.raw_id || src.id}
+                  </span>
+                  <div className="truncate">
+                    <span className="font-semibold text-slate-200 block truncate">{src.title}</span>
+                    <span className="text-[10px] text-slate-500 font-mono">
+                      Priority: <strong className="text-amber-400">{src.priority || 'P1'}</strong> • Status: {src.status}
+                    </span>
+                  </div>
+                </div>
 
-        <div className="space-y-2">
-          {sources.map((src) => (
-            <div
-              key={src.id}
-              className="glass-panel p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs"
-            >
-              <div className="flex items-center space-x-3 overflow-hidden">
-                <span className="text-[10px] font-mono font-bold text-purple-400 shrink-0">
-                  {src.id}
-                </span>
-                <span className="font-semibold text-slate-200 truncate">{src.title}</span>
+                <div className="flex items-center space-x-3 shrink-0">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 uppercase">
+                    {src.raw_storage || 'cloud'}
+                  </span>
+                  {(src.raw_url || src.original_url) && (
+                    <a
+                      href={src.raw_url || src.original_url || '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-400 transition"
+                      title="Open Original Cloud File"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
               </div>
-
-              <div className="flex items-center space-x-4 shrink-0">
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400">
-                  {src.raw_storage || 'web'}
-                </span>
-                {(src.raw_url || src.original_url) && (
-                  <a
-                    href={src.raw_url || src.original_url || '#'}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-400 transition"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'manifest' && (
+        <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+                <FileCode className="w-4 h-4 text-emerald-400" />
+                <span>Bulk Raw Manifest Ingest</span>
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Paste raw files from your TeraBox, Drive, or Telegram catalogs. P0 items are extracted immediately; P1–P4 are queued progressively.
+              </p>
+            </div>
+            <button
+              onClick={handleLoadSample}
+              className="text-xs text-purple-400 hover:text-purple-300 font-semibold underline"
+            >
+              Load Sample Template
+            </button>
+          </div>
+
+          <form onSubmit={handleImportManifest} className="space-y-4">
+            <textarea
+              rows={10}
+              required
+              value={manifestText}
+              onChange={(e) => setManifestText(e.target.value)}
+              placeholder='[ { "raw_id": "RAW-001", "filename": "video.mp4", "storage": "terabox", "url": "https://...", "priority": "P0" } ]'
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500"
+            />
+
+            {importResult && (
+              <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30 text-xs text-emerald-300">
+                {importResult.message}
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={isImporting || !manifestText.trim()}
+                className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition disabled:opacity-50"
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Cataloging Raw Files...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4" />
+                    <span>Import Manifest to Second Brain</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

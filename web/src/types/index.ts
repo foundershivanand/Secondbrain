@@ -21,13 +21,18 @@ export type SourceStatus =
   | 'FAILED'
   | 'NEEDS_REVIEW';
 
+export type IngestionPriority = 'P0' | 'P1' | 'P2' | 'P3' | 'P4';
+
 export interface SourceRecord {
   id: string;
+  raw_id?: string | null;
   source_type: SourceType;
   title: string | null;
   original_url: string | null;
-  raw_storage: string | null;
+  raw_storage: string | null; // 'terabox', 'gdrive', 'telegram', 'discord', 'web', 'local'
   raw_file_id: string | null;
+  raw_message_id?: string | null;
+  channel_id?: string | null;
   raw_url: string | null;
   mime_type: string | null;
   file_size: number | null;
@@ -36,6 +41,7 @@ export interface SourceRecord {
   status: SourceStatus;
   content_hash: string | null;
   importance: number;
+  priority?: IngestionPriority;
   created_at: string;
 }
 
@@ -43,7 +49,7 @@ export interface AtomicKnowledgeItem {
   id?: string;
   knowledge_id?: string;
   statement: string;
-  concept_type: 'CONCEPT' | 'FACT' | 'CLAIM' | 'ACTION' | 'INSIGHT' | 'USER_THOUGHT' | 'AI_GENERATED_IDEA';
+  concept_type: 'CONCEPT' | 'FACT' | 'CLAIM' | 'ACTION' | 'INSIGHT' | 'USER_THOUGHT' | 'AI_SUGGESTION';
   confidence: number;
   created_at?: string;
 }
@@ -55,7 +61,8 @@ export interface KnowledgeRecord {
   knowledge_type: string;
   core_idea: string;
   key_information: string; // JSON string
-  insights: string;        // JSON string
+  insights: string;        // JSON string (AI suggestions)
+  my_thought: string | null;// Explicit user thoughts
   actionable_items: string;// JSON string
   topics: string;          // JSON string
   entities: string;        // JSON string
@@ -77,6 +84,8 @@ export interface MemoryRecord {
   evidence: string | null;
   confidence: number | null;
   importance: number;
+  repetition_count: number;
+  memory_score: number | null;
   status: 'CANDIDATE' | 'DURABLE' | 'REJECTED' | 'SUPERSEDED';
   created_at: string;
   updated_at: string;
@@ -91,10 +100,33 @@ export interface RelationshipRecord {
   created_at: string;
 }
 
+export interface BrainState {
+  current_goals: string[];
+  active_projects: string[];
+  important_preferences: string[];
+  recent_learning: string[];
+  current_interests: { topic: string; interest_score: number; trend: string }[];
+  open_questions: string[];
+  recent_decisions: string[];
+  knowledge_gaps: string[];
+}
+
+export interface MapOfContentRecord {
+  id: string;
+  topic: string;
+  title: string;
+  summary: string;
+  linked_knowledge: string; // JSON array of IDs
+  markdown_path: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CitationSource {
   id: string;
   title: string;
   source_type: string;
+  raw_id?: string | null;
   original_url?: string | null;
   raw_storage?: string | null;
   raw_url?: string | null;
@@ -108,6 +140,11 @@ export interface ChatResponse {
   related_topics: string[];
   memories_used: string[];
   suggested_questions: string[];
+  conflict_detected?: {
+    prior_belief: string;
+    new_evidence: string;
+    suggested_action: string;
+  };
 }
 
 export interface BrainStats {
@@ -117,4 +154,5 @@ export interface BrainStats {
   memoriesCount: number;
   durableMemoriesCount: number;
   relationshipsCount: number;
+  mocsCount?: number;
 }

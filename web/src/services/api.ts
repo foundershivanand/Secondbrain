@@ -265,4 +265,37 @@ export const api = {
   getMarkdownDownloadUrl(id: string): string {
     return `${getApiBaseUrl()}/api/export/markdown/${id}`;
   },
+
+  async getSyncStatus(): Promise<{
+    configured: boolean;
+    owner?: string | null;
+    repo?: string;
+    branch?: string;
+  }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/sync/status`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to get sync status');
+    return res.json();
+  },
+
+  async triggerSyncAll(): Promise<{
+    success: boolean;
+    total: number;
+    successful: number;
+    message: string;
+  }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/sync/all`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Sync failed' }));
+      throw new Error(err.error || 'Sync failed');
+    }
+    return res.json();
+  },
 };

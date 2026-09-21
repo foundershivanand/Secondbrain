@@ -13,6 +13,7 @@ import { handleBrainState } from './routes/brain-state';
 import { handleMOCs } from './routes/mocs';
 import { handleManifestImport } from './routes/manifest';
 import { handleDailyBrief } from './routes/daily-brief';
+import { handleSync } from './routes/sync';
 import { runMemoryConsolidationAgent } from './ai/memory-agent';
 import { runEvolutionAgent } from './ai/evolution-agent';
 import { verifyAuth } from './utils/security';
@@ -100,7 +101,7 @@ export default {
       }
 
       if (pathname.startsWith('/api/mocs')) {
-        return await handleMOCs(request, db);
+        return await handleMOCs(request, env, db);
       }
 
       if (pathname === '/api/manifest/import') {
@@ -109,6 +110,11 @@ export default {
 
       if (pathname.startsWith('/api/daily-brief')) {
         return await handleDailyBrief(request, env, db);
+      }
+
+      if (pathname.startsWith('/api/sync')) {
+        const pathParts = pathname.replace(/^\/api\/sync\/?/, '').split('/').filter(Boolean);
+        return await handleSync(request, env, db, pathParts);
       }
 
       return errorResponse(`Endpoint not found: ${pathname}`, 404);

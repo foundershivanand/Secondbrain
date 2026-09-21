@@ -11,6 +11,7 @@ import { extractKnowledgeWithGemini } from '../ai/gemini';
 import { generateObsidianMarkdown } from './markdown';
 import { sha256 } from '../utils/hash';
 import { sanitizeUntrustedInput } from '../utils/security';
+import { syncFileToGitHub } from '../services/github-sync';
 
 export interface IngestionInput {
   sourceType: SourceType;
@@ -259,6 +260,18 @@ export async function processIngestion(
     sourceRecord.status = 'DONE';
     sourceRecord.processed_at = processedAt;
     sourceRecord.title = extraction.title;
+
+    // 13. Cloud-Native Obsidian Vault Sync (Committed directly from Worker to GitHub 24/7)
+    try {
+      await syncFileToGitHub(
+        env,
+        `${markdown.folder}/${markdown.filename}`,
+        markdown.content,
+        `vault: add ${extraction.title} (${knowledgeId})`
+      );
+    } catch (gitErr) {
+      console.error('Cloud GitHub sync warning (non-blocking):', gitErr);
+    }
 
     return {
       source: sourceRecord,

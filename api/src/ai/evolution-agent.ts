@@ -2,6 +2,9 @@ import { Env } from '../config';
 import { Database } from '../db';
 import { callGemini, cleanAndParseJson } from './gemini';
 import { BrainState, KnowledgeRecord } from '../types';
+import { syncFileToGitHub } from '../services/github-sync';
+import { formatBrainStateMarkdown, formatDailyBriefMarkdown } from '../pipeline/markdown';
+
 
 export interface DiscoveredConnection {
   from_id: string;
@@ -153,6 +156,32 @@ ${JSON.stringify(
       }
 
       await db.updateBrainState(brainState);
+    }
+
+    // 3. Direct Cloud GitHub Sync (Daily Brief & Brain State Context)
+    const today = new Date().toISOString().split('T')[0];
+    const dailyBriefContent = parsed.daily_brief_markdown || '# 🧠 Daily Intelligence Brief\n\nEvolution completed successfully.';
+    const briefMd = formatDailyBriefMarkdown(today, dailyBriefContent);
+
+    try {
+      await syncFileToGitHub(
+        env,
+        `06 Memories/Daily Brief - ${today}.md`,
+        briefMd,
+        `vault: add daily intelligence brief for ${today}`
+      );
+
+      if (brainState) {
+        const contextMd = formatBrainStateMarkdown(brainState);
+        await syncFileToGitHub(
+          env,
+          '06 Memories/Current Context.md',
+          contextMd,
+          `vault: update current context after nightly evolution`
+        );
+      }
+    } catch (syncErr) {
+      console.error('Failed to sync daily brief to GitHub:', syncErr);
     }
 
     return {

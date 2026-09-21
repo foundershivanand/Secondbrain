@@ -1,8 +1,15 @@
+import { Env } from '../config';
 import { Database } from '../db';
 import { jsonResponse, errorResponse } from '../utils/response';
 import { MapOfContentRecord } from '../types';
+import { syncFileToGitHub } from '../services/github-sync';
+import { formatMOCMarkdown } from '../pipeline/markdown';
 
-export async function handleMOCs(request: Request, db: Database): Promise<Response> {
+export async function handleMOCs(
+  request: Request,
+  env: Env,
+  db: Database
+): Promise<Response> {
   if (request.method === 'GET') {
     const mocs = await db.listMOCs();
     return jsonResponse({ mocs });
@@ -34,6 +41,19 @@ export async function handleMOCs(request: Request, db: Database): Promise<Respon
       };
 
       await db.createOrUpdateMOC(moc);
+
+      // Direct Cloud GitHub Sync
+      const mocContent = formatMOCMarkdown(
+        topic,
+        moc.id,
+        notes.map((n) => ({ title: n.title, core_idea: n.core_idea }))
+      );
+      try {
+        await syncFileToGitHub(env, markdownPath, mocContent, `vault: update MOC for ${topic}`);
+      } catch (gitErr) {
+        console.error('Failed to sync MOC to GitHub:', gitErr);
+      }
+
       return jsonResponse({ success: true, moc, notesCount: notes.length });
     } catch (err: any) {
       return errorResponse(`Failed to generate MOC: ${err.message}`, 500);
@@ -42,3 +62,4 @@ export async function handleMOCs(request: Request, db: Database): Promise<Respon
 
   return errorResponse('Method not allowed', 405);
 }
+

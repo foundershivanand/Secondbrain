@@ -123,3 +123,115 @@ ${rawSourceLink}
     folder: '01 Knowledge',
   };
 }
+
+export function formatBrainStateMarkdown(state: any): string {
+  const goals = (state?.current_goals || []).map((g: string) => `- ${g}`).join('\n') || '- None listed';
+  const projects = (state?.active_projects || []).map((p: string) => `- ${p}`).join('\n') || '- None active';
+  const preferences = (state?.important_preferences || []).map((p: string) => `- ${p}`).join('\n') || '- None listed';
+  const learning = (state?.recent_learning || []).map((l: string) => `- ${l}`).join('\n') || '- None captured recently';
+  const interests = (state?.current_interests || [])
+    .map((i: any) => `- **${i.topic}**: Interest score ${i.interest_score} (Trend: ${i.trend})`)
+    .join('\n') || '- None tracked';
+  const questions = (state?.open_questions || []).map((q: string) => `- ${q}`).join('\n') || '- None active';
+  const gaps = (state?.knowledge_gaps || []).map((g: string) => `- ${g}`).join('\n') || '- None identified';
+  const decisions = (state?.recent_decisions || []).map((d: string) => `- ${d}`).join('\n') || '- None recorded';
+
+  return `---
+id: MEM-CURRENT-CONTEXT
+type: memory
+category: current_context
+updated_at: ${new Date().toISOString().split('T')[0]}
+---
+
+# ⚡ Current Context (Brain State)
+
+*Compact 5–20 KB context loaded into AI reasoning loops for instant global orientation.*
+
+## Current Goals
+${goals}
+
+## Active Projects
+${projects}
+
+## Important Preferences
+${preferences}
+
+## Recent Learning
+${learning}
+
+## Current Interests
+${interests}
+
+## Open Questions & Knowledge Gaps
+${questions}
+${gaps}
+
+## Recent Decisions
+${decisions}
+`;
+}
+
+export function formatDailyBriefMarkdown(dateStr: string, briefContent: string): string {
+  return `---
+id: BRIEF-${dateStr}
+type: daily_brief
+created_at: ${new Date().toISOString()}
+tags:
+  - daily-brief
+  - second-brain
+  - evolution
+---
+
+${briefContent}
+`;
+}
+
+export function formatMOCMarkdown(
+  topic: string,
+  mocId: string,
+  notes: { title: string; core_idea: string }[]
+): string {
+  const noteBullets = notes.length > 0
+    ? notes.map((n) => `- [[${n.title}]] — ${n.core_idea}`).join('\n')
+    : '- Awaiting more notes linked to this topic.';
+
+  return `---
+id: ${mocId}
+type: moc
+topic: ${topic}
+updated_at: ${new Date().toISOString().split('T')[0]}
+---
+
+# 🗺️ Map of Content: ${topic}
+
+> **Map of Content (MOC):** Navigation hub aggregating knowledge notes, atomic breakthroughs, and lineage for [[${topic}]].
+
+## 🌟 Linked Knowledge Notes
+${noteBullets}
+
+## 📚 Related Topics
+- [[${topic}]]
+`;
+}
+
+export function formatDurableMemoriesMarkdown(memories: any[]): string {
+  const list = memories.length > 0
+    ? memories.map((m) => `- [${m.id}] **${m.memory_type}**: ${m.content} *(importance: ${m.importance || 8}/10)*`).join('\n')
+    : '- No durable memories consolidated yet.';
+
+  return `---
+id: MEM-DURABLE-ALL
+type: memory
+category: durable_memories
+updated_at: ${new Date().toISOString().split('T')[0]}
+---
+
+# 🧠 Consolidated Durable Memories
+
+*Validated personal facts, preferences, lessons, and principles maintained by the Autonomous Memory Consolidation Agent.*
+
+## Memory Log
+${list}
+`;
+}
+

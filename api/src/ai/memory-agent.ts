@@ -2,8 +2,11 @@ import { Env } from '../config';
 import { Database } from '../db';
 import { callGemini, cleanAndParseJson } from './gemini';
 import { MEMORY_CONSOLIDATION_PROMPT } from './prompts';
+import { syncFileToGitHub } from '../services/github-sync';
+import { formatBrainStateMarkdown, formatDurableMemoriesMarkdown } from '../pipeline/markdown';
 
 export interface ConsolidationDecision {
+
   candidate_id: string;
   decision: 'PROMOTE' | 'REJECT' | 'UPDATE_EXISTING' | 'MERGE';
   updated_content?: string;
@@ -108,6 +111,24 @@ ${JSON.stringify(
         ).slice(0, 8);
 
         await db.updateBrainState(brainState);
+
+        // Direct Cloud GitHub Sync (Zero-laptop dependency)
+        const contextMd = formatBrainStateMarkdown(brainState);
+        await syncFileToGitHub(
+          env,
+          '06 Memories/Current Context.md',
+          contextMd,
+          `vault: update current context (${promotedCount} memories consolidated)`
+        );
+
+        const durableMemories = await db.getDurableMemories(100);
+        const durableMd = formatDurableMemoriesMarkdown(durableMemories);
+        await syncFileToGitHub(
+          env,
+          '06 Memories/Durable Memories.md',
+          durableMd,
+          `vault: sync consolidated durable memories`
+        );
       }
     } catch (e) {
       console.error('Failed to sync brain state after consolidation:', e);

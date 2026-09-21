@@ -12,7 +12,9 @@ import { handleExport } from './routes/export';
 import { handleBrainState } from './routes/brain-state';
 import { handleMOCs } from './routes/mocs';
 import { handleManifestImport } from './routes/manifest';
+import { handleDailyBrief } from './routes/daily-brief';
 import { runMemoryConsolidationAgent } from './ai/memory-agent';
+import { runEvolutionAgent } from './ai/evolution-agent';
 import { verifyAuth } from './utils/security';
 import { handleCorsPreflight, jsonResponse, errorResponse } from './utils/response';
 
@@ -105,6 +107,10 @@ export default {
         return await handleManifestImport(request, env, db);
       }
 
+      if (pathname.startsWith('/api/daily-brief')) {
+        return await handleDailyBrief(request, env, db);
+      }
+
       return errorResponse(`Endpoint not found: ${pathname}`, 404);
     } catch (err: any) {
       console.error('Unhandled Worker error:', err);
@@ -113,16 +119,28 @@ export default {
   },
 
   /**
-   * Cloudflare Cron Trigger (Nightly Memory Consolidation Agent)
+   * Cloudflare Cron Trigger (Nightly Autonomous Intelligence Harnessing)
+   * Runs daily at 2:00 AM UTC
    */
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    console.log('⏰ Running scheduled nightly Memory Consolidation Agent at:', new Date().toISOString());
+    const timestamp = new Date().toISOString();
+    console.log(`⏰ [Cron Trigger] Starting Nightly Second Brain Harnessing at ${timestamp}`);
     const db = new Database(env.DB);
+
+    // 1. Run Nightly Memory Consolidation Agent (M4 Personal Memories)
     try {
-      const report = await runMemoryConsolidationAgent(env, db);
-      console.log(`✅ Nightly consolidation completed: ${report.promotedCount} promoted, ${report.rejectedCount} rejected.`);
+      const memReport = await runMemoryConsolidationAgent(env, db);
+      console.log(`✅ [Memory Agent] Promoted ${memReport.promotedCount} to durable, rejected ${memReport.rejectedCount}.`);
     } catch (err) {
-      console.error('❌ Scheduled memory consolidation failed:', err);
+      console.error('❌ [Memory Agent] Failed:', err);
+    }
+
+    // 2. Run Nightly Evolution & Discovery Agent (M3 Cross-Source Connections & Pattern Synthesis)
+    try {
+      const evoReport = await runEvolutionAgent(env, db);
+      console.log(`✅ [Evolution Agent] Discovered ${evoReport.newConnections.length} new connections and ${evoReport.productOpportunitiesDetected.length} product opportunities.`);
+    } catch (err) {
+      console.error('❌ [Evolution Agent] Failed:', err);
     }
   },
 };

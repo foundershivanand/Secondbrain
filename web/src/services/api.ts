@@ -204,6 +204,14 @@ export const api = {
     return res.json();
   },
 
+  async getDailyBrief(): Promise<{ success: boolean; report: any }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/daily-brief`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch daily brief');
+    return res.json();
+  },
+
   async importManifest(items: any[]): Promise<any> {
     const res = await fetch(`${getApiBaseUrl()}/api/manifest/import`, {
       method: 'POST',

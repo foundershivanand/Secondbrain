@@ -36,10 +36,26 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDailyBriefOpen, setIsDailyBriefOpen] = useState(false);
+  const [briefReport, setBriefReport] = useState<any>(null);
+  const [isLoadingBrief, setIsLoadingBrief] = useState(false);
 
   useEffect(() => {
     api.getBrainState().then((s) => setBrainState(s)).catch(() => {});
   }, []);
+
+  const handleFetchBrief = async () => {
+    setIsDailyBriefOpen(true);
+    setIsLoadingBrief(true);
+    try {
+      const res = await api.getDailyBrief();
+      setBriefReport(res.report);
+    } catch (e: any) {
+      alert(`Failed to load Daily Brief: ${e.message}`);
+    } finally {
+      setIsLoadingBrief(false);
+    }
+  };
 
   const samplePrompts = [
     'What have I learned about AI agent memory?',
@@ -105,6 +121,83 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                 {brainState.current_interests?.[0]?.topic || 'AI agents'}
               </strong>
             </span>
+            <button
+              onClick={handleFetchBrief}
+              className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white border border-purple-500/40 text-[10px] font-bold transition flex items-center space-x-1"
+            >
+              <Sparkles className="w-3 h-3" />
+              <span>Evolution Brief</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Evolution Brief Modal */}
+      {isDailyBriefOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center space-x-2">
+                <span className="p-2 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30">
+                  <Sparkles className="w-5 h-5" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Daily Intelligence & Evolution Brief</h3>
+                  <p className="text-xs text-slate-400">Nightly cross-domain pattern matching & gap discovery</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsDailyBriefOpen(false)}
+                className="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-slate-800"
+              >
+                ✕
+              </button>
+            </div>
+
+            {isLoadingBrief ? (
+              <div className="p-8 text-center text-xs text-purple-300 space-y-2">
+                <Sparkles className="w-6 h-6 animate-spin mx-auto text-purple-400" />
+                <p>Synthesizing cross-source connections and knowledge evolution...</p>
+              </div>
+            ) : briefReport ? (
+              <div className="space-y-4 text-xs">
+                {/* Patterns & Opportunities */}
+                {briefReport.productOpportunitiesDetected?.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-amber-950/20 border border-amber-500/30 space-y-1.5">
+                    <span className="font-bold text-amber-400 uppercase tracking-wider text-[10px]">
+                      🚀 Product Opportunities Discovered Across Sources
+                    </span>
+                    <ul className="space-y-1 text-slate-200">
+                      {briefReport.productOpportunitiesDetected.map((opp: string, idx: number) => (
+                        <li key={idx} className="flex items-start space-x-1.5">
+                          <span>💡</span>
+                          <span>{opp}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Knowledge Gaps */}
+                {briefReport.knowledgeGapsIdentified?.length > 0 && (
+                  <div className="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-500/30 space-y-1.5">
+                    <span className="font-bold text-indigo-400 uppercase tracking-wider text-[10px]">
+                      🔍 Knowledge Gaps to Investigate
+                    </span>
+                    <ul className="space-y-1 text-slate-300">
+                      {briefReport.knowledgeGapsIdentified.map((gap: string, idx: number) => (
+                        <li key={idx}>• {gap}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Markdown Summary */}
+                <div className="glass-panel p-4 rounded-xl border border-slate-800 whitespace-pre-wrap text-slate-300 leading-relaxed font-sans">
+                  {briefReport.dailyBriefMarkdown}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
       )}

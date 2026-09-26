@@ -29,8 +29,10 @@ export async function syncFileToGitHub(
   }
 
   const cleanPath = filePath.replace(/^\/+/, '');
-  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${cleanPath}`;
-  const message = commitMessage || `vault: update ${cleanPath} [via Cloudflare Worker]`;
+  const prefix = env.GITHUB_PATH_PREFIX ? `${env.GITHUB_PATH_PREFIX.replace(/^\/+|\/+$/g, '')}/` : '';
+  const finalPath = cleanPath.startsWith(prefix) ? cleanPath : `${prefix}${cleanPath}`;
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${finalPath}`;
+  const message = commitMessage || `vault: update ${finalPath} [via Cloudflare Worker]`;
 
   try {
     // 1. Check if file already exists in repo to obtain its blob SHA (required for updates)

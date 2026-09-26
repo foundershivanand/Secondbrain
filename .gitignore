@@ -8,3 +8,5 @@ dist/
 .dev.vars
 .dev.vars.*
 terabox-progress.json
+terabox-manifest*.json
+scripts/terabox-sources.sql

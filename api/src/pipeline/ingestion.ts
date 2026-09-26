@@ -160,6 +160,42 @@ export async function processIngestion(
       extraction.my_thought = input.userNote;
     }
 
+    // Skip personal photos / casual media to prevent Obsidian vault clutter
+    if (extraction.should_skip_note || extraction.is_personal_media) {
+      const skippedAt = new Date().toISOString();
+      await db.updateSourceStatus(sourceId, 'IGNORED_PERSONAL_MEDIA', skippedAt, extraction.title || 'Personal Media (Skipped)');
+      if (jobId) await db.updateJobStatus(jobId, 'COMPLETED');
+      sourceRecord.status = 'IGNORED_PERSONAL_MEDIA';
+      sourceRecord.title = extraction.title || 'Personal Media (Skipped)';
+      return {
+        source: sourceRecord,
+        knowledge: {
+          id: knowledgeId,
+          source_id: sourceId,
+          title: extraction.title || 'Personal Media (Skipped)',
+          knowledge_type: 'personal_media_skipped',
+          core_idea: extraction.core_idea || 'Personal media - skipped from knowledge vault',
+          key_information: '[]',
+          insights: '[]',
+          my_thought: null,
+          actionable_items: '[]',
+          topics: '[]',
+          entities: '[]',
+          tags: '[]',
+          confidence: 1.0,
+          importance: 1,
+          why_saved: 'Casual personal media',
+          what_changed: 'Skipped to keep vault clean',
+          markdown_path: '',
+          created_at: now,
+          updated_at: now,
+        },
+        extraction,
+        markdown: { filename: '', content: '', folder: '' },
+        isDuplicate: false,
+      };
+    }
+
     // 5. Update status -> ANALYZING
     await db.updateSourceStatus(sourceId, 'ANALYZING', null, extraction.title);
 

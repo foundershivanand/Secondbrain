@@ -21,7 +21,8 @@ export type SourceStatus =
   | 'INDEXING'
   | 'DONE'
   | 'FAILED'
-  | 'NEEDS_REVIEW';
+  | 'NEEDS_REVIEW'
+  | 'IGNORED_PERSONAL_MEDIA';
 
 export type IngestionPriority = 'P0' | 'P1' | 'P2' | 'P3' | 'P4';
 
@@ -113,6 +114,8 @@ export interface ExtractionResult {
   content_ideas?: string[];
   why_saved: string;
   what_changed: string;
+  is_personal_media?: boolean;
+  should_skip_note?: boolean;
 }
 
 export interface KnowledgeRecord {

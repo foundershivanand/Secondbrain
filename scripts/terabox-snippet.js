@@ -100,10 +100,24 @@
   await scanDir("/");
   window.teraboxManifest = allFiles;
 
-  try {
-    copy(JSON.stringify(allFiles, null, 2));
-    console.log("Manifest copied to clipboard!");
-  } catch (e) {}
+  console.log("FINISHED! Found " + allFiles.length + " media files. Triggering download popup...");
+
+  function triggerDownload() {
+    var blob = new Blob([JSON.stringify(allFiles, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "terabox-manifest.json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1000);
+  }
+
+  // Automatically trigger the download popup
+  triggerDownload();
 
   var prevBtn = document.getElementById("tb-dl-btn");
   if (prevBtn) prevBtn.remove();
@@ -124,20 +138,8 @@
   btn.style.border = "2px solid #ffffff";
   btn.style.cursor = "pointer";
   btn.style.boxShadow = "0 8px 24px rgba(0,0,0,0.5)";
-
-  btn.onclick = function() {
-    var blob = new Blob([JSON.stringify(allFiles, null, 2)], { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = "terabox-manifest.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  btn.onclick = triggerDownload;
 
   document.body.appendChild(btn);
-  console.log("FINISHED! Found " + allFiles.length + " media files (filtered out code/node_modules).");
-  console.log("Click the purple button at top right to download.");
+  console.log("Download triggered! (If blocked by browser, click the purple button on top right).");
 })();

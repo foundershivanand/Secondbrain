@@ -1,4 +1,3 @@
-// Clean, pure ASCII TeraBox browser exporter with zero backticks and zero emojis
 (async function() {
   console.log("Scanning TeraBox library...");
   var allFiles = [];
@@ -58,11 +57,26 @@
   await fetchDirectory("/");
   window.teraboxManifest = allFiles;
 
-  try {
-    copy(JSON.stringify(allFiles, null, 2));
-    console.log("Copied to clipboard!");
-  } catch (e) {}
+  console.log("Scan complete! Found " + allFiles.length + " files. Triggering download popup...");
 
+  function triggerDownload() {
+    var blob = new Blob([JSON.stringify(allFiles, null, 2)], { type: "application/json" });
+    var dlUrl = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = dlUrl;
+    a.download = "terabox-manifest.json";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(dlUrl);
+    }, 1000);
+  }
+
+  // Trigger browser download popup automatically
+  triggerDownload();
+
+  // Also add fallback button in top-right corner if browser blocked popup
   var oldBtn = document.getElementById("terabox-dl-btn");
   if (oldBtn) oldBtn.remove();
 
@@ -82,19 +96,8 @@
   btn.style.border = "2px solid #ffffff";
   btn.style.cursor = "pointer";
   btn.style.boxShadow = "0 8px 24px rgba(0,0,0,0.5)";
-
-  btn.onclick = function() {
-    var blob = new Blob([JSON.stringify(allFiles, null, 2)], { type: "application/json" });
-    var dlUrl = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = dlUrl;
-    a.download = "terabox-manifest.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(dlUrl);
-  };
+  btn.onclick = triggerDownload;
 
   document.body.appendChild(btn);
-  console.log("DONE! Found " + allFiles.length + " files. Click the purple button on the top right!");
+  console.log("DONE! Found " + allFiles.length + " files.");
 })();

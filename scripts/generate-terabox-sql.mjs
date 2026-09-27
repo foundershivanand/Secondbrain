@@ -17,8 +17,8 @@ for (const item of manifest) {
   else if (['pdf'].includes(ext)) sourceType = 'pdf';
   else if (['mp3', 'm4a', 'wav', 'ogg'].includes(ext)) sourceType = 'voice';
 
-  const rawId = item.raw_id || ('RAW-TERABOX-' + Math.floor(100000 + Math.random() * 900000));
-  const sourceId = 'SRC-' + rawId.replace('RAW-TERABOX-', '');
+  const rawId = item.fs_id ? `RAW-TERABOX-${item.fs_id}` : (item.raw_id || ('RAW-TERABOX-' + Math.floor(100000 + Math.random() * 900000)));
+  const sourceId = item.fs_id ? `SRC-${item.fs_id}` : ('SRC-' + rawId.replace('RAW-TERABOX-', ''));
   const title = (item.filename || 'Untitled').replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').trim();
   const priority = item.priority || 'P1';
   const importance = priority === 'P0' ? 9 : (priority === 'P1' ? 7 : 5);

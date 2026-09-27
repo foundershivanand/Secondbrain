@@ -54,47 +54,111 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     { type: 'raw_pointer', label: 'Cloud Pointer', icon: HardDrive },
   ];
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const [queuedFiles, setQueuedFiles] = useState<{ name: string; mime: string; base64: string; sizeMB: string }[]>([]);
+  const [batchResults, setBatchResults] = useState<{ title: string; filename?: string; isPersonal?: boolean; isDuplicate?: boolean }[]>([]);
 
-    setFileName(file.name);
-    setFileMime(file.type);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = (reader.result as string).split(',')[1];
-      setFileBase64(base64);
-    };
-    reader.readAsDataURL(file);
+    if (files.length === 1) {
+      const file = files[0];
+      setFileName(file.name);
+      setFileMime(file.type);
+      setQueuedFiles([]);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(',')[1];
+        setFileBase64(base64);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // Multi-file batch
+      const items: { name: string; mime: string; base64: string; sizeMB: string }[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const base64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve((reader.result as string).split(',')[1]);
+          reader.readAsDataURL(file);
+        });
+        items.push({
+          name: file.name,
+          mime: file.type || 'image/jpeg',
+          base64,
+          sizeMB: (file.size / (1024 * 1024)).toFixed(2),
+        });
+      }
+      setQueuedFiles(items);
+      setFileName(`${items.length} photos selected`);
+    }
   };
 
   const handleCapture = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setLoadingStep('Uploading to Cloudflare Worker...');
+    setBatchResults([]);
 
     try {
-      setTimeout(() => setLoadingStep('Analyzing with Google Gemini AI...'), 700);
-      setTimeout(() => setLoadingStep('Extracting atomic knowledge & relationships...'), 1400);
-      setTimeout(() => setLoadingStep('Generating Obsidian Markdown note & indexing D1...'), 2100);
+      if (queuedFiles.length > 1) {
+        // Multi-file batch processing
+        const results = [];
+        for (let i = 0; i < queuedFiles.length; i++) {
+          const item = queuedFiles[i];
+          setLoadingStep(`[${i + 1}/${queuedFiles.length}] Analyzing ${item.name} with Gemini...`);
 
-      const result = await api.capture({
-        source_type: activeType,
-        text: text || undefined,
-        url: url || undefined,
-        user_note: userNote || undefined,
-        importance,
-        raw_storage: activeType === 'raw_pointer' ? rawStorage : undefined,
-        raw_url: rawUrl || undefined,
-        base64_data: fileBase64 || undefined,
-        mime_type: fileMime || undefined,
-      });
+          try {
+            const res = await api.capture({
+              source_type: activeType,
+              user_note: userNote || undefined,
+              importance,
+              base64_data: item.base64,
+              mime_type: item.mime,
+            });
 
-      setSuccessData(result);
-      setIsLoading(false);
-      onSuccess();
+            results.push({
+              title: res.knowledge?.title || item.name,
+              filename: res.markdown?.filename,
+              isPersonal: res.source?.status === 'IGNORED_PERSONAL_MEDIA',
+              isDuplicate: res.isDuplicate,
+            });
+          } catch (itemErr: any) {
+            results.push({
+              title: item.name,
+              filename: itemErr.message,
+              isPersonal: false,
+            });
+          }
+        }
+
+        setBatchResults(results);
+        setIsLoading(false);
+        onSuccess();
+      } else {
+        // Single file / item
+        setLoadingStep('Uploading to Cloudflare Worker...');
+        setTimeout(() => setLoadingStep('Analyzing with Google Gemini AI...'), 700);
+        setTimeout(() => setLoadingStep('Extracting atomic knowledge & relationships...'), 1400);
+        setTimeout(() => setLoadingStep('Generating Obsidian Markdown note & indexing D1...'), 2100);
+
+        const result = await api.capture({
+          source_type: activeType,
+          text: text || undefined,
+          url: url || undefined,
+          user_note: userNote || undefined,
+          importance,
+          raw_storage: activeType === 'raw_pointer' ? rawStorage : undefined,
+          raw_url: rawUrl || undefined,
+          base64_data: fileBase64 || undefined,
+          mime_type: fileMime || undefined,
+        });
+
+        setSuccessData(result);
+        setIsLoading(false);
+        onSuccess();
+      }
     } catch (err: any) {
       setError(err.message || 'Capture failed');
       setIsLoading(false);
@@ -109,6 +173,8 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setFileMime(null);
     setFileName(null);
     setRawUrl('');
+    setQueuedFiles([]);
+    setBatchResults([]);
     setSuccessData(null);
     setError(null);
     onClose();
@@ -138,7 +204,51 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto flex-1 space-y-5">
-          {successData ? (
+          {batchResults.length > 0 ? (
+            <div className="text-center py-6 space-y-4">
+              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Batch Capture Complete!</h3>
+                <p className="text-xs text-purple-300 font-semibold mt-1">
+                  Processed {batchResults.length} photos with Gemini Vision
+                </p>
+              </div>
+
+              <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-left text-xs space-y-2 max-h-60 overflow-y-auto">
+                {batchResults.map((res, i) => (
+                  <div key={i} className="flex items-center justify-between py-1 border-b border-slate-800/60 last:border-0">
+                    <span className="text-slate-200 font-medium truncate max-w-xs">{res.title}</span>
+                    {res.isPersonal ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">Personal Photo (Skipped)</span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">Note Created</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-center space-x-3 pt-2">
+                <button
+                  onClick={() => {
+                    setBatchResults([]);
+                    setQueuedFiles([]);
+                    setFileName(null);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition"
+                >
+                  Capture More
+                </button>
+                <button
+                  onClick={resetForm}
+                  className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white shadow-lg shadow-purple-600/30 transition"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          ) : successData ? (
             <div className="text-center py-6 space-y-4">
               <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8" />
@@ -233,27 +343,46 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
 
               {activeType === 'screenshot' && (
                 <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-slate-300">Upload Screenshot or Image</label>
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Upload Screenshots or Photos {queuedFiles.length > 0 && `(${queuedFiles.length} selected)`}
+                  </label>
                   <div className="border-2 border-dashed border-slate-700/80 hover:border-purple-500/60 rounded-xl p-6 text-center cursor-pointer transition bg-slate-950/40 relative">
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleFileChange}
                       className="absolute inset-0 opacity-0 cursor-pointer"
                     />
                     <Camera className="w-8 h-8 mx-auto text-purple-400 mb-2" />
                     <p className="text-xs text-slate-300 font-medium">
-                      {fileName || 'Click to select screenshot or drag image here'}
+                      {fileName || 'Click to select 1 or multiple photos from phone or PC'}
                     </p>
                     <p className="text-[11px] text-slate-500 mt-1">
-                      Gemini Vision will extract UX patterns, concepts, text, and architecture
+                      Gemini Vision extracts diagrams, ideas, text, & UI patterns. Personal family photos are automatically filtered out.
                     </p>
                   </div>
+
+                  {queuedFiles.length > 1 && (
+                    <div className="p-3 bg-slate-950/80 rounded-xl border border-slate-800 space-y-1.5 max-h-36 overflow-y-auto">
+                      <div className="text-[11px] font-semibold text-purple-300 flex justify-between">
+                        <span>Queued for Vision Processing:</span>
+                        <span>{queuedFiles.length} photos</span>
+                      </div>
+                      {queuedFiles.map((q, idx) => (
+                        <div key={idx} className="flex justify-between items-center text-[11px] text-slate-300">
+                          <span className="truncate max-w-[200px]">{q.name}</span>
+                          <span className="text-slate-500 text-[10px] font-mono">{q.sizeMB} MB</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   <input
                     type="text"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Optional: Add context about this screenshot"
+                    placeholder="Optional: Add context about these photos"
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
                   />
                 </div>
@@ -437,7 +566,11 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                   ) : (
                     <>
                       <Sparkles className="w-4 h-4" />
-                      <span>Ingest into Second Brain</span>
+                      <span>
+                        {queuedFiles.length > 1
+                          ? `Extract from ${queuedFiles.length} Photos (AI Vision)`
+                          : 'Ingest into Second Brain'}
+                      </span>
                     </>
                   )}
                 </button>

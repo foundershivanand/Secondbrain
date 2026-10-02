@@ -12,6 +12,8 @@ import {
 function getApiBaseUrl(): string {
   const custom = localStorage.getItem('sb_api_endpoint');
   if (custom && custom.trim()) return custom.replace(/\/+$/, '');
+  const envUrl = (import.meta as any).env?.VITE_API_URL;
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) return envUrl.replace(/\/+$/, '');
   return ''; // Default uses relative /api proxied to Worker
 }
 

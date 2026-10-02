@@ -11,6 +11,7 @@
     "db:init:local": "cd api && npx wrangler d1 execute second_brain --local --file=./schema.sql",
     "db:init:remote": "cd api && npx wrangler d1 execute second_brain --remote --file=./schema.sql",
     "seed": "node scripts/seed-demo.mjs",
+    "seed:remote": "node scripts/seed-demo.mjs --remote",
     "sync:vault": "node scripts/sync-vault.mjs",
     "scan:raw": "node scripts/scan-raw-storage.mjs",
     "terabox:import": "node scripts/terabox-importer.mjs"

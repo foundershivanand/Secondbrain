@@ -2,11 +2,11 @@
 id: KN-069193
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-1123334141069193
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F2ndSem.pdf"
-file_size: 175199
-priority: P1
+raw_id: RAW-SRC-1123334141069193
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Academics
   - Education
@@ -30,23 +30,7 @@ This document likely contains important academic information, schedules, syllabi
 
 ## Atomic Knowledge
 
-### Academic documents like '2ndSem
-
-Academic documents like '2ndSem.pdf' are crucial for organizing and tracking educational progress.
-
-**Type:** `FACT` | **Confidence:** 90%
-
-### Effective semester planning requires access to consolidated information regarding courses, schedules, and deadlines
-
-Effective semester planning requires access to consolidated information regarding courses, schedules, and deadlines.
-
-**Type:** `CONCEPT` | **Confidence:** 85%
-
-### Digital academic files facilitate easy access and backup of important educational materials
-
-Digital academic files facilitate easy access and backup of important educational materials.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -59,18 +43,21 @@ Digital academic files facilitate easy access and backup of important educationa
 - [ ] Integrate any schedules or deadlines from this document into a personal calendar or task manager.
 - [ ] Organize all semester-related files in a dedicated digital folder for easy access.
 
-## Related Topics
+## Related Knowledge
 
 - [[Academics]]
 - [[Education]]
 - [[Semester Planning]]
 - [[Course Management]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `2ndSem.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/2ndSem.pdf`
-- **File Size:** 0.17 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F2ndSem.pdf)
+This file was saved to retain important academic information for the second semester, ensuring easy access to course materials, schedules, and other critical details necessary for academic success and planning.
+
+## What Changed
+
+This reinforces the importance of structured organization for academic materials. It highlights the value of having a dedicated digital repository for semester-specific documents to prevent loss of critical information and facilitate efficient study planning.
+
+## Original
+
+No external URL

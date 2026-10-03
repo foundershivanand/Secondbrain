@@ -13,6 +13,8 @@
     "seed": "node scripts/seed-demo.mjs",
     "seed:remote": "node scripts/seed-demo.mjs --remote",
     "sync:vault": "node scripts/sync-vault.mjs",
+    "sync:cloud": "curl -s -X POST -H 'Authorization: Bearer secondbrain_dev_secret' https://second-brain-api.fitt.workers.dev/api/sync/all",
+    "db:sync:remote": "node scripts/push-to-remote-d1.mjs",
     "scan:raw": "node scripts/scan-raw-storage.mjs",
     "terabox:import": "node scripts/terabox-importer.mjs"
   },

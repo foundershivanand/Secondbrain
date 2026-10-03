@@ -32,77 +32,76 @@ Your Second Brain uses standard GitHub Flavored Markdown with `[[WikiLinks]]` an
 
 ### Option A: Local Desktop Setup (PC / Linux)
 
-If Obsidian is already installed on your PC:
-1. Open **Obsidian**.
-2. On the welcome screen, click **"Open folder as vault"** (or click the vault switcher icon at the bottom left).
-3. Navigate to and select this exact folder:
+Obsidian is already installed and pre-configured on this system:
+1. Open **Obsidian** (search for Obsidian in your application menu or run `obsidian` in terminal).
+2. Obsidian is already configured to open:
    ```text
    /home/shiva/secondbrain/vault
    ```
-4. Click **Open**.
-
-*(If you need to install Obsidian on Linux, run: `sudo snap install obsidian --classic` or download the AppImage from [obsidian.md](https://obsidian.md)).*
-
-#### What you will see immediately:
-- **`01 Knowledge/`**: All your distilled AI notes (e.g. `KN-979049 - AI Study Case.md`, `KN-537603 - Intouch Appointment Letter.md`).
-- **`02 Topics/`**: Topic hubs and Maps of Content (MOCs).
-- **`06 Memories/`**: Your durable principles, goals, preferences, and mental models.
-- **Interactive Graph View**: Press `Ctrl + G` to view your connected knowledge graph with real-time links between topics, entities, and sources.
+   *(All folders are also mirrored to `/home/shiva/Documents/Obsidian Vault` via real-time links).*
+3. You will immediately see:
+   - **`01 Knowledge/`**: All your distilled AI notes (e.g. `KN-979049 - AI Study Case.md`, `KN-448941 - Autonomous Cloud Sync Verification.md`).
+   - **`02 Topics/`**: Topic hubs and Maps of Content (MOCs).
+   - **`06 Memories/`**: Your durable principles, goals, preferences, and mental models.
+   - **Interactive Graph View**: Press `Ctrl + G` to view your connected knowledge graph with real-time links.
 
 ---
 
-### Option B: Mobile Setup (Android / iPhone) via GitHub Sync
+### Option B: Mobile Setup (Android / iPhone)
 
-Your Cloudflare Worker and Importer automatically commit all created notes to your private GitHub repository: [`sh15aa/mysecondbrain`](https://github.com/sh15aa/mysecondbrain).
+You have two simple ways to use your Second Brain on mobile:
 
-To have your entire Second Brain on your phone:
+#### Method 1: Instant Mobile Web App (No setup required)
+Open your deployed Cloudflare PWA directly in your mobile browser:
+👉 **[https://second-brain-web-83u.pages.dev](https://second-brain-web-83u.pages.dev)**
+- **Add to Home Screen**: In Chrome/Safari, tap **"Add to Home Screen"** to install it as a native app.
+- **Features**: Visual Topics Graph, Brain Chat, Inbox, and **+ Quick Capture** for photos, notes, links, and documents.
+- **Sync**: Fully connected 24/7 to the live Cloudflare D1 database and automatically commits to GitHub.
 
-1. **Install Obsidian on your phone**:
-   - Download **Obsidian** from the Google Play Store or Apple App Store.
-2. **Install the Git Sync Plugin**:
-   - Open Obsidian on your phone ➔ Go to **Settings ➔ Community Plugins** ➔ Turn off Safe Mode.
-   - Search for **Obsidian Git** (or **Remotely Save**) and click **Install** then **Enable**.
-3. **Configure GitHub Sync**:
-   - In the **Obsidian Git** plugin settings:
-     - Set **Repository URL**: `https://github.com/sh15aa/mysecondbrain.git`
-     - Enter your GitHub username: `sh15aa`
-     - Paste your GitHub Personal Access Token (PAT) from your [`.env`](file:///home/shiva/secondbrain/.env) file.
-     - Set **Auto-pull interval**: `5` minutes (automatically pulls new notes created by AI).
-4. **Done!**
-   - Whenever you capture photos or import TeraBox files on your PC or through the web app, your phone's Obsidian vault pulls the new notes automatically.
+#### Method 2: Mobile Obsidian App via Obsidian Git
+1. Download **Obsidian** from Google Play Store or Apple App Store.
+2. In Obsidian: Go to **Settings ➔ Community Plugins** ➔ Turn off Safe Mode.
+3. Search for **Obsidian Git** ➔ Click **Install** then **Enable**.
+4. Pull down the top bar to open the **Command Palette**:
+   - Run: `Obsidian Git: Clone an existing remote repo`
+   - Repository URL: `https://github.com/sh15aa/mysecondbrain.git`
+   - GitHub Username: `sh15aa`
+   - Password / Personal Access Token: Use the token from [`.env`](file:///home/shiva/secondbrain/.env) (`GITHUB_TOKEN`)
+   - Specify folder: `.` (root)
+   - Depth: `1`
+5. In **Obsidian Git Settings**:
+   - Set **Auto-pull interval**: `5` minutes.
+6. Whenever notes are captured on the web app or generated via AI, your phone's Obsidian pulls them automatically!
 
 ---
 
-## 🌐 3. How to Run & Use the Web App
+## 🌐 3. Web Application & Cloud API
 
-The Second Brain includes a full-featured web app with a visual Topics Graph, Brain Chat, Inbox, and Quick Capture.
+- **Live Cloud App (Mobile & Web):** [https://second-brain-web-83u.pages.dev](https://second-brain-web-83u.pages.dev)
+- **Live Cloud Worker API:** [https://second-brain-api.fitt.workers.dev](https://second-brain-api.fitt.workers.dev)
 
-### Starting the Application:
-Run the two dev servers in separate terminal tabs:
-
+### Starting Local Development (Optional):
 ```bash
-# Terminal 1: Start Cloudflare Worker API Backend
+# Terminal 1: Start Cloudflare Worker API Backend locally
 npm run dev:api
 
-# Terminal 2: Start React Frontend
+# Terminal 2: Start React Frontend locally
 npm run dev:web
 ```
 
-- **Open on your PC:** [http://localhost:5173](http://localhost:5173)
-- **Open on your Phone (Same Wi-Fi):** `http://<YOUR_PC_LOCAL_IP>:5173`
-  *(Find your IP by running `hostname -I` in terminal)*.
+- Local Web App: [http://localhost:5173](http://localhost:5173)
 
-### Adding 5–10 Photos from Your Phone via Web UI:
-1. Open the Web App on your phone.
-2. Tap the purple **`+ Quick Capture`** button in the top navigation.
-3. Switch to the **Screenshot / Image** tab.
-4. Tap the upload area: your phone gallery will open, allowing you to select **multiple photos at once**.
-5. Tap **`Extract from X Photos (AI Vision)`**.
-6. The AI will:
-   - Analyze diagrams, text, code, or UX ideas using Gemini Vision.
-   - Automatically filter out family/casual photos (marked as *Personal Photo - Skipped*).
-   - Check for duplicates.
-   - Write the markdown note to `vault/01 Knowledge/` and commit to GitHub.
+### Useful Synchronization Commands:
+```bash
+# 1. Trigger full cloud sync to GitHub repository:
+npm run sync:cloud
+
+# 2. Sync local SQLite database changes to remote Cloudflare D1:
+npm run db:sync:remote
+
+# 3. Pull latest cloud notes into local vault:
+git pull origin main
+```
 
 ---
 

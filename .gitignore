@@ -10,3 +10,5 @@ dist/
 terabox-progress.json
 terabox-manifest*.json
 scripts/terabox-sources.sql
+scripts/sync-core-to-remote.sql
+vault/.obsidian/

@@ -11,7 +11,9 @@ export interface RetrievalResult {
   sources: CitationSource[];
   recentActivity?: {
     type: 'video' | 'general';
-    items: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string }>;
+    items: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string }>;
+    isYouTubeQuery?: boolean;
+    hasNoVideos?: boolean;
   };
 }
 
@@ -20,7 +22,8 @@ export async function retrieveRelevantContext(
   userQuery: string
 ): Promise<RetrievalResult> {
   const lowerQuery = userQuery.toLowerCase();
-  const isVideoQuery = /\b(video|youtube|watch|watched|watching|liked|likes|seen|viewed)\b/i.test(lowerQuery);
+  const isYouTubeQuery = /\b(youtube|yt|liked|likes)\b/i.test(lowerQuery);
+  const isVideoQuery = isYouTubeQuery || /\b(video|watch|watched|watching|seen|viewed)\b/i.test(lowerQuery);
   const isRecencyQuery = /\b(last|latest|recent|recently|newest|yesterday|today|just now|past|previous)\b/i.test(lowerQuery);
 
   const relevantKnowledgeMap = new Map<string, KnowledgeRecord>();
@@ -29,8 +32,9 @@ export async function retrieveRelevantContext(
 
   // 0. Recency Handling: If asking about recent/last videos or recent notes
   if (isVideoQuery) {
-    const recentVideos = await db.getRecentSourcesByType(['youtube', 'video'], 5);
-    const videoItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string }> = [];
+    const sourceTypes = isYouTubeQuery ? ['youtube'] : ['youtube', 'video'];
+    const recentVideos = await db.getRecentSourcesByType(sourceTypes, 5);
+    const videoItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string }> = [];
 
     for (const src of recentVideos) {
       const k = await db.getKnowledgeBySourceId(src.id);
@@ -42,16 +46,17 @@ export async function retrieveRelevantContext(
           url: src.original_url || src.raw_url || undefined,
           captured_at: src.captured_at,
           core_idea: k.core_idea,
+          source_type: src.source_type,
         });
       }
     }
 
-    if (videoItems.length > 0) {
-      recentActivity = {
-        type: 'video',
-        items: videoItems,
-      };
-    }
+    recentActivity = {
+      type: 'video',
+      items: videoItems,
+      isYouTubeQuery,
+      hasNoVideos: videoItems.length === 0,
+    };
   } else if (isRecencyQuery) {
     const recentNotes = await db.getRecentKnowledge(5);
     const noteItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string }> = [];
@@ -214,14 +219,23 @@ export async function answerBrainQuery(
   if (context.recentActivity) {
     contextBlock += `=== CHRONOLOGICAL PROVENANCE / RECENT ACTIVITY ===\n`;
     if (context.recentActivity.type === 'video') {
-      contextBlock += `Order of most recently captured/watched/liked videos (MOST RECENT FIRST):\n`;
-      context.recentActivity.items.forEach((item, idx) => {
-        contextBlock += `${idx + 1}. [${idx === 0 ? 'LATEST / LAST WATCHED' : `Earlier Video #${idx}`}] "${item.title}"\n`;
-        if (item.url) contextBlock += `   Original URL: ${item.url}\n`;
-        if (item.captured_at) contextBlock += `   Captured / Watched At: ${item.captured_at}\n`;
-        if (item.core_idea) contextBlock += `   Core Idea: ${item.core_idea}\n`;
-      });
-      contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what video I watched last" or asks about the latest/last video watched, the exact answer is: "${context.recentActivity.items[0]?.title}". Present its core ideas, actionable takeaways, and link (${context.recentActivity.items[0]?.url || ''}). Do NOT confuse with older or other videos.\n\n`;
+      if (context.recentActivity.hasNoVideos) {
+        contextBlock += `CRITICAL FACT: The user asked about ${context.recentActivity.isYouTubeQuery ? 'YouTube or liked' : 'recent'} videos, but NO ${context.recentActivity.isYouTubeQuery ? 'YouTube' : 'video'} notes exist in the Second Brain yet.\n`;
+        contextBlock += `DO NOT cite unrelated notes, mock data, or offline media files unless explicitly requested.\n`;
+        contextBlock += `Explicitly tell the user:\n`;
+        contextBlock += `1. No ${context.recentActivity.isYouTubeQuery ? 'YouTube' : ''} videos have been captured or synced to your Second Brain yet.\n`;
+        contextBlock += `2. Instant capture: Tap "Share" on any YouTube video in the YouTube mobile app -> select Telegram -> send to @MyDailySecondBrainBot (or paste the link into the Second Brain Web App "Quick Capture"). It extracts the core ideas, takeaways, and creates an Obsidian note within seconds.\n`;
+        contextBlock += `3. Automatic sync: Background polling of YouTube Liked Videos requires Google OAuth credentials to access private playlist data.\n\n`;
+      } else {
+        contextBlock += `Order of most recently captured/watched/liked videos (MOST RECENT FIRST):\n`;
+        context.recentActivity.items.forEach((item, idx) => {
+          contextBlock += `${idx + 1}. [${idx === 0 ? 'LATEST / LAST WATCHED' : `Earlier Video #${idx}`}] "${item.title}" (${item.source_type || 'video'})\n`;
+          if (item.url) contextBlock += `   Original URL: ${item.url}\n`;
+          if (item.captured_at) contextBlock += `   Captured / Watched At: ${item.captured_at}\n`;
+          if (item.core_idea) contextBlock += `   Core Idea: ${item.core_idea}\n`;
+        });
+        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what video I watched last" or asks about the latest/last video watched, the exact answer is: "${context.recentActivity.items[0]?.title}". Present its core ideas, actionable takeaways, and link (${context.recentActivity.items[0]?.url || ''}). Do NOT confuse with older or other videos.\n\n`;
+      }
     } else {
       contextBlock += `Order of most recently saved notes (MOST RECENT FIRST):\n`;
       context.recentActivity.items.forEach((item, idx) => {

@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-295102
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMUasEHSkz4H2uTY_cZvc6q3ECp9q8AAukiAAJQFghWN_sc7Q1rRgABPQQ"
-importance: 7
+importance: 8
 confidence: 0.95
 topics:
   - UI/UX Design
@@ -32,27 +32,7 @@ A dynamic, context-aware AI fitness application concept that generates personali
 
 ## Atomic Knowledge
 
-### Dynamic workout generation based on real-time equipment availability reduces friction for home and travel fitness
-
-Dynamic workout generation based on real-time equipment availability reduces friction for home and travel fitness.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Integrating subjective user state ('How are you feeling?') allows AI planners to adjust workout intensity dynamically
-
-Integrating subjective user state ('How are you feeling?') allows AI planners to adjust workout intensity dynamically.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### MiniMax M3 designed a 3-screen UI flow for an AI Workout Planner covering equipment selection, workout overview, and active tracking
-
-MiniMax M3 designed a 3-screen UI flow for an AI Workout Planner covering equipment selection, workout overview, and active tracking.
-
-**Type:** `FACT` | **Confidence:** 98%
-
-## My Thoughts
-
-Excellent UI inspiration for dynamic, context-aware AI generation flows. The constraint-first selection screen is a great pattern for any AI tool.
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -63,10 +43,6 @@ Excellent UI inspiration for dynamic, context-aware AI generation flows. The con
 
 - [ ] Analyze the UI layout of MiniMax M3's design for potential implementation in context-aware planning apps.
 - [ ] Explore logic structures for generating workouts based on tag-based equipment filtering.
-
-## Product & SaaS Opportunities
-
-- 💡 A lightweight, local-first web app that generates markdown-based workout plans based on a quick checklist of available equipment.
 
 ## Related Knowledge
 

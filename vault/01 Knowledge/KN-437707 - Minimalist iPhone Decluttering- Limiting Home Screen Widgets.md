@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-437707
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMYasEHTJPtg-kFiZstRHJZbtbIKRgAAuwiAAJQFghWzmj16MLjY-g9BA"
-importance: 7
+importance: 8
 confidence: 0.95
 topics:
   - Digital Minimalism
@@ -30,17 +30,7 @@ Reducing mobile cognitive load and visual distraction by limiting the home scree
 
 ## Atomic Knowledge
 
-### Limiting home screen widgets to 1-2 items reduces visual clutter and cognitive load
-
-Limiting home screen widgets to 1-2 items reduces visual clutter and cognitive load.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Consolidating daily schedules into a single minimalist widget helps maintain focus on immediate tasks
-
-Consolidating daily schedules into a single minimalist widget helps maintain focus on immediate tasks.
-
-**Type:** `ACTION` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -49,10 +39,6 @@ Consolidating daily schedules into a single minimalist widget helps maintain foc
 ## Actions
 
 - [ ] Audit current phone widgets and remove all but the 1 or 2 most critical ones (e.g., Calendar or To-Do list).
-
-## Product & SaaS Opportunities
-
-- 💡 A minimalist widget builder app that aggregates only the absolute essentials (calendar, top task) into a single, highly aesthetic widget to bypass the 1-2 widget limit elegantly.
 
 ## Related Knowledge
 

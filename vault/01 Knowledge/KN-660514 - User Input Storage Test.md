@@ -5,8 +5,8 @@ source_type: text
 raw_id: RAW-660514
 storage: telegram
 raw_url: ""
-importance: 7
-confidence: 1
+importance: 8
+confidence: 0.95
 topics:
   - System Testing
   - Knowledge Extraction
@@ -27,21 +27,7 @@ The user is testing the system's ability to store and process their input.
 
 ## Atomic Knowledge
 
-### The user's input 'This is to test that whatever I put here is stored' was provided
-
-The user's input 'This is to test that whatever I put here is stored' was provided.
-
-**Type:** `FACT` | **Confidence:** 100%
-
-### The user's intention is to verify that their input is successfully stored by the system
-
-The user's intention is to verify that their input is successfully stored by the system.
-
-**Type:** `USER_THOUGHT` | **Confidence:** 100%
-
-## My Thoughts
-
-This is to test that whatever I put here is stored
+No atomic knowledge blocks extracted.
 
 ## Insights
 

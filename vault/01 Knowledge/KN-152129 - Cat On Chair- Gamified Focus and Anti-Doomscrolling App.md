@@ -5,8 +5,8 @@ source_type: screenshot
 raw_id: RAW-152129
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMrasEMa-bxdtQknXAOIqAOrBCRz6QAAvsiAAJQFghWVezsAAHbv9foPQQ"
-importance: 7
-confidence: 0.99
+importance: 8
+confidence: 0.95
 topics:
   - Productivity
   - Gamification
@@ -33,23 +33,7 @@ Using gamified virtual companions (cats) to incentivize focus sessions and block
 
 ## Atomic Knowledge
 
-### Cat On Chair is a mobile application that blocks distracting apps and displays a virtual cat companion during focus timers
-
-Cat On Chair is a mobile application that blocks distracting apps and displays a virtual cat companion during focus timers.
-
-**Type:** `FACT` | **Confidence:** 99%
-
-### Gamifying focus timers with cute virtual pets increases user adherence to digital wellbeing boundaries
-
-Gamifying focus timers with cute virtual pets increases user adherence to digital wellbeing boundaries.
-
-**Type:** `CONCEPT` | **Confidence:** 90%
-
-### Passive virtual companionship (digital 'body doubling') can reduce the anxiety and friction associated with putting down one's phone
-
-Passive virtual companionship (digital 'body doubling') can reduce the anxiety and friction associated with putting down one's phone.
-
-**Type:** `INSIGHT` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -60,11 +44,6 @@ Passive virtual companionship (digital 'body doubling') can reduce the anxiety a
 
 - [ ] Download and test 'Cat On Chair' to analyze its onboarding flow and gamification loop.
 - [ ] Deconstruct the visual assets and reward mechanics used to keep users engaged without causing further screen addiction.
-
-## Product & SaaS Opportunities
-
-- 💡 A desktop IDE extension that features a virtual pet which grows or stays happy only when you are actively writing code or keeping focus.
-- 💡 A browser-based 'cozy room' builder where focus hours translate into furniture and decorations for a virtual workspace.
 
 ## Related Knowledge
 

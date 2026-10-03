@@ -2,11 +2,11 @@
 id: KN-251540
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-841087524251540
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F3rdSem.pdf"
-file_size: 164346
-priority: P1
+raw_id: RAW-SRC-841087524251540
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Academics
   - Higher Education
@@ -31,17 +31,7 @@ This PDF file likely contains essential academic information, such as course out
 
 ## Atomic Knowledge
 
-### The file '3rdSem
-
-The file '3rdSem.pdf' is an academic document associated with the third semester of a study program.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### This document serves as a reference for academic planning and course requirements for the third semester
-
-This document serves as a reference for academic planning and course requirements for the third semester.
-
-**Type:** `CLAIM` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -53,7 +43,7 @@ This document serves as a reference for academic planning and course requirement
 - [ ] Review the content of '3rdSem.pdf' to identify specific courses, learning objectives, deadlines, and required readings for the third semester.
 - [ ] Integrate key dates and assignments from this document into a personal academic calendar.
 
-## Related Topics
+## Related Knowledge
 
 - [[Academics]]
 - [[Higher Education]]
@@ -61,11 +51,14 @@ This document serves as a reference for academic planning and course requirement
 - [[Semester Studies]]
 - [[Study Materials]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `3rdSem.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/3rdSem.pdf`
-- **File Size:** 0.16 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F3rdSem.pdf)
+This file was saved to retain critical academic information for the third semester, ensuring easy access to course details, schedules, and study plans.
+
+## What Changed
+
+This document provides a structured overview or detailed plan for the academic commitments and learning objectives of the third semester, solidifying understanding of upcoming coursework and expectations.
+
+## Original
+
+No external URL

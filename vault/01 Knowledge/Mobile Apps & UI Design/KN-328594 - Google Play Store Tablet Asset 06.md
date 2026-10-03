@@ -1,7 +1,7 @@
 ---
-category: Mobile Apps & UI Design
 id: KN-328594
 type: knowledge
+category: Mobile Apps & UI Design
 source_type: screenshot
 raw_id: RAW-SRC-444364078328594
 storage: web

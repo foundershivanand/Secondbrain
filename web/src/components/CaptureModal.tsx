@@ -34,12 +34,14 @@ interface CaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: { url?: string; text?: string; title?: string } | null;
 }
 
 export const CaptureModal: React.FC<CaptureModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialData,
 }) => {
   const [activeType, setActiveType] = useState<SourceType>('screenshot');
   const [text, setText] = useState('');
@@ -48,6 +50,39 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const [importance, setImportance] = useState<number>(7);
   const [rawStorage, setRawStorage] = useState('web');
   const [rawUrl, setRawUrl] = useState('');
+
+  // Prefill when opened via Share Target or URL params
+  useEffect(() => {
+    if (initialData) {
+      if (initialData.url) {
+        setUrl(initialData.url);
+        if (initialData.url.includes('youtube.com') || initialData.url.includes('youtu.be')) {
+          setActiveType('youtube');
+        } else {
+          setActiveType('url');
+        }
+      }
+      if (initialData.text && !initialData.url) {
+        // If text contains a URL
+        const match = initialData.text.match(/https?:\/\/[^\s]+/);
+        if (match) {
+          setUrl(match[0]);
+          const remainingText = initialData.text.replace(match[0], '').trim();
+          if (remainingText) setUserNote(remainingText);
+          if (match[0].includes('youtube.com') || match[0].includes('youtu.be')) {
+            setActiveType('youtube');
+          } else {
+            setActiveType('url');
+          }
+        } else {
+          setText(initialData.text);
+          setActiveType('text');
+        }
+      } else if (initialData.text && initialData.url) {
+        setUserNote(initialData.text);
+      }
+    }
+  }, [initialData]);
 
   // Selected & Compressed Photos
   const [photos, setPhotos] = useState<ProcessedImage[]>([]);

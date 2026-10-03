@@ -17,6 +17,28 @@ export function App() {
   const [isCaptureOpen, setIsCaptureOpen] = useState(false);
   const [stats, setStats] = useState<BrainStats | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>(undefined);
+  const [shareData, setShareData] = useState<{ url?: string; text?: string; title?: string } | null>(null);
+
+  // Detect Share Target from mobile OS (Android / iOS share sheet)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const url = params.get('url') || params.get('link');
+      const text = params.get('text');
+      const title = params.get('title');
+
+      if (url || text || title) {
+        setShareData({
+          url: url || undefined,
+          text: text || undefined,
+          title: title || undefined,
+        });
+        setIsCaptureOpen(true);
+        // Clean URL params without page reload
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
 
   const refreshStats = async () => {
     try {
@@ -73,7 +95,11 @@ export function App() {
       {/* Quick Capture Modal */}
       <CaptureModal
         isOpen={isCaptureOpen}
-        onClose={() => setIsCaptureOpen(false)}
+        initialData={shareData}
+        onClose={() => {
+          setIsCaptureOpen(false);
+          setShareData(null);
+        }}
         onSuccess={() => {
           refreshStats();
         }}

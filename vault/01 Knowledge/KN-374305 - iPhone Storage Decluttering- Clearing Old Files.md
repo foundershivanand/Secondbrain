@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-374305
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMXasEHSyc5Nn8Z-ArbjGzwpKFJuWgAAusiAAJQFghWItBrVfUMiC89BA"
-importance: 6
+importance: 8
 confidence: 0.95
 topics:
   - iPhone
@@ -31,27 +31,7 @@ Regularly auditing and deleting unneeded files from the iOS Files and Downloads 
 
 ## Atomic Knowledge
 
-### iOS downloads do not automatically self-clean and will accumulate indefinitely in the Files app unless manually deleted
-
-iOS downloads do not automatically self-clean and will accumulate indefinitely in the Files app unless manually deleted.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Go through the Files and downloads folders on iOS and delete anything you do not need anymore to free up storage
-
-Go through the Files and downloads folders on iOS and delete anything you do not need anymore to free up storage.
-
-**Type:** `ACTION` | **Confidence:** 99%
-
-### Mobile system directories like 'Downloads' are less visible than photo galleries, making them common hidden culprits for low storage issues
-
-Mobile system directories like 'Downloads' are less visible than photo galleries, making them common hidden culprits for low storage issues.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-## My Thoughts
-
-I often forget to check the actual Files app on my phone; most of my cleanup is focused on photos, but PDFs and zip files from Safari accumulate rapidly here.
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -60,10 +40,6 @@ I often forget to check the actual Files app on my phone; most of my cleanup is 
 ## Actions
 
 - [ ] Open the iOS Files app, navigate to the Downloads folder, and delete obsolete files.
-
-## Product & SaaS Opportunities
-
-- 💡 An iOS Shortcut that automatically alerts the user when the local 'Downloads' folder exceeds a certain size threshold (e.g., 1GB) and prompts a cleanup.
 
 ## Related Knowledge
 

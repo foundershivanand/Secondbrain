@@ -13,20 +13,33 @@ export const DEFAULT_WORKER_API = 'https://second-brain-api.fitt.workers.dev';
 export const DEFAULT_AUTH_TOKEN = 'secondbrain_dev_secret';
 
 export function getApiBaseUrl(): string {
-  const custom = localStorage.getItem('sb_api_endpoint');
-  if (custom && custom.trim()) return custom.replace(/\/+$/, '');
+  const isLocalhost =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  const custom = typeof window !== 'undefined' ? localStorage.getItem('sb_api_endpoint') : null;
+  if (custom && custom.trim()) {
+    const trimmed = custom.trim().replace(/\/+$/, '');
+    // Guard against mixed content or localhost on mobile devices
+    if (!isLocalhost && (trimmed.includes('localhost') || trimmed.includes('127.0.0.1') || trimmed.startsWith('http://'))) {
+      return DEFAULT_WORKER_API;
+    }
+    return trimmed;
+  }
+
   const envUrl = (import.meta as any).env?.VITE_API_URL;
   if (envUrl && typeof envUrl === 'string' && envUrl.trim()) return envUrl.replace(/\/+$/, '');
 
   // If running in production browser on Cloudflare Pages or mobile PWA, point directly to the deployed Worker API
-  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+  if (!isLocalhost) {
     return DEFAULT_WORKER_API;
   }
   return ''; // Default uses relative /api proxied to Worker in local Vite dev
 }
 
 export function getAuthHeader(): Record<string, string> {
-  const token = localStorage.getItem('sb_auth_token') || DEFAULT_AUTH_TOKEN;
+  const custom = typeof window !== 'undefined' ? localStorage.getItem('sb_auth_token') : null;
+  const token = (custom && custom.trim()) ? custom.trim() : DEFAULT_AUTH_TOKEN;
   if (token) return { Authorization: `Bearer ${token}` };
   return {};
 }
@@ -70,6 +83,7 @@ export const api = {
 
   async capture(payload: {
     source_type?: string;
+    title?: string;
     text?: string;
     url?: string;
     raw_storage?: string;

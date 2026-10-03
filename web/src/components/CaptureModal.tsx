@@ -13,10 +13,10 @@ import {
   Loader2,
   RotateCcw,
   Trash2,
-  Play,
   Square,
   Image as ImageIcon,
   AlertCircle,
+  FolderOpen,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceType } from '../types';
@@ -28,13 +28,15 @@ import {
   blobToBase64,
   ProcessedImage,
 } from '../utils/media';
+import { CANONICAL_CATEGORIES } from '../utils/categories';
 
 interface CaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (result?: any) => void;
   initialType?: SourceType;
   initialData?: { url?: string; text?: string; title?: string } | null;
+  defaultCategory?: string;
 }
 
 export const CaptureModal: React.FC<CaptureModalProps> = ({
@@ -43,11 +45,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   onSuccess,
   initialType = 'text',
   initialData,
+  defaultCategory,
 }) => {
   const [activeType, setActiveType] = useState<SourceType>(initialType);
+  const [title, setTitle] = useState('');
   const [text, setText] = useState('');
   const [url, setUrl] = useState('');
   const [userNote, setUserNote] = useState('');
+  const [category, setCategory] = useState<string>(defaultCategory || '');
   const [importance, setImportance] = useState<number>(7);
   const [rawStorage, setRawStorage] = useState('web');
   const [rawUrl, setRawUrl] = useState('');
@@ -55,6 +60,9 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   // Prefill when opened via Share Target or URL params
   useEffect(() => {
     if (initialData) {
+      if (initialData.title) {
+        setTitle(initialData.title);
+      }
       if (initialData.url) {
         setUrl(initialData.url);
         if (initialData.url.includes('youtube.com') || initialData.url.includes('youtu.be')) {
@@ -64,7 +72,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
         }
       }
       if (initialData.text && !initialData.url) {
-        // If text contains a URL
         const match = initialData.text.match(/https?:\/\/[^\s]+/);
         if (match) {
           setUrl(match[0]);
@@ -112,7 +119,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   // Submission State
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
-  const [successData, setSuccessData] = useState<any>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
   const [batchResults, setBatchResults] = useState<{ title: string; filename?: string; isPersonal?: boolean; isDuplicate?: boolean }[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,15 +154,15 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setIsRecordingAudio(false);
   };
 
-  // Sync activeType when modal opens or initialType changes
   useEffect(() => {
     if (isOpen) {
       if (initialType) setActiveType(initialType);
+      if (defaultCategory) setCategory(defaultCategory);
       setError(null);
+      setSuccessToast(null);
     }
-  }, [isOpen, initialType]);
+  }, [isOpen, initialType, defaultCategory]);
 
-  // Cleanup on unmount or modal close
   useEffect(() => {
     return () => {
       stopCameraStream();
@@ -166,22 +173,22 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   if (!isOpen) return null;
 
   const captureTabs: { type: SourceType; label: string; icon: any }[] = [
-    { type: 'text', label: 'Note / Thought', icon: FileText },
-    { type: 'youtube', label: 'YouTube / Video', icon: Video },
-    { type: 'url', label: 'Web Article', icon: Link2 },
-    { type: 'screenshot', label: 'Camera & Photos', icon: Camera },
+    { type: 'text', label: 'Note / Idea', icon: FileText },
+    { type: 'url', label: 'Web Link', icon: Link2 },
+    { type: 'screenshot', label: 'Camera / Photos', icon: Camera },
     { type: 'voice', label: 'Voice Memo', icon: Mic },
+    { type: 'youtube', label: 'YouTube Video', icon: Video },
     { type: 'pdf', label: 'PDF Document', icon: FileCode },
     { type: 'raw_pointer', label: 'Cloud Pointer', icon: HardDrive },
   ];
 
-  // 1. Handle File Selection (with client-side resizing)
+  // 1. Handle File Selection
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setIsProcessingMedia(true);
-    setMediaProcessingStatus('Optimizing photos for mobile upload...');
+    setMediaProcessingStatus('Optimizing image...');
     setError(null);
 
     const processedList: ProcessedImage[] = [];
@@ -200,7 +207,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setPhotos((prev) => [...prev, ...processedList]);
     setIsProcessingMedia(false);
     setMediaProcessingStatus('');
-    // Reset file input so user can re-select same file if needed
     e.target.value = '';
   };
 
@@ -254,7 +260,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 3. Handle Live Voice Recording
+  // 3. Handle Voice Memo
   const handleStartRecording = async () => {
     setAudioError(null);
     setRecordedAudioBase64(null);
@@ -265,11 +271,12 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
       const stream = await requestMicrophoneStream();
       audioStreamRef.current = stream;
 
-      const mimeType = MediaRecorder.isTypeSupported('audio/webm')
-        ? 'audio/webm'
-        : MediaRecorder.isTypeSupported('audio/mp4')
-        ? 'audio/mp4'
-        : 'audio/ogg';
+      let mimeType = 'audio/webm';
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('audio/webm')) mimeType = 'audio/webm';
+        else if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+        else if (MediaRecorder.isTypeSupported('audio/ogg')) mimeType = 'audio/ogg';
+      }
 
       setRecordedAudioMime(mimeType);
 
@@ -294,14 +301,13 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           setAudioError('Failed to encode audio: ' + b64Err.message);
         }
 
-        // Stop microphone hardware
         if (audioStreamRef.current) {
           audioStreamRef.current.getTracks().forEach((t) => t.stop());
           audioStreamRef.current = null;
         }
       };
 
-      recorder.start(500); // 500ms chunk interval
+      recorder.start(500);
       setIsRecordingAudio(true);
       setAudioRecordingTime(0);
 
@@ -332,7 +338,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setAudioRecordingTime(0);
   };
 
-  // 4. Form Submission
+  // 4. Submission
   const handleCapture = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -341,15 +347,15 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
 
     try {
       if (activeType === 'screenshot' && photos.length > 1) {
-        // Multi-photo batch
         const results = [];
         for (let i = 0; i < photos.length; i++) {
           const item = photos[i];
-          setLoadingStep(`[${i + 1}/${photos.length}] Analyzing ${item.name} with Gemini...`);
+          setLoadingStep(`Analyzing photo ${i + 1}/${photos.length}...`);
 
           try {
             const res = await api.capture({
               source_type: 'screenshot',
+              title: title.trim() || undefined,
               user_note: userNote || text || undefined,
               importance,
               base64_data: item.base64,
@@ -373,12 +379,9 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
 
         setBatchResults(results);
         setIsLoading(false);
-        onSuccess();
+        onSuccess(results);
       } else {
-        // Single Capture
-        setLoadingStep('Connecting to Second Brain...');
-        setTimeout(() => setLoadingStep('Analyzing with Google Gemini AI...'), 700);
-        setTimeout(() => setLoadingStep('Extracting atomic knowledge & concepts...'), 1500);
+        setLoadingStep('Ingesting into Second Brain...');
 
         let payloadBase64: string | undefined;
         let payloadMime: string | undefined;
@@ -391,25 +394,37 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           payloadMime = recordedAudioMime;
         }
 
+        const noteContext = category
+          ? `[Category: ${category}] ${userNote || ''}`.trim()
+          : userNote || undefined;
+
         const result = await api.capture({
           source_type: activeType,
-          text: text || undefined,
-          url: url || undefined,
-          user_note: userNote || undefined,
+          title: title.trim() || undefined,
+          text: text.trim() || undefined,
+          url: url.trim() || undefined,
+          user_note: noteContext,
           importance,
           raw_storage: activeType === 'raw_pointer' ? rawStorage : undefined,
-          raw_url: rawUrl || undefined,
+          raw_url: rawUrl.trim() || undefined,
           base64_data: payloadBase64,
           mime_type: payloadMime,
         });
 
-        setSuccessData(result);
         setIsLoading(false);
-        onSuccess();
+        setSuccessToast(result.isDuplicate ? 'Note already in Second Brain' : 'Captured & Indexed successfully!');
+
+        // Call parent onSuccess immediately to update UI
+        onSuccess(result.knowledge || result);
+
+        // Auto-close after brief confirmation
+        setTimeout(() => {
+          resetForm();
+        }, 1100);
       }
     } catch (err: any) {
       console.error('Capture error:', err);
-      setError(err.message || 'Capture failed. Check your API settings.');
+      setError(err.message || 'Capture failed. Check network or settings.');
       setIsLoading(false);
     }
   };
@@ -417,6 +432,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const resetForm = () => {
     stopCameraStream();
     stopAudioRecordingStream();
+    setTitle('');
     setText('');
     setUrl('');
     setUserNote('');
@@ -425,7 +441,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setRecordedAudioBase64(null);
     setAudioPreviewUrl(null);
     setBatchResults([]);
-    setSuccessData(null);
+    setSuccessToast(null);
     setError(null);
     onClose();
   };
@@ -437,308 +453,279 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/80">
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-white leading-tight">Universal Quick Capture</h2>
-              <p className="text-[11px] text-slate-400">Camera, Voice, Photos & Raw Thought to Knowledge</p>
-            </div>
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center bg-black/75 backdrop-blur-sm sm:p-4"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isLoading) resetForm();
+      }}
+    >
+      <div className="relative w-full sm:max-w-xl bg-slate-900 border-t sm:border border-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-slate-800 bg-slate-950/80 shrink-0">
+          <div className="flex items-center space-x-2">
+            <span className="p-1.5 rounded-lg bg-purple-600/20 text-purple-400">
+              <Sparkles className="w-4 h-4" />
+            </span>
+            <h2 className="text-sm font-bold text-white tracking-tight">
+              {activeType === 'text' ? 'New Note & Idea' : 'Quick Capture'}
+            </h2>
           </div>
           <button
             onClick={resetForm}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition active:scale-95"
+            disabled={isLoading}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 overscroll-contain">
-          {batchResults.length > 0 ? (
-            <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Batch Capture Complete!</h3>
-                <p className="text-xs text-purple-300 font-semibold mt-1">
-                  Processed {batchResults.length} photos with Gemini Vision
-                </p>
-              </div>
+        {/* Capture Type Selector - Minimal Pill Tabs */}
+        <div className="px-4 py-2 border-b border-slate-800/60 bg-slate-950/40 shrink-0 overflow-x-auto scrollbar-none">
+          <div className="flex items-center space-x-1 whitespace-nowrap">
+            {captureTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isSelected = activeType === tab.type;
+              return (
+                <button
+                  type="button"
+                  key={tab.type}
+                  onClick={() => {
+                    stopCameraStream();
+                    stopAudioRecordingStream();
+                    setActiveType(tab.type);
+                  }}
+                  className={`flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                    isSelected
+                      ? 'bg-purple-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-              <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-left text-xs space-y-2 max-h-60 overflow-y-auto">
+        {/* Form Body - Scrollable */}
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain">
+          {successToast ? (
+            <div className="py-8 text-center space-y-3">
+              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm font-bold text-white">{successToast}</h3>
+              <p className="text-xs text-slate-400">Vault synced and linked in your Second Brain.</p>
+            </div>
+          ) : batchResults.length > 0 ? (
+            <div className="py-4 space-y-3">
+              <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Processed {batchResults.length} photos</span>
+              </div>
+              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1.5 max-h-48 overflow-y-auto">
                 {batchResults.map((res, i) => (
-                  <div key={i} className="flex items-center justify-between py-1 border-b border-slate-800/60 last:border-0">
-                    <span className="text-slate-200 font-medium truncate max-w-xs">{res.title}</span>
-                    {res.isPersonal ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">Personal Photo (Skipped)</span>
-                    ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold">Note Created</span>
-                    )}
+                  <div key={i} className="flex justify-between items-center py-1 border-b border-slate-800/60 last:border-0">
+                    <span className="text-slate-300 truncate max-w-xs">{res.title}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                      Indexed
+                    </span>
                   </div>
                 ))}
               </div>
-
-              <div className="flex justify-center space-x-3 pt-2">
-                <button
-                  onClick={() => {
-                    setBatchResults([]);
-                    setPhotos([]);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition"
-                >
-                  Capture More
-                </button>
-                <button
-                  onClick={resetForm}
-                  className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white shadow-lg shadow-purple-600/30 transition"
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          ) : successData ? (
-            <div className="text-center py-6 space-y-4">
-              <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  {successData.isDuplicate ? 'Already in Second Brain' : 'Captured & Indexed!'}
-                </h3>
-                <p className="text-sm text-purple-300 font-semibold mt-1">
-                  {successData.knowledge?.title}
-                </p>
-                {successData.knowledge?.core_idea && (
-                  <p className="text-xs text-slate-400 mt-2 max-w-md mx-auto italic">
-                    "{successData.knowledge?.core_idea}"
-                  </p>
-                )}
-              </div>
-
-              <div className="p-4 bg-slate-950/80 rounded-xl border border-slate-800 text-left text-xs space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Vault File:</span>
-                  <span className="text-slate-200 font-mono truncate max-w-[240px]">{successData.markdown?.filename}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Knowledge ID:</span>
-                  <span className="text-purple-400 font-mono">{successData.knowledge?.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Storage Strategy:</span>
-                  <span className="text-emerald-400 font-semibold">Pointer & Compressed Index</span>
-                </div>
-              </div>
-
-              <div className="flex justify-center space-x-3 pt-2">
-                <button
-                  onClick={() => {
-                    setSuccessData(null);
-                    setText('');
-                    setUrl('');
-                    setPhotos([]);
-                    setRecordedAudioBase64(null);
-                    setAudioPreviewUrl(null);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition"
-                >
-                  Capture Another
-                </button>
-                <button
-                  onClick={resetForm}
-                  className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-semibold text-white shadow-lg shadow-purple-600/30 transition"
-                >
-                  Done
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="w-full py-2 rounded-xl bg-purple-600 text-white text-xs font-bold"
+              >
+                Done
+              </button>
             </div>
           ) : (
-            <form onSubmit={handleCapture} className="space-y-4">
-              {/* Type Switcher */}
-              <div className="flex flex-wrap gap-1 p-1 bg-slate-950/90 rounded-xl border border-slate-800">
-                {captureTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isSelected = activeType === tab.type;
-                  return (
-                    <button
-                      type="button"
-                      key={tab.type}
-                      onClick={() => {
-                        stopCameraStream();
-                        stopAudioRecordingStream();
-                        setActiveType(tab.type);
-                      }}
-                      className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
-                        isSelected
-                          ? 'bg-purple-600 text-white shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            <form id="capture-form" onSubmit={handleCapture} className="space-y-3.5">
+              {/* NOTE / TEXT TAB */}
+              {activeType === 'text' && (
+                <div className="space-y-2.5">
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Note title (optional, AI generates if blank)..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                  />
 
-              {/* 1. CAMERA & PHOTOS TAB */}
+                  <textarea
+                    required
+                    rows={4}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Write your note, idea, or paste content here..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition resize-none leading-relaxed"
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                        Category (Optional)
+                      </label>
+                      <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                      >
+                        <option value="">Auto-classify with Gemini</option>
+                        {CANONICAL_CATEGORIES.map((cat) => (
+                          <option key={cat.id} value={cat.name}>
+                            {cat.icon} {cat.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                        Context / Why Save?
+                      </label>
+                      <input
+                        type="text"
+                        value={userNote}
+                        onChange={(e) => setUserNote(e.target.value)}
+                        placeholder="Context or reasoning..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* WEB LINK TAB */}
+              {activeType === 'url' && (
+                <div className="space-y-2.5">
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1">Web URL</label>
+                    <input
+                      type="url"
+                      required
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="https://example.com/article"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1">Context Note</label>
+                    <input
+                      type="text"
+                      value={userNote}
+                      onChange={(e) => setUserNote(e.target.value)}
+                      placeholder="Why is this link relevant?"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* YOUTUBE TAB */}
+              {activeType === 'youtube' && (
+                <div className="space-y-2.5">
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1">YouTube Video Link</label>
+                    <input
+                      type="url"
+                      required
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    />
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Gemini extracts spoken concepts and timestamps without downloading heavy video files.
+                  </p>
+                </div>
+              )}
+
+              {/* CAMERA / PHOTOS TAB */}
               {activeType === 'screenshot' && (
                 <div className="space-y-3">
                   {cameraError && (
-                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start space-x-2">
-                      <AlertCircle className="w-4 h-4 mt-0.5 text-amber-400 flex-shrink-0" />
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
                       <span>{cameraError}</span>
                     </div>
                   )}
 
-                  {/* Live Camera View */}
                   {isCameraActive ? (
-                    <div className="relative rounded-2xl overflow-hidden bg-black border border-purple-500/40 shadow-xl">
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="w-full h-64 sm:h-80 object-cover bg-black"
-                      />
-                      <div className="absolute top-3 right-3 flex items-center space-x-2">
+                    <div className="relative rounded-xl overflow-hidden bg-black border border-purple-500/40">
+                      <video ref={videoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
+                      <div className="absolute top-2 right-2 flex space-x-1.5">
                         <button
                           type="button"
                           onClick={handleToggleCameraFacing}
-                          className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/80 transition"
-                          title="Switch Camera (Front/Back)"
+                          className="p-1.5 rounded-full bg-black/60 text-white"
                         >
-                          <RotateCcw className="w-4 h-4" />
+                          <RotateCcw className="w-3.5 h-3.5" />
                         </button>
                         <button
                           type="button"
                           onClick={stopCameraStream}
-                          className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/80 transition"
-                          title="Close Camera"
+                          className="p-1.5 rounded-full bg-black/60 text-white"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
-
-                      {/* Snap Button */}
-                      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                      <div className="absolute bottom-3 left-0 right-0 flex justify-center">
                         <button
                           type="button"
                           onClick={handleSnapPhoto}
-                          className="flex items-center space-x-2 px-6 py-2.5 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-xl shadow-purple-900/50 active:scale-95 transition ring-4 ring-white/20"
+                          className="px-5 py-2 rounded-full bg-purple-600 text-white font-bold text-xs shadow-lg active:scale-95"
                         >
-                          <Camera className="w-5 h-5" />
-                          <span>Snap Photo</span>
+                          Snap Photo
                         </button>
                       </div>
                     </div>
                   ) : (
-                    /* Photo Actions Selection */
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {/* Live Camera Button (Triggers Camera Permission) */}
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => handleStartCamera('environment')}
-                        className="flex items-center justify-center space-x-2.5 p-4 rounded-xl border border-purple-500/30 bg-purple-600/10 hover:bg-purple-600/20 text-purple-200 transition active:scale-98"
+                        className="flex flex-col items-center justify-center p-3 rounded-xl border border-purple-500/30 bg-purple-600/10 hover:bg-purple-600/20 text-purple-200 transition"
                       >
-                        <Camera className="w-5 h-5 text-purple-400" />
-                        <div className="text-left">
-                          <div className="text-xs font-bold text-white">Open Live Camera</div>
-                          <div className="text-[10px] text-purple-300/80">Requests camera permission</div>
-                        </div>
+                        <Camera className="w-5 h-5 text-purple-400 mb-1" />
+                        <span className="text-xs font-semibold">Live Camera</span>
                       </button>
 
-                      {/* Gallery / File Picker */}
-                      <label className="flex items-center justify-center space-x-2.5 p-4 rounded-xl border border-slate-700/80 bg-slate-950/60 hover:bg-slate-900 text-slate-200 transition cursor-pointer active:scale-98">
-                        <ImageIcon className="w-5 h-5 text-indigo-400" />
-                        <div className="text-left">
-                          <div className="text-xs font-bold text-white">Upload from Gallery</div>
-                          <div className="text-[10px] text-slate-400">Select screenshots or photos</div>
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleFileSelect}
-                          className="hidden"
-                        />
+                      <label className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-slate-300 transition cursor-pointer">
+                        <ImageIcon className="w-5 h-5 text-indigo-400 mb-1" />
+                        <span className="text-xs font-semibold">Photo Gallery</span>
+                        <input type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" />
                       </label>
                     </div>
                   )}
 
-                  {/* Native Mobile Camera Fallback */}
-                  {!isCameraActive && (
-                    <div className="text-center pt-1">
-                      <label className="inline-flex items-center space-x-1.5 text-[11px] text-purple-400 hover:text-purple-300 cursor-pointer underline">
-                        <span>Or take photo with native system camera app</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          onChange={handleFileSelect}
-                          className="hidden"
-                        />
-                      </label>
-                    </div>
-                  )}
-
-                  {/* Processing Status */}
                   {isProcessingMedia && (
-                    <div className="flex items-center space-x-2 p-3 rounded-xl bg-purple-950/40 border border-purple-800/40 text-purple-300 text-xs">
-                      <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                    <div className="flex items-center space-x-2 text-xs text-purple-300">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       <span>{mediaProcessingStatus}</span>
                     </div>
                   )}
 
-                  {/* Selected Photos Grid */}
                   {photos.length > 0 && (
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-300 font-semibold px-1">
-                        <span>Selected Photos ({photos.length}):</span>
-                        <button
-                          type="button"
-                          onClick={() => setPhotos([])}
-                          className="text-[11px] text-rose-400 hover:text-rose-300"
-                        >
-                          Clear all
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-48 overflow-y-auto p-1">
-                        {photos.map((photo, idx) => (
-                          <div
-                            key={idx}
-                            className="relative group rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 aspect-video flex items-center justify-center shadow"
+                    <div className="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto">
+                      {photos.map((photo, idx) => (
+                        <div key={idx} className="relative rounded-lg overflow-hidden border border-slate-800 aspect-video">
+                          <img src={photo.previewUrl} alt={photo.name} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePhoto(idx)}
+                            className="absolute top-1 right-1 p-1 rounded-full bg-rose-600/80 text-white"
                           >
-                            <img
-                              src={photo.previewUrl}
-                              alt={photo.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 opacity-90 p-2 flex flex-col justify-between">
-                              <button
-                                type="button"
-                                onClick={() => handleRemovePhoto(idx)}
-                                className="self-end p-1 rounded-full bg-rose-600/80 text-white hover:bg-rose-600 transition"
-                                title="Remove photo"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                              <div className="text-[10px] text-slate-200 font-mono truncate">
-                                {photo.sizeMB} MB
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   )}
 
@@ -746,131 +733,65 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                     type="text"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Optional context about this screenshot/photo..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    placeholder="Optional notes or context about photo..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
                   />
                 </div>
               )}
 
-              {/* 2. TEXT TAB */}
-              {activeType === 'text' && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Thought, Idea, or Note
-                  </label>
-                  <textarea
-                    required
-                    rows={4}
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="e.g. This idea could be a SaaS. Retrieval-based agents should decouple storage from reasoning..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition font-sans"
-                  />
-                </div>
-              )}
-
-              {/* 3. VOICE MEMO TAB */}
+              {/* VOICE MEMO TAB */}
               {activeType === 'voice' && (
                 <div className="space-y-3">
                   {audioError && (
-                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start space-x-2">
-                      <AlertCircle className="w-4 h-4 mt-0.5 text-amber-400 flex-shrink-0" />
-                      <span>{audioError}</span>
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs">
+                      {audioError}
                     </div>
                   )}
 
-                  {/* Microphone Live Recorder */}
-                  <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-4">
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-3">
                     {isRecordingAudio ? (
-                      <div className="space-y-3 py-2">
-                        <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs font-mono font-bold animate-pulse">
-                          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                          <span>RECORDING {formatTimer(audioRecordingTime)}</span>
+                      <div className="space-y-2">
+                        <div className="text-rose-400 text-xs font-mono font-bold animate-pulse">
+                          RECORDING {formatTimer(audioRecordingTime)}
                         </div>
-                        <p className="text-xs text-slate-300">Speak clearly into your phone's microphone...</p>
-                        <div className="flex justify-center space-x-3 pt-2">
-                          <button
-                            type="button"
-                            onClick={handleStopRecording}
-                            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 active:scale-95 transition"
-                          >
-                            <Square className="w-4 h-4" />
-                            <span>Stop & Save Audio</span>
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={handleStopRecording}
+                          className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold inline-flex items-center space-x-1.5"
+                        >
+                          <Square className="w-3.5 h-3.5" />
+                          <span>Stop Recording</span>
+                        </button>
                       </div>
                     ) : recordedAudioBase64 && audioPreviewUrl ? (
-                      <div className="space-y-3 py-1">
-                        <div className="flex items-center justify-between text-xs font-semibold text-emerald-400">
-                          <span>Voice Recording Ready</span>
-                          <span className="font-mono text-slate-400">{formatTimer(audioRecordingTime)}</span>
-                        </div>
-                        <audio controls src={audioPreviewUrl} className="w-full h-10 rounded-lg" />
-                        <div className="flex justify-center space-x-3">
-                          <button
-                            type="button"
-                            onClick={handleDiscardAudio}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-rose-300 transition"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>Re-record</span>
-                          </button>
-                        </div>
+                      <div className="space-y-2">
+                        <audio controls src={audioPreviewUrl} className="w-full h-9" />
+                        <button
+                          type="button"
+                          onClick={handleDiscardAudio}
+                          className="text-xs text-rose-400 hover:underline"
+                        >
+                          Re-record
+                        </button>
                       </div>
                     ) : (
-                      <div className="space-y-2 py-2">
-                        <Mic className="w-10 h-10 mx-auto text-rose-400" />
-                        <div className="text-xs font-bold text-white">Record Audio with Microphone</div>
-                        <p className="text-[11px] text-slate-400 max-w-sm mx-auto">
-                          Requests microphone permission to transcribe and extract concepts with Gemini AI.
-                        </p>
-                        <div className="pt-2">
-                          <button
-                            type="button"
-                            onClick={handleStartRecording}
-                            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-rose-600/25 active:scale-95 transition"
-                          >
-                            <Mic className="w-4 h-4" />
-                            <span>Start Microphone Recording</span>
-                          </button>
-                        </div>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={handleStartRecording}
+                        className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold inline-flex items-center space-x-2"
+                      >
+                        <Mic className="w-4 h-4" />
+                        <span>Start Microphone Recording</span>
+                      </button>
                     )}
                   </div>
-
-                  <textarea
-                    rows={2}
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Optional notes or transcription context..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
                 </div>
               )}
 
-              {/* 4. YOUTUBE / VIDEO TAB */}
-              {activeType === 'youtube' && (
-                <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-slate-300">YouTube or Video URL</label>
-                  <input
-                    type="url"
-                    required
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                  <p className="text-[11px] text-slate-400">
-                    Gemini extracts spoken concepts, timestamps, and key insights without downloading gigabytes of video to your database.
-                  </p>
-                </div>
-              )}
-
-              {/* 5. PDF TAB */}
+              {/* PDF TAB */}
               {activeType === 'pdf' && (
-                <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-slate-300">Upload PDF Document / Whitepaper</label>
-                  <div className="border-2 border-dashed border-slate-700/80 hover:border-purple-500/60 rounded-xl p-6 text-center cursor-pointer transition bg-slate-950/40 relative">
+                <div className="space-y-2.5">
+                  <div className="border border-dashed border-slate-800 hover:border-purple-500/60 rounded-xl p-5 text-center relative cursor-pointer bg-slate-950/60">
                     <input
                       type="file"
                       accept=".pdf,application/pdf"
@@ -878,172 +799,122 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                         const file = e.target.files?.[0];
                         if (!file) return;
                         setIsProcessingMedia(true);
-                        setMediaProcessingStatus('Reading PDF document...');
                         try {
                           const base64 = await blobToBase64(file);
-                          setPhotos([
-                            {
-                              name: file.name,
-                              mime: 'application/pdf',
-                              base64,
-                              previewUrl: '',
-                              sizeMB: (file.size / (1024 * 1024)).toFixed(2),
-                              width: 0,
-                              height: 0,
-                            },
-                          ]);
+                          setPhotos([{
+                            name: file.name,
+                            mime: 'application/pdf',
+                            base64,
+                            previewUrl: '',
+                            sizeMB: (file.size / (1024 * 1024)).toFixed(2),
+                            width: 0,
+                            height: 0,
+                          }]);
                         } catch (err: any) {
-                          setError('Failed to read PDF: ' + err.message);
+                          setError('PDF read error: ' + err.message);
                         } finally {
                           setIsProcessingMedia(false);
-                          setMediaProcessingStatus('');
                         }
                       }}
                       className="absolute inset-0 opacity-0 cursor-pointer"
                     />
-                    <FileCode className="w-8 h-8 mx-auto text-indigo-400 mb-2" />
-                    <p className="text-xs text-slate-300 font-medium">
+                    <FileCode className="w-6 h-6 mx-auto text-indigo-400 mb-1" />
+                    <span className="text-xs text-slate-300">
                       {photos.length > 0 && photos[0].mime === 'application/pdf'
-                        ? `${photos[0].name} (${photos[0].sizeMB} MB)`
-                        : 'Click to select PDF or whitepaper'}
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-1">Untrusted content defense is strictly enforced.</p>
+                        ? photos[0].name
+                        : 'Choose PDF document'}
+                    </span>
                   </div>
                 </div>
               )}
 
-              {/* 6. URL TAB */}
-              {activeType === 'url' && (
-                <div className="space-y-3">
-                  <label className="block text-xs font-semibold text-slate-300">Web Article or Resource Link</label>
-                  <input
-                    type="url"
-                    required
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://example.com/article"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                  />
-                </div>
-              )}
-
-              {/* 7. RAW POINTER TAB */}
+              {/* CLOUD POINTER TAB */}
               {activeType === 'raw_pointer' && (
-                <div className="space-y-3">
-                  <div className="p-3 bg-purple-950/30 border border-purple-800/40 rounded-xl text-xs text-purple-200">
-                    💡 <strong>Pointer Architecture:</strong> Large 100 GB+ files stay in TeraBox, Google Drive, Telegram, or Discord. Your Second Brain only indexes compressed insights and keeps this pointer.
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2.5">
+                  <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Storage Provider</label>
+                      <label className="block text-[11px] font-medium text-slate-400 mb-1">Storage</label>
                       <select
                         value={rawStorage}
                         onChange={(e) => setRawStorage(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-purple-500"
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
                       >
                         <option value="terabox">TeraBox</option>
                         <option value="gdrive">Google Drive</option>
                         <option value="telegram">Telegram</option>
                         <option value="discord">Discord</option>
-                        <option value="s3">AWS S3 / Wasabi</option>
+                        <option value="s3">AWS S3</option>
                         <option value="local">Local Hard Drive</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">Direct Pointer Link / Path</label>
+                      <label className="block text-[11px] font-medium text-slate-400 mb-1">Direct Link</label>
                       <input
                         type="text"
                         value={rawUrl}
                         onChange={(e) => setRawUrl(e.target.value)}
-                        placeholder="https://terabox.com/s/... or /media/archive/..."
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-purple-500"
-                      >
-                      </input>
+                        placeholder="https://..."
+                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
+                      />
                     </div>
                   </div>
                   <textarea
                     rows={2}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Summary or key takeaway of this large file..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 focus:outline-none focus:border-purple-500"
+                    placeholder="Key takeaway of this pointer..."
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 resize-none"
                   />
                 </div>
               )}
 
-              {/* Context Note (Why did I save this?) */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-                  <span>Why did I save this? (Optional Context)</span>
-                  <span className="text-[10px] text-purple-400">Provenance & Lineage</span>
-                </label>
-                <input
-                  type="text"
-                  value={userNote}
-                  onChange={(e) => setUserNote(e.target.value)}
-                  placeholder="e.g. Useful for product idea; solves current memory limit"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                />
-              </div>
-
-              {/* Importance Slider */}
-              <div className="flex items-center justify-between p-3 bg-slate-950/60 rounded-xl border border-slate-800/80">
-                <span className="text-xs font-medium text-slate-300">Importance Rating</span>
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={importance}
-                    onChange={(e) => setImportance(Number(e.target.value))}
-                    className="w-28 accent-purple-500"
-                  />
-                  <span className="text-xs font-bold text-purple-400 font-mono w-6 text-right">
-                    {importance}/10
-                  </span>
-                </div>
-              </div>
-
               {error && (
-                <div className="p-3 rounded-xl bg-red-900/30 border border-red-800/50 text-red-200 text-xs">
+                <div className="p-2.5 rounded-xl bg-red-900/30 border border-red-800/50 text-red-200 text-xs">
                   {error}
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading || isProcessingMedia || (activeType === 'screenshot' && photos.length === 0 && !text)}
-                  className="flex items-center space-x-2 px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 transition disabled:opacity-50 active:scale-95"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>{loadingStep}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      <span>
-                        {activeType === 'screenshot' && photos.length > 1
-                          ? `Extract from ${photos.length} Photos (AI Vision)`
-                          : 'Ingest into Second Brain'}
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
             </form>
           )}
         </div>
+
+        {/* Modal Sticky Footer - Always Visible Above Keyboard */}
+        {!successToast && batchResults.length === 0 && (
+          <div className="p-3 sm:px-5 sm:py-3 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between shrink-0 pb-safe">
+            <button
+              type="button"
+              onClick={resetForm}
+              disabled={isLoading}
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              form="capture-form"
+              disabled={
+                isLoading ||
+                isProcessingMedia ||
+                (activeType === 'screenshot' && photos.length === 0 && !text) ||
+                (activeType === 'text' && !text.trim()) ||
+                ((activeType === 'url' || activeType === 'youtube') && !url.trim())
+              }
+              className="flex items-center space-x-1.5 px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-purple-600/30 transition active:scale-95"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>{loadingStep || 'Saving...'}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{activeType === 'text' ? 'Save Note' : 'Capture'}</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -44,3 +44,17 @@
   border-color: rgba(168, 85, 247, 0.35);
   transform: translateY(-1px);
 }
+
+/* Touch and safe-area utilities */
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

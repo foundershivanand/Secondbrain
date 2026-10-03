@@ -10,7 +10,7 @@ import { MemoriesView } from './pages/MemoriesView';
 import { SourcesView } from './pages/SourcesView';
 import { Settings } from './pages/Settings';
 import { api } from './services/api';
-import { BrainStats, SourceType } from './types';
+import { BrainStats, SourceType, KnowledgeRecord } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('brain');
@@ -18,6 +18,10 @@ export function App() {
   const [stats, setStats] = useState<BrainStats | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>(undefined);
   const [shareData, setShareData] = useState<{ url?: string; text?: string; title?: string } | null>(null);
+  const [captureType, setCaptureType] = useState<SourceType>('text');
+  const [captureCategory, setCaptureCategory] = useState<string | undefined>(undefined);
+  const [knowledgeRefreshKey, setKnowledgeRefreshKey] = useState(0);
+  const [newlyCreatedNote, setNewlyCreatedNote] = useState<KnowledgeRecord | null>(null);
 
   // Detect Share Target from mobile OS (Android / iOS share sheet)
   useEffect(() => {
@@ -53,11 +57,18 @@ export function App() {
     refreshStats();
   }, [activeTab]);
 
-  const [captureType, setCaptureType] = useState<SourceType>('text');
-
-  const handleOpenCapture = (type: SourceType = 'text') => {
+  const handleOpenCapture = (type: SourceType = 'text', category?: string) => {
     setCaptureType(type);
+    setCaptureCategory(category);
     setIsCaptureOpen(true);
+  };
+
+  const handleCaptureSuccess = (result?: any) => {
+    refreshStats();
+    setKnowledgeRefreshKey((prev) => prev + 1);
+    if (result && result.id && typeof result.id === 'string' && result.id.startsWith('KN-')) {
+      setNewlyCreatedNote(result);
+    }
   };
 
   const handleNavigateTopic = (topic: string) => {
@@ -66,7 +77,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white pb-20 lg:pb-0">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white pb-16 md:pb-0">
       {/* Navigation Header */}
       <Navbar
         activeTab={activeTab}
@@ -85,9 +96,11 @@ export function App() {
         )}
         {activeTab === 'knowledge' && (
           <KnowledgeView
-            onOpenCapture={() => handleOpenCapture('text')}
+            onOpenCapture={handleOpenCapture}
             selectedTopic={selectedTopic}
             onClearTopic={() => setSelectedTopic(undefined)}
+            refreshTrigger={knowledgeRefreshKey}
+            newNoteItem={newlyCreatedNote}
           />
         )}
         {activeTab === 'topics' && (
@@ -104,13 +117,13 @@ export function App() {
         isOpen={isCaptureOpen}
         initialType={captureType}
         initialData={shareData}
+        defaultCategory={captureCategory}
         onClose={() => {
           setIsCaptureOpen(false);
           setShareData(null);
+          setCaptureCategory(undefined);
         }}
-        onSuccess={() => {
-          refreshStats();
-        }}
+        onSuccess={handleCaptureSuccess}
       />
     </div>
   );

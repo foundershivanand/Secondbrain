@@ -96,7 +96,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] max-w-5xl mx-auto p-4 sm:p-6 space-y-4">
+    <div className="flex flex-col h-[calc(100dvh-8rem)] sm:h-[calc(100vh-5rem)] max-w-4xl mx-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
       {/* Compact Brain State Banner (Section 32) */}
       {brainState && (
         <div className="glass-panel p-3 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">

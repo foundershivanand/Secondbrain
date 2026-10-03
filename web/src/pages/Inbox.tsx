@@ -98,52 +98,61 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center space-x-2">
-            <InboxIcon className="w-6 h-6 text-purple-400" />
-            <span>Universal Ingestion Inbox</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Every text, image, YouTube video, PDF, or Telegram message enters here and is indexed into structured knowledge.
-          </p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center space-x-2.5">
+          <div className="p-1.5 rounded-lg bg-purple-600/15 text-purple-400">
+            <InboxIcon className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center space-x-2">
+              <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
+                Ingestion Inbox
+              </h1>
+              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                {sources.length}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 hidden sm:block">
+              Incoming captures, Telegram webhooks & raw stream
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
           <button
             onClick={fetchSources}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+            className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
             title="Refresh Inbox"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
           <button
             onClick={onOpenCapture}
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-lg shadow-purple-600/30 transition"
+            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-sm shadow-purple-600/25 transition active:scale-95 shrink-0"
           >
-            <Plus className="w-4 h-4" />
-            <span>Quick Capture</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Capture</span>
           </button>
         </div>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
+      <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
         {[
-          { id: 'ALL', label: 'All Ingestions' },
+          { id: 'ALL', label: 'All' },
           { id: 'PROCESSING', label: 'In Pipeline' },
           { id: 'DONE', label: 'Completed' },
-          { id: 'FAILED', label: 'Needs Review' },
+          { id: 'FAILED', label: 'Failed' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setFilter(tab.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+            className={`px-3 py-1 rounded-lg font-medium transition whitespace-nowrap ${
               filter === tab.id
-                ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'bg-slate-900 border border-slate-800/80 text-slate-400 hover:text-white'
             }`}
           >
             {tab.label}

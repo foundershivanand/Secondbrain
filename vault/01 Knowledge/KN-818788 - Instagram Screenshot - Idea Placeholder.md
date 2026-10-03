@@ -2,11 +2,11 @@
 id: KN-818788
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-58900812818788
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233836.Instagram.png"
-file_size: 793594
-priority: P1
+raw_id: RAW-SRC-58900812818788
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Social Media
   - Content Curation
@@ -31,17 +31,7 @@ A screenshot captured from Instagram and saved into an 'Ideas' folder, indicatin
 
 ## Atomic Knowledge
 
-### Content saved in an 'Ideas' folder typically represents intentional curation by the user, indicating perceived value or relevance
-
-Content saved in an 'Ideas' folder typically represents intentional curation by the user, indicating perceived value or relevance.
-
-**Type:** `FACT` | **Confidence:** 85%
-
-### Instagram serves as a significant platform for sharing diverse visual content, including personal media, informational graphics, and inspirational posts
-
-Instagram serves as a significant platform for sharing diverse visual content, including personal media, informational graphics, and inspirational posts.
-
-**Type:** `FACT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -53,7 +43,7 @@ Instagram serves as a significant platform for sharing diverse visual content, i
 - [ ] Review the actual image content to extract specific knowledge, concepts, or actionable items.
 - [ ] Categorize the content based on its visual and textual elements once available.
 
-## Related Topics
+## Related Knowledge
 
 - [[Social Media]]
 - [[Content Curation]]
@@ -61,16 +51,14 @@ Instagram serves as a significant platform for sharing diverse visual content, i
 - [[Personal Knowledge Management]]
 - [[Digital Capture]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260730-233836.Instagram.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233836.Instagram.png`
-- **File Size:** 0.76 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233836.Instagram.png)
+Likely saved as a visual prompt, inspiration, or a piece of information from Instagram that the user found relevant enough to include in their 'ideas' collection, indicating its potential value for future reference or development.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260730-233836.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260730-233836.Instagram.png) (`/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260730-233836.Instagram.png`)
-- [Screenshot_20260730-233836.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233836.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233836.Instagram.png`)
-- [Screenshot_20260730-233836.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260730-233836.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260730-233836.Instagram.png`)
+## What Changed
+
+Reinforces the understanding that valuable knowledge and inspiration can be sourced and curated from diverse digital environments, including social media platforms, when intentionally captured and organized.
+
+## Original
+
+No external URL

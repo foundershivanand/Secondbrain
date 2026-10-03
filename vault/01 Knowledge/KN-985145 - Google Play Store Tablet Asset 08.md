@@ -2,11 +2,11 @@
 id: KN-985145
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-238355405985145
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2Fplaystore_assets%2Fplaystore_assets%2Ftablet%2Ftablet_08.png"
-file_size: 157439
-priority: P1
+raw_id: RAW-SRC-238355405985145
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - App Store Optimization
   - UI Design
@@ -28,11 +28,7 @@ A promotional graphic asset intended for Google Play Store tablet listings, show
 
 ## Atomic Knowledge
 
-### Tablet-specific screenshots are required for Google Play Store listings to properly showcase responsive UI designs
-
-Tablet-specific screenshots are required for Google Play Store listings to properly showcase responsive UI designs.
-
-**Type:** `FACT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -42,17 +38,20 @@ Tablet-specific screenshots are required for Google Play Store listings to prope
 
 - [ ] Verify proper scaling and layout adherence for Google Play Store graphic guidelines.
 
-## Related Topics
+## Related Knowledge
 
 - [[App Store Optimization]]
 - [[UI Design]]
 - [[Marketing Assets]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `tablet_08.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Download/playstore_assets/playstore_assets/tablet/tablet_08.png`
-- **File Size:** 0.15 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2Fplaystore_assets%2Fplaystore_assets%2Ftablet%2Ftablet_08.png)
+Saved as part of the app's marketing and store listing asset repository for tablet devices.
+
+## What Changed
+
+Maintains organized records of store deployment assets.
+
+## Original
+
+No external URL

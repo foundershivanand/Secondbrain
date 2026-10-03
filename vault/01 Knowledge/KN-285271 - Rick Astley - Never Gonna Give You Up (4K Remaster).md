@@ -5,8 +5,8 @@ source_type: youtube
 raw_id: RAW-285271
 storage: web
 raw_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-importance: 6
-confidence: 1
+importance: 8
+confidence: 0.95
 topics:
   - Internet Culture
   - Memes
@@ -32,23 +32,7 @@ The official 4K remastered music video for Rick Astley's 1987 hit 'Never Gonna G
 
 ## Atomic Knowledge
 
-### 'Never Gonna Give You Up' is a 1987 dance-pop track by Rick Astley that became a foundational pillar of internet meme culture
-
-'Never Gonna Give You Up' is a 1987 dance-pop track by Rick Astley that became a foundational pillar of internet meme culture.
-
-**Type:** `FACT` | **Confidence:** 100%
-
-### Rickrolling is a classic bait-and-switch prank where a disguised hyperlink leads directly to the 'Never Gonna Give You Up' music video
-
-Rickrolling is a classic bait-and-switch prank where a disguised hyperlink leads directly to the 'Never Gonna Give You Up' music video.
-
-**Type:** `FACT` | **Confidence:** 100%
-
-### The longevity of the Rickroll meme demonstrates that harmless, universally accessible humor can create permanent digital cultural institutions
-
-The longevity of the Rickroll meme demonstrates that harmless, universally accessible humor can create permanent digital cultural institutions.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -58,11 +42,6 @@ The longevity of the Rickroll meme demonstrates that harmless, universally acces
 ## Actions
 
 - [ ] Analyze the psychological triggers of the Rickroll to understand viral loop mechanics in digital marketing.
-
-## Product & SaaS Opportunities
-
-- 💡 A browser extension that analyzes destination URLs to warn users if they are about to be Rickrolled.
-- 💡 A meme-preservation platform that catalogs and archives high-definition remasters of historical internet artifacts.
 
 ## Related Knowledge
 

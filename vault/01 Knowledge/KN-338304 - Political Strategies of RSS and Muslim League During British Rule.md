@@ -5,7 +5,7 @@ source_type: pdf
 raw_id: RAW-338304
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMJasEEPXZDTNOgSWQa88rN9r4kQEAAAuYiAAJQFghWPLZW3K3-o_c9BA"
-importance: 7
+importance: 8
 confidence: 0.95
 topics:
   - Indian History
@@ -31,23 +31,7 @@ The RSS and the All-India Muslim League largely avoided mass anti-colonial movem
 
 ## Atomic Knowledge
 
-### The RSS and All-India Muslim League stayed out of mass anti-colonial movements to focus on communal consolidation and mutual competition
-
-The RSS and All-India Muslim League stayed out of mass anti-colonial movements to focus on communal consolidation and mutual competition.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### The Morley-Minto Reforms of 1909 institutionalized separate electorates, aiding the Muslim League's positioning as a representative voice
-
-The Morley-Minto Reforms of 1909 institutionalized separate electorates, aiding the Muslim League's positioning as a representative voice.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### The Muslim League cooperated with the British colonial administration during World War II while the Congress launched the Quit India Movement, allowing the League to consolidate political power
-
-The Muslim League cooperated with the British colonial administration during World War II while the Congress launched the Quit India Movement, allowing the League to consolidate political power.
-
-**Type:** `FACT` | **Confidence:** 95%
+No atomic knowledge blocks extracted.
 
 ## Insights
 

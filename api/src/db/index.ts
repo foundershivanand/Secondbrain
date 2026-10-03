@@ -98,6 +98,16 @@ export class Database {
     return res.results || [];
   }
 
+  async getRecentSourcesByType(sourceTypes: string[], limit: number = 5): Promise<SourceRecord[]> {
+    if (sourceTypes.length === 0) return [];
+    const placeholders = sourceTypes.map(() => '?').join(',');
+    const res = await this.db
+      .prepare(`SELECT * FROM sources WHERE source_type IN (${placeholders}) ORDER BY captured_at DESC LIMIT ?`)
+      .bind(...sourceTypes, limit)
+      .all<SourceRecord>();
+    return res.results || [];
+  }
+
   // --- KNOWLEDGE ---
   async createKnowledge(k: KnowledgeRecord): Promise<void> {
     await this.db
@@ -149,6 +159,32 @@ export class Database {
       ...record,
       atomic_items: atomic.results || [],
     };
+  }
+
+  async getKnowledgeBySourceId(sourceId: string): Promise<KnowledgeRecord | null> {
+    const record = await this.db
+      .prepare(`SELECT * FROM knowledge WHERE source_id = ? LIMIT 1`)
+      .bind(sourceId)
+      .first<KnowledgeRecord>();
+    if (!record) return null;
+
+    const atomic = await this.db
+      .prepare(`SELECT * FROM atomic_knowledge WHERE knowledge_id = ?`)
+      .bind(record.id)
+      .all<AtomicKnowledgeItem>();
+
+    return {
+      ...record,
+      atomic_items: atomic.results || [],
+    };
+  }
+
+  async getRecentKnowledge(limit: number = 5): Promise<KnowledgeRecord[]> {
+    const res = await this.db
+      .prepare(`SELECT * FROM knowledge ORDER BY created_at DESC LIMIT ?`)
+      .bind(limit)
+      .all<KnowledgeRecord>();
+    return res.results || [];
   }
 
   async listKnowledge(limit: number = 50, offset: number = 0, topic?: string): Promise<KnowledgeRecord[]> {

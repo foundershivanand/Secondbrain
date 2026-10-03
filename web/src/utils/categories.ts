@@ -1,6 +1,6 @@
 /**
  * Second Brain Curated Category Taxonomy
- * Strictly bounded to <= 30 categories with intelligent keyword clustering
+ * Strictly bounded to <= 30 categories (19 canonical categories) with intelligent keyword clustering.
  */
 
 export interface CategoryDef {
@@ -18,7 +18,7 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     icon: '🤖',
     color: 'text-purple-400 border-purple-500/30 bg-purple-500/10',
     keywords: [
-      'ai', 'llm', 'llms', 'gemini', 'gpt', 'claude', 'openai', 'prompt', 'prompting',
+      'ai study case', 'ai', 'llm', 'llms', 'gemini api', 'gpt', 'claude', 'openai', 'prompt', 'prompting',
       'rag', 'embedding', 'embeddings', 'transformer', 'fine-tuning', 'tokens',
       'deep learning', 'machine learning', 'vision model', 'nlp', 'reasoning model'
     ],
@@ -35,47 +35,14 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 'productivity-pkm',
-    name: 'Productivity & PKM Systems',
-    icon: '⚡',
-    color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
+    id: 'digital-wellness',
+    name: 'Digital Wellness & Screen Time',
+    icon: '📱',
+    color: 'text-rose-400 border-rose-500/30 bg-rose-500/10',
     keywords: [
-      'second brain', 'obsidian', 'pkm', 'note-taking', 'knowledge management',
-      'productivity', 'focus', 'screen time', 'doomscrolling', 'screenzen', 'opal',
-      'brain rot', 'time blocking', 'workflow', 'habits', 'deep work', 'moc', 'zettelkasten'
-    ],
-  },
-  {
-    id: 'software-architecture',
-    name: 'Software Architecture & Backend',
-    icon: '🏗️',
-    color: 'text-blue-400 border-blue-500/30 bg-blue-500/10',
-    keywords: [
-      'architecture', 'system design', 'backend', 'cloudflare', 'workers', 'serverless',
-      'database', 'sqlite', 'd1', 'sql', 'microservices', 'api', 'distributed systems',
-      'caching', 'rest', 'graphql', 'rust', 'golang', 'node.js', 'docker'
-    ],
-  },
-  {
-    id: 'web-mobile-engineering',
-    name: 'Web & Mobile Engineering',
-    icon: '💻',
-    color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10',
-    keywords: [
-      'react', 'typescript', 'javascript', 'frontend', 'pwa', 'web app', 'mobile app',
-      'tailwind', 'css', 'html', 'next.js', 'vite', 'ui components', 'state management',
-      'responsive design', 'browser extension', 'userscript'
-    ],
-  },
-  {
-    id: 'saas-product',
-    name: 'SaaS & Product Strategy',
-    icon: '🚀',
-    color: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
-    keywords: [
-      'saas', 'startup', 'product', 'mrr', 'arr', 'monetization', 'pricing', 'onboarding',
-      'business model', 'product-market fit', 'growth', 'acquisition', 'retention',
-      'churn', 'b2b', 'freemium', 'landing page', 'customer development'
+      'screenzen', 'opal', 'touch grass', 'clearspace', 'focus flight', 'brain rot', 'cat on chair',
+      'screen time', 'doomscrolling', 'digital detox', 'decluttering', 'hiding apps', 'widgets',
+      'lock screen', 'home screen', 'phone addiction', 'habit friction', 'frictionless'
     ],
   },
   {
@@ -84,29 +51,62 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     icon: '🔌',
     color: 'text-orange-400 border-orange-500/30 bg-orange-500/10',
     keywords: [
-      'hardware', 'iot', 'smart mirror', 'thermal printer', 'raspberry pi', 'arduino',
+      'voice-to-print', 'smart mirror', 'thermal printer', 'raspberry pi', 'arduino',
       'esp32', 'ambient computing', 'sensors', 'embedded', 'microcontroller',
-      'robotics', 'physical computing', 'maker', 'electronics'
+      'robotics', 'physical computing', 'maker', 'electronics', 'hardware'
     ],
   },
   {
-    id: 'developer-tools',
-    name: 'Developer Tools & Automation',
-    icon: '🛠️',
-    color: 'text-teal-400 border-teal-500/30 bg-teal-500/10',
+    id: 'mobile-ui-apps',
+    name: 'Mobile Apps & UI Design',
+    icon: '📲',
+    color: 'text-cyan-400 border-cyan-500/30 bg-cyan-500/10',
     keywords: [
-      'git', 'github', 'devops', 'cli', 'automation', 'bash', 'terminal', 'shell',
-      'ci/cd', 'tooling', 'linters', 'prettier', 'wrangler', 'testing', 'scripts'
+      'play store', 'tablet asset', 'app interface', 'app idea', 'instagram', 'ui concept',
+      'workout planner', 'trip planner', 'wireframe', 'mobile app', 'dashboard ui',
+      'screenshot', 'ui design', 'concept', 'figma'
     ],
   },
   {
-    id: 'cybersecurity-privacy',
-    name: 'Cybersecurity & Privacy',
-    icon: '🛡️',
-    color: 'text-rose-400 border-rose-500/30 bg-rose-500/10',
+    id: 'academics-education',
+    name: 'Academics & Education',
+    icon: '🎓',
+    color: 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10',
     keywords: [
-      'security', 'privacy', 'auth', 'oauth', 'jwt', 'encryption', 'token', 'cryptography',
-      'vulnerability', 'untrusted', 'injection', 'defense', 'passwords', 'threat'
+      'semester', 'academic', 'first semester', '2nd semester', 'third semester',
+      '5th semester', 'sixth semester', 'university', 'college', 'coursework',
+      'syllabus', 'examination', 'degree', 'marksheet', 'education', 'learning'
+    ],
+  },
+  {
+    id: 'history-politics',
+    name: 'History, Governance & Politics',
+    icon: '🏛️',
+    color: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+    keywords: [
+      'ncert', 'rss', 'muslim league', 'british rule', 'quit india', 'committees in india',
+      'indian history', 'constitution', 'political', 'governance', 'parliament',
+      'anti-colonial', 'civil services', 'history'
+    ],
+  },
+  {
+    id: 'legal-administration',
+    name: 'Legal, Career & Administration',
+    icon: '📜',
+    color: 'text-blue-400 border-blue-500/30 bg-blue-500/10',
+    keywords: [
+      'appointment letter', 'intouch', 'affidavit', 'format template', 'durgv.rai',
+      'contract', 'agreement', 'legal', 'hr documents', 'employment', 'formal communication'
+    ],
+  },
+  {
+    id: 'media-arts',
+    name: 'Cinema, Literature & Arts',
+    icon: '🎬',
+    color: 'text-purple-300 border-purple-400/30 bg-purple-400/10',
+    keywords: [
+      '12 angry men', 'the odyssey', 'cinema', 'film', 'movie', 'literature', 'homer',
+      'epic', 'play', 'storytelling', 'script', 'arts', 'classic'
     ],
   },
   {
@@ -115,38 +115,76 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     icon: '📊',
     color: 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10',
     keywords: [
-      'data pipeline', 'etl', 'analytics', 'metrics', 'bi', 'visualization', 'warehouse',
-      'bigquery', 'duckdb', 'data modeling', 'statistics'
+      'hr analytics', 'mock data analysis', 'data pipeline', 'etl', 'analytics', 'metrics',
+      'bi', 'visualization', 'warehouse', 'bigquery', 'duckdb', 'data modeling', 'statistics'
     ],
   },
   {
-    id: 'design-ux',
-    name: 'Design & User Experience',
-    icon: '🎨',
-    color: 'text-pink-400 border-pink-500/30 bg-pink-500/10',
+    id: 'productivity-pkm',
+    name: 'Productivity & PKM Systems',
+    icon: '⚡',
+    color: 'text-teal-400 border-teal-500/30 bg-teal-500/10',
     keywords: [
-      'design', 'ui/ux', 'user experience', 'visual hierarchy', 'typography',
-      'design system', 'wireframe', 'figma', 'interaction design', 'accessibility'
+      'second brain', 'obsidian', 'pkm', 'note-taking', 'knowledge management',
+      'productivity', 'time blocking', 'workflow', 'habits', 'deep work', 'moc', 'zettelkasten'
     ],
   },
   {
-    id: 'content-media',
-    name: 'Content Creation & Media',
-    icon: '✍️',
-    color: 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10',
+    id: 'software-architecture',
+    name: 'Software Architecture & Backend',
+    icon: '🏗️',
+    color: 'text-sky-400 border-sky-500/30 bg-sky-500/10',
     keywords: [
-      'content', 'youtube', 'video production', 'writing', 'copywriting', 'podcasting',
-      'creator', 'storytelling', 'audience', 'publishing', 'media', 'social media'
+      'architecture', 'system design', 'backend', 'cloudflare', 'workers', 'serverless',
+      'database', 'sqlite', 'd1', 'sql', 'microservices', 'api', 'distributed systems'
     ],
   },
   {
-    id: 'finance-investing',
+    id: 'web-engineering',
+    name: 'Web Engineering & PWA',
+    icon: '💻',
+    color: 'text-cyan-300 border-cyan-400/30 bg-cyan-400/10',
+    keywords: [
+      'react', 'typescript', 'javascript', 'frontend', 'pwa', 'web app',
+      'tailwind', 'css', 'html', 'vite', 'ui components', 'state management'
+    ],
+  },
+  {
+    id: 'saas-product',
+    name: 'SaaS & Product Strategy',
+    icon: '🚀',
+    color: 'text-amber-300 border-amber-400/30 bg-amber-400/10',
+    keywords: [
+      'saas', 'startup', 'product', 'mrr', 'arr', 'monetization', 'pricing', 'onboarding',
+      'business model', 'product-market fit', 'growth', 'acquisition'
+    ],
+  },
+  {
+    id: 'developer-tools',
+    name: 'Developer Tools & DevOps',
+    icon: '🛠️',
+    color: 'text-emerald-300 border-emerald-400/30 bg-emerald-400/10',
+    keywords: [
+      'git', 'github', 'devops', 'cli', 'automation', 'bash', 'terminal', 'shell',
+      'ci/cd', 'wrangler', 'testing', 'scripts'
+    ],
+  },
+  {
+    id: 'cybersecurity-privacy',
+    name: 'Cybersecurity & Privacy',
+    icon: '🛡️',
+    color: 'text-red-400 border-red-500/30 bg-red-500/10',
+    keywords: [
+      'security', 'privacy', 'auth', 'oauth', 'jwt', 'encryption', 'token', 'cryptography'
+    ],
+  },
+  {
+    id: 'finance-economics',
     name: 'Finance & Economics',
     icon: '💰',
-    color: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
+    color: 'text-green-400 border-green-500/30 bg-green-500/10',
     keywords: [
-      'finance', 'investing', 'economics', 'crypto', 'stocks', 'portfolio', 'wealth',
-      'fintech', 'macroeconomics', 'money', 'revenue'
+      'finance', 'investing', 'economics', 'crypto', 'stocks', 'portfolio', 'wealth'
     ],
   },
   {
@@ -156,26 +194,16 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     color: 'text-violet-400 border-violet-500/30 bg-violet-500/10',
     keywords: [
       'mental model', 'first principles', 'systems thinking', 'philosophy', 'cognitive bias',
-      'decision making', 'rationality', 'learning', 'psychology', 'stoicism'
-    ],
-  },
-  {
-    id: 'career-leadership',
-    name: 'Career & Leadership',
-    icon: '👥',
-    color: 'text-sky-400 border-sky-500/30 bg-sky-500/10',
-    keywords: [
-      'career', 'hiring', 'leadership', 'management', 'teamwork', 'communication',
-      'negotiation', 'interviewing', 'mentorship'
+      'decision making', 'rationality', 'psychology', 'stoicism'
     ],
   },
   {
     id: 'general-knowledge',
-    name: 'General Knowledge & Research',
+    name: 'General Knowledge & Reference',
     icon: '📚',
     color: 'text-slate-400 border-slate-700/50 bg-slate-800/40',
     keywords: [
-      'research', 'science', 'math', 'physics', 'reference', 'article', 'general'
+      'research', 'science', 'reference', 'article', 'general', 'moto g64', 'unknown'
     ],
   },
 ];
@@ -187,10 +215,20 @@ export const MAX_TOTAL_CATEGORIES = 30;
  */
 export function resolveNoteCategory(note: {
   title?: string;
-  topics?: string[] | string;
+  topics?: string[] | string | null;
   core_idea?: string;
   knowledge_type?: string;
+  markdown_path?: string | null;
 }): CategoryDef {
+  // 0. If markdown_path already contains a category folder, check match
+  if (note.markdown_path) {
+    for (const cat of CANONICAL_CATEGORIES) {
+      if (note.markdown_path.includes(`/${cat.name}/`) || note.markdown_path.startsWith(`01 Knowledge/${cat.name}/`)) {
+        return cat;
+      }
+    }
+  }
+
   let topicList: string[] = [];
   if (Array.isArray(note.topics)) {
     topicList = note.topics;
@@ -230,7 +268,7 @@ export function resolveNoteCategory(note: {
         // Higher weight if in title or topic
         const topicMatch = topicList.some((t) => t.toLowerCase().includes(kw));
         const titleMatch = (note.title || '').toLowerCase().includes(kw);
-        score += topicMatch ? 3 : (titleMatch ? 2 : 1);
+        score += topicMatch ? 5 : (titleMatch ? 3 : 1);
       }
     }
 
@@ -243,10 +281,15 @@ export function resolveNoteCategory(note: {
   return bestCategory;
 }
 
-/**
- * Group an array of knowledge notes by their canonical Category
- */
-export function groupNotesByCategory<T extends { title?: string; topics?: any; core_idea?: string; knowledge_type?: string }>(
+export function groupNotesByCategory<T extends {
+  id?: string;
+  title?: string;
+  topics?: any;
+  core_idea?: string;
+  knowledge_type?: string;
+  markdown_path?: string | null;
+  [key: string]: any;
+}>(
   notes: T[]
 ): { category: CategoryDef; count: number; notes: T[] }[] {
   const map = new Map<string, { category: CategoryDef; notes: T[] }>();

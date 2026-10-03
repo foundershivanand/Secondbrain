@@ -1,10 +1,18 @@
 import { ExtractionResult, SourceRecord } from '../types';
+import { resolveCategoryName } from '../utils/categories';
 
 export function generateObsidianMarkdown(
   knowledgeId: string,
   extraction: ExtractionResult,
   source?: SourceRecord | null
-): { filename: string; content: string; folder: string } {
+): { filename: string; content: string; folder: string; category: string } {
+  const categoryName = resolveCategoryName({
+    title: extraction.title,
+    topics: extraction.topics,
+    core_idea: extraction.core_idea,
+    knowledge_type: extraction.source_type,
+  });
+
   const sanitizedTitle = (extraction.title || 'Untitled')
     .replace(/[\\/:*?"<>|]/g, '-')
     .trim();
@@ -66,6 +74,7 @@ export function generateObsidianMarkdown(
   const markdown = `---
 id: ${knowledgeId}
 type: knowledge
+category: ${categoryName}
 source_type: ${extraction.source_type || 'text'}
 raw_id: ${source?.raw_id || 'RAW-POINTER'}
 storage: ${source?.raw_storage || 'web'}
@@ -120,7 +129,8 @@ ${rawSourceLink}
   return {
     filename,
     content: markdown,
-    folder: '01 Knowledge',
+    folder: `01 Knowledge/${categoryName}`,
+    category: categoryName,
   };
 }
 

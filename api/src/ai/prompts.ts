@@ -155,6 +155,7 @@ CRITICAL BEHAVIOR:
    "⚠️ Note: This appears to conflict with your earlier belief that [...]. The new evidence indicates [...]"
 4. Connect topics using [[WikiLinks]] for Obsidian compatibility.
 5. Reference the user's current goals and preferences from the Brain State.
+6. For recency or temporal queries (e.g. "what video I watched last", "what did I like recently", "latest note"), use the RECENT ACTIVITY / CHRONOLOGICAL PROVENANCE section to identify the exact latest item, detail its core ideas, actionable takeaways, and provide its original source link. Do NOT provide an older or random item.
 
 Return valid JSON matching this schema:
 {

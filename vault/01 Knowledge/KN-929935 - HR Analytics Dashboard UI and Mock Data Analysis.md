@@ -5,8 +5,8 @@ source_type: screenshot
 raw_id: RAW-929935
 storage: telegram
 raw_url: "telegram://file/AgACAgUAAxkBAAMQasEFsx77pYEdUypOg7GXNFSoGeQAAn4TaxuOwwlWt-xVs8_jb7IBAAMCAAN5AAM9BA"
-importance: 7
-confidence: 0.99
+importance: 8
+confidence: 0.95
 topics:
   - HR Analytics
   - Data Visualization
@@ -33,23 +33,7 @@ An HR Analytics Dashboard displaying key metrics (attrition rate, department sta
 
 ## Atomic Knowledge
 
-### Real-world HR analytics data rarely exhibits uniform distribution across all demographic and organizational dimensions; uniform distributions typically indicate synthetic or randomly generated mock data
-
-Real-world HR analytics data rarely exhibits uniform distribution across all demographic and organizational dimensions; uniform distributions typically indicate synthetic or randomly generated mock data.
-
-**Type:** `INSIGHT` | **Confidence:** 99%
-
-### The dashboard tracks key HR metrics including Attrition Rate, Average Hourly Rate, Job Role distribution, Working Years, Education Field, Gender, Department, Business Travel, Monthly Income, and Marital Status
-
-The dashboard tracks key HR metrics including Attrition Rate, Average Hourly Rate, Job Role distribution, Working Years, Education Field, Gender, Department, Business Travel, Monthly Income, and Marital Status.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### An overall attrition rate of 50
-
-An overall attrition rate of 50.2% is unsustainably high for typical organizations, indicating either a severe organizational crisis or synthetic data.
-
-**Type:** `CLAIM` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -59,10 +43,6 @@ An overall attrition rate of 50.2% is unsustainably high for typical organizatio
 ## Actions
 
 - [ ] When building portfolio dashboards, use realistic datasets (like the IBM HR Analytics Employee Attrition dataset) instead of purely uniform synthetic data to demonstrate true analytical capability.
-
-## Product & SaaS Opportunities
-
-- 💡 A mock data generator specifically designed for HR dashboards that injects realistic correlations (e.g., higher attrition in lower income brackets, specific department variances) rather than flat uniform distributions.
 
 ## Related Knowledge
 

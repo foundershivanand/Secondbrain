@@ -5,8 +5,8 @@ source_type: screenshot
 raw_id: RAW-244107
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMqasEMaxiigyf17L54EXf1r1ZpMXcAAvoiAAJQFghWzQ4sTfB6nQs9BA"
-importance: 7
-confidence: 0.9
+importance: 8
+confidence: 0.95
 topics:
   - Digital Detox
   - Screen Time
@@ -32,23 +32,7 @@ An anti-doomscrolling app that blocks access to other applications until the use
 
 ## Atomic Knowledge
 
-### Introducing high-friction physical real-world requirements (like photographing nature) is an effective behavioral intervention to break digital doomscrolling loops
-
-Introducing high-friction physical real-world requirements (like photographing nature) is an effective behavioral intervention to break digital doomscrolling loops.
-
-**Type:** `CONCEPT` | **Confidence:** 90%
-
-### The 'Touch Grass' app blocks application access until the user submits a photo of real grass
-
-The 'Touch Grass' app blocks application access until the user submits a photo of real grass.
-
-**Type:** `FACT` | **Confidence:** 99%
-
-### Making doomscrolling intentionally annoying or high-friction is a viable strategy for reducing screen time
-
-Making doomscrolling intentionally annoying or high-friction is a viable strategy for reducing screen time.
-
-**Type:** `CLAIM` | **Confidence:** 95%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -59,11 +43,6 @@ Making doomscrolling intentionally annoying or high-friction is a viable strateg
 
 - [ ] Explore the 'Touch Grass' app or similar physical-friction screen time blockers to reduce doomscrolling.
 - [ ] Research other apps in iampascio's list of '8 apps that make doomscrolling so annoying you just stop'.
-
-## Product & SaaS Opportunities
-
-- 💡 An app blocker that requires completing a physical micro-workout (e.g., step count, squats verified by camera) to unlock social media.
-- 💡 A 'Proof of Real Life' API that developers can integrate to lock features until a real-world action is verified via AI image recognition.
 
 ## Related Knowledge
 

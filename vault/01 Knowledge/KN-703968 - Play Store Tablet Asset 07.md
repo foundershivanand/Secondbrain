@@ -2,11 +2,11 @@
 id: KN-703968
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-692358771703968
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2Fplaystore_assets%2Fplaystore_assets%2Ftablet%2Ftablet_07.png"
-file_size: 157242
-priority: P1
+raw_id: RAW-SRC-692358771703968
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - App Marketing
   - Google Play Store
@@ -30,11 +30,7 @@ A promotional tablet screenshot asset intended for Google Play Store listing, sh
 
 ## Atomic Knowledge
 
-### Play Store tablet assets require specific dimension and UI layout optimizations to effectively showcase app functionality on larger screens
-
-Play Store tablet assets require specific dimension and UI layout optimizations to effectively showcase app functionality on larger screens.
-
-**Type:** `CONCEPT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -44,18 +40,21 @@ Play Store tablet assets require specific dimension and UI layout optimizations 
 
 - [ ] Verify the screenshot asset meets current Google Play Store guidelines and device aspect ratios.
 
-## Related Topics
+## Related Knowledge
 
 - [[App Marketing]]
 - [[Google Play Store]]
 - [[UI/UX Design]]
 - [[Tablet Optimization]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `tablet_07.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Download/playstore_assets/playstore_assets/tablet/tablet_07.png`
-- **File Size:** 0.15 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2Fplaystore_assets%2Fplaystore_assets%2Ftablet%2Ftablet_07.png)
+Saved as part of the app store asset pipeline for deployment and marketing purposes.
+
+## What Changed
+
+Maintains readiness for app store listing updates and visual asset management.
+
+## Original
+
+No external URL

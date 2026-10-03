@@ -34,7 +34,7 @@ export default {
     const db = new Database(env.DB);
 
     // 2. Public Health Check & Root
-    if (pathname === '/' || pathname === '/api/health') {
+    if (pathname === '/' || pathname === '/health' || pathname === '/healthz' || pathname === '/api/health') {
       return jsonResponse({
         status: 'online',
         service: 'Second Brain API',

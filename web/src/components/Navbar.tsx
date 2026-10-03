@@ -107,6 +107,34 @@ export const Navbar: React.FC<NavbarProps> = ({
           { id: 'brain', label: 'Brain', icon: Brain },
           { id: 'inbox', label: 'Inbox', icon: Inbox },
           { id: 'knowledge', label: 'Notes', icon: BookOpen },
+        ].map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex flex-col items-center py-1 px-2 rounded-lg text-[10px] font-medium transition-all ${
+                isActive ? 'text-purple-400 font-bold' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'text-purple-400 scale-110' : ''}`} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+
+        {/* Center Prominent Mobile Capture Action Button */}
+        <button
+          onClick={onOpenCapture}
+          className="flex items-center justify-center -mt-5 w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white shadow-xl shadow-purple-600/40 ring-4 ring-slate-950 active:scale-95 transition"
+          aria-label="Quick Capture"
+          title="Quick Capture"
+        >
+          <Plus className="w-6 h-6" />
+        </button>
+
+        {[
           { id: 'ideas', label: 'Ideas', icon: Lightbulb },
           { id: 'memories', label: 'Memory', icon: Sparkles },
           { id: 'settings', label: 'Settings', icon: Settings },
@@ -117,7 +145,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-lg text-[10px] font-medium transition-all ${
+              className={`flex flex-col items-center py-1 px-2 rounded-lg text-[10px] font-medium transition-all ${
                 isActive ? 'text-purple-400 font-bold' : 'text-slate-400 hover:text-slate-200'
               }`}
             >

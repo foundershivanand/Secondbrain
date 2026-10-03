@@ -78,7 +78,7 @@ const filterKeyword = getOption('--filter', '').toLowerCase();
 const limitCount = parseInt(getOption('--limit', '0'), 10);
 const isDryRun = process.argv.includes('--dry-run');
 const syncGithub = process.argv.includes('--sync-github');
-const geminiModel = getOption('--model', 'gemini-2.5-flash');
+const geminiModel = getOption('--model', 'gemini-3.5-flash-lite');
 
 const geminiKey = env.GEMINI_API_KEY;
 if (!geminiKey && !isDryRun) {
@@ -351,31 +351,40 @@ Otherwise, extract high-density, structured knowledge into strictly valid JSON m
   "should_skip_note": false
 }`;
 
-async function callGemini(metaText) {
+async function callGemini(metaText, retries = 3) {
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`;
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: metaText }] }],
-      systemInstruction: { parts: [{ text: EXTRACTION_PROMPT }] },
-      generationConfig: {
-        temperature: 0.2,
-        topP: 0.8,
-        responseMimeType: 'application/json'
-      }
-    })
-  });
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: metaText }] }],
+        systemInstruction: { parts: [{ text: EXTRACTION_PROMPT }] },
+        generationConfig: {
+          temperature: 0.2,
+          topP: 0.8,
+          responseMimeType: 'application/json'
+        }
+      })
+    });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini API error [${res.status}]: ${errText}`);
+    if (res.status === 429) {
+      console.warn(`   ⏳ Rate limit (429) hit, cooling down for 25s before retry (attempt ${attempt + 1}/${retries})...`);
+      await new Promise(r => setTimeout(r, 25000));
+      continue;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Gemini API error [${res.status}]: ${errText}`);
+    }
+
+    const data = await res.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) throw new Error('Empty response from Gemini');
+    return JSON.parse(rawText);
   }
-
-  const data = await res.json();
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!rawText) throw new Error('Empty response from Gemini');
-  return JSON.parse(rawText);
+  throw new Error(`Rate limit exceeded after ${retries} attempts.`);
 }
 
 function generateMarkdown(knowledgeId, extraction, item, duplicates = []) {
@@ -642,8 +651,8 @@ Priority: ${item.priority || 'P1'}`;
     saveProgress();
   }
 
-  // Gentle throttle
-  await new Promise(r => setTimeout(r, 1200));
+  // Gentle throttle (respects 15 RPM free tier limit)
+  await new Promise(r => setTimeout(r, 4200));
 }
 
 console.log(`\n🎉 Batch processing completed!`);

@@ -32,23 +32,7 @@ Clearspace reduces compulsive phone use by introducing high-friction barriers—
 
 ## Atomic Knowledge
 
-### Introducing physical or cognitive friction breaks the automatic habit loop of compulsive phone checking
-
-Introducing physical or cognitive friction breaks the automatic habit loop of compulsive phone checking.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Clearspace is a Y Combinator-backed digital wellness app that blocks access to addictive apps until a specific challenge is completed
-
-Clearspace is a Y Combinator-backed digital wellness app that blocks access to addictive apps until a specific challenge is completed.
-
-**Type:** `FACT` | **Confidence:** 99%
-
-### Making doomscrolling physically demanding or annoying is an effective behavioral design strategy to reduce screen time
-
-Making doomscrolling physically demanding or annoying is an effective behavioral design strategy to reduce screen time.
-
-**Type:** `CLAIM` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -59,11 +43,6 @@ Making doomscrolling physically demanding or annoying is an effective behavioral
 
 - [ ] Explore Clearspace or similar friction-based app blockers to curb mindless social media usage.
 - [ ] Implement a manual 'friction rule' for digital habits: perform a physical movement (e.g., 5 deep breaths or 10 squats) before opening distracting apps.
-
-## Product & SaaS Opportunities
-
-- 💡 A browser extension that forces users to solve a quick mental puzzle or type a mindful affirmation before opening distracting websites.
-- 💡 A smart-home integrated router that throttles bandwidth to entertainment devices until physical activity goals (tracked via wearable) are met.
 
 ## Related Knowledge
 

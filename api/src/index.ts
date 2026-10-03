@@ -14,6 +14,7 @@ import { handleMOCs } from './routes/mocs';
 import { handleManifestImport } from './routes/manifest';
 import { handleDailyBrief } from './routes/daily-brief';
 import { handleSync } from './routes/sync';
+import { handleYouTubeRoutes, syncYouTubeVideos } from './routes/youtube-sync';
 import { runMemoryConsolidationAgent } from './ai/memory-agent';
 import { runEvolutionAgent } from './ai/evolution-agent';
 import { verifyAuth } from './utils/security';
@@ -48,12 +49,18 @@ export default {
       return handleTelegramWebhook(request, env, db);
     }
 
-    // 4. Authentication Check for API routes (if env.AUTH_TOKEN is configured)
+    // 4. Public OAuth Handlers (Google YouTube OAuth redirect & callback)
+    if (pathname === '/api/youtube/auth' || pathname === '/api/youtube/callback') {
+      const pathParts = pathname.replace(/^\/api\/youtube\/?/, '').split('/').filter(Boolean);
+      return handleYouTubeRoutes(request, env, db, pathParts);
+    }
+
+    // 5. Authentication Check for API routes (if env.AUTH_TOKEN is configured)
     if (!verifyAuth(request, env)) {
       return errorResponse('Unauthorized: Invalid or missing API token', 401);
     }
 
-    // 5. Route Dispatcher
+    // 6. Route Dispatcher
     try {
       if (pathname === '/api/capture') {
         return await handleCapture(request, env, db);
@@ -114,7 +121,15 @@ export default {
 
       if (pathname.startsWith('/api/sync')) {
         const pathParts = pathname.replace(/^\/api\/sync\/?/, '').split('/').filter(Boolean);
+        if (pathParts[0] === 'youtube') {
+          return await handleYouTubeRoutes(request, env, db, ['sync']);
+        }
         return await handleSync(request, env, db, pathParts);
+      }
+
+      if (pathname.startsWith('/api/youtube')) {
+        const pathParts = pathname.replace(/^\/api\/youtube\/?/, '').split('/').filter(Boolean);
+        return await handleYouTubeRoutes(request, env, db, pathParts);
       }
 
       return errorResponse(`Endpoint not found: ${pathname}`, 404);
@@ -129,24 +144,39 @@ export default {
    * Runs daily at 2:00 AM UTC
    */
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
-    const timestamp = new Date().toISOString();
-    console.log(`⏰ [Cron Trigger] Starting Nightly Second Brain Harnessing at ${timestamp}`);
+    const now = new Date();
+    const currentHour = now.getUTCHours();
+    const timestamp = now.toISOString();
+    console.log(`⏰ [Cron Trigger] Starting Second Brain Scheduled Tasks at ${timestamp} (UTC hour: ${currentHour})`);
     const db = new Database(env.DB);
 
-    // 1. Run Nightly Memory Consolidation Agent (M4 Personal Memories)
-    try {
-      const memReport = await runMemoryConsolidationAgent(env, db);
-      console.log(`✅ [Memory Agent] Promoted ${memReport.promotedCount} to durable, rejected ${memReport.rejectedCount}.`);
-    } catch (err) {
-      console.error('❌ [Memory Agent] Failed:', err);
+    // 1. Run Nightly Memory Consolidation Agent (2:00 AM UTC)
+    if (currentHour === 2) {
+      try {
+        const memReport = await runMemoryConsolidationAgent(env, db);
+        console.log(`✅ [Memory Agent] Promoted ${memReport.promotedCount} to durable, rejected ${memReport.rejectedCount}.`);
+      } catch (err) {
+        console.error('❌ [Memory Agent] Failed:', err);
+      }
+
+      // 2. Run Nightly Evolution & Discovery Agent (2:00 AM UTC)
+      try {
+        const evoReport = await runEvolutionAgent(env, db);
+        console.log(`✅ [Evolution Agent] Discovered ${evoReport.newConnections.length} new connections and ${evoReport.productOpportunitiesDetected.length} product opportunities.`);
+      } catch (err) {
+        console.error('❌ [Evolution Agent] Failed:', err);
+      }
     }
 
-    // 2. Run Nightly Evolution & Discovery Agent (M3 Cross-Source Connections & Pattern Synthesis)
+    // 3. Automated YouTube Liked Videos & Playlist Ingestion (Runs every hour)
     try {
-      const evoReport = await runEvolutionAgent(env, db);
-      console.log(`✅ [Evolution Agent] Discovered ${evoReport.newConnections.length} new connections and ${evoReport.productOpportunitiesDetected.length} product opportunities.`);
+      console.log('🎬 [YouTube Auto-Sync] Checking for newly liked videos or playlist additions...');
+      const ytReport = await syncYouTubeVideos(env, db, 10);
+      if (ytReport.newIngested > 0) {
+        console.log(`✅ [YouTube Auto-Sync] Ingested ${ytReport.newIngested} new videos into Obsidian vault.`);
+      }
     } catch (err) {
-      console.error('❌ [Evolution Agent] Failed:', err);
+      console.error('❌ [YouTube Auto-Sync] Failed:', err);
     }
   },
 };

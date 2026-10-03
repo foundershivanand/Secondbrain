@@ -83,6 +83,13 @@ export class Database {
       .first<SourceRecord>();
   }
 
+  async getSourceByUrl(url: string): Promise<SourceRecord | null> {
+    return await this.db
+      .prepare(`SELECT * FROM sources WHERE original_url = ? OR raw_url = ? LIMIT 1`)
+      .bind(url, url)
+      .first<SourceRecord>();
+  }
+
   async listSources(limit: number = 50, offset: number = 0): Promise<SourceRecord[]> {
     const res = await this.db
       .prepare(`SELECT * FROM sources ORDER BY created_at DESC LIMIT ? OFFSET ?`)
@@ -319,6 +326,22 @@ export class Database {
     await this.db
       .prepare(`INSERT OR REPLACE INTO brain_state (key, data, updated_at) VALUES ('current', ?, ?)`)
       .bind(JSON.stringify(state), now)
+      .run();
+  }
+
+  async getKV(key: string): Promise<string | null> {
+    const record = await this.db
+      .prepare(`SELECT data FROM brain_state WHERE key = ?`)
+      .bind(key)
+      .first<{ data: string }>();
+    return record?.data || null;
+  }
+
+  async setKV(key: string, data: string): Promise<void> {
+    const now = new Date().toISOString();
+    await this.db
+      .prepare(`INSERT OR REPLACE INTO brain_state (key, data, updated_at) VALUES (?, ?, ?)`)
+      .bind(key, data, now)
       .run();
   }
 

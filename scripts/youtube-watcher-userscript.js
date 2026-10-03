@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         Second Brain - YouTube Automatic Watch History Sync & AI Extractor
+// @name         Second Brain - YouTube Automatic Watch & Like History Sync
 // @namespace    https://second-brain-api.fitt.workers.dev/
-// @version      1.0.0
-// @description  Automatically sync watched YouTube videos to your Second Brain Obsidian Vault with AI-extracted atomic ideas and summaries.
+// @version      1.1.0
+// @description  Automatically sync watched and liked YouTube videos to your Second Brain Obsidian Vault with AI-extracted atomic ideas and summaries.
 // @author       Second Brain
-// @match        https://www.youtube.com/watch*
+// @match        https://www.youtube.com/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -18,7 +18,7 @@
   // --- Configuration ---
   const API_ENDPOINT = 'https://second-brain-api.fitt.workers.dev/api/capture';
   const AUTH_TOKEN = 'secondbrain_dev_secret';
-  const MIN_WATCH_SECONDS = 25; // Minimum seconds watched before syncing (prevents clicking accidents)
+  const MIN_WATCH_SECONDS = 30; // Minimum seconds watched before auto-syncing
 
   let currentVideoId = null;
   let watchTimer = null;
@@ -31,12 +31,12 @@
   }
 
   function getVideoTitle() {
-    const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, #title h1 yt-formatted-string');
+    const titleEl = document.querySelector('h1.ytd-watch-metadata yt-formatted-string, #title h1 yt-formatted-string, ytd-watch-metadata h1');
     return titleEl ? titleEl.textContent.trim() : document.title.replace(' - YouTube', '').trim();
   }
 
   function getChannelName() {
-    const channelEl = document.querySelector('#owner #channel-name a, ytd-channel-name a');
+    const channelEl = document.querySelector('#owner #channel-name a, ytd-channel-name a, #channel-name a');
     return channelEl ? channelEl.textContent.trim() : '';
   }
 
@@ -75,22 +75,25 @@
     }, 4500);
   }
 
-  function syncVideo(videoId, title, channel) {
-    const syncedKey = `sb_synced_${videoId}`;
+  function syncVideo(videoId, title, channel, isLiked = false) {
+    const syncedKey = isLiked ? `sb_liked_${videoId}` : `sb_synced_${videoId}`;
     if (localStorage.getItem(syncedKey)) {
       console.log(`[Second Brain] Video already synced: ${videoId}`);
       return;
     }
 
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-    showToast(`🧠 <b>Second Brain:</b> Extracting ideas from <i>"${title.slice(0, 30)}..."</i>`);
+    const badge = isLiked ? '👍 Liked Video' : '👀 Watched Video';
+    showToast(`🧠 <b>Second Brain:</b> Extracting ideas from ${badge} <i>"${title.slice(0, 25)}..."</i>`);
 
     const payload = JSON.stringify({
       source_type: 'youtube',
       url: videoUrl,
       title: title,
-      user_note: channel ? `Channel: ${channel} (Auto-captured from YouTube watch history)` : 'Auto-captured from YouTube watch history',
-      importance: 7
+      user_note: channel
+        ? `Channel: ${channel} (${isLiked ? 'Liked on YouTube' : 'Watched on YouTube'})`
+        : (isLiked ? 'Liked on YouTube' : 'Watched on YouTube'),
+      importance: isLiked ? 8 : 7,
     });
 
     GM_xmlhttpRequest({
@@ -104,6 +107,7 @@
       onload: function (response) {
         if (response.status >= 200 && response.status < 300) {
           localStorage.setItem(syncedKey, 'true');
+          localStorage.setItem(`sb_synced_${videoId}`, 'true');
           hasSyncedCurrentVideo = true;
           showToast(`✅ <b>Second Brain:</b> Synced & added to Obsidian vault!`, true);
           console.log(`[Second Brain] Successfully synced video ${videoId} to Obsidian vault.`);
@@ -138,7 +142,7 @@
               clearInterval(watchTimer);
               const title = getVideoTitle();
               const channel = getChannelName();
-              syncVideo(currentVideoId, title, channel);
+              syncVideo(currentVideoId, title, channel, false);
             }
           }
         }, 1000);
@@ -146,10 +150,37 @@
     }
   }
 
-  // Monitor YouTube SPA navigation changes (yt-navigate-finish event)
+  // Detect when user clicks the "Like" thumbs-up button on YouTube
+  function setupLikeButtonListener() {
+    document.addEventListener('click', (e) => {
+      const target = e.target;
+      if (!target) return;
+
+      const likeBtn = target.closest('like-button-view-model button, ytd-like-button-renderer button, button[aria-label*="like" i], button[aria-label*="Like" i]');
+      if (likeBtn) {
+        setTimeout(() => {
+          const isPressed = likeBtn.getAttribute('aria-pressed') === 'true' ||
+                            likeBtn.classList.contains('style-default-active') ||
+                            likeBtn.closest('like-button-view-model')?.querySelector('[aria-pressed="true"]');
+          if (isPressed) {
+            const videoId = getVideoId();
+            if (videoId) {
+              const title = getVideoTitle();
+              const channel = getChannelName();
+              console.log(`[Second Brain] Like clicked on video ${videoId}: "${title}"`);
+              syncVideo(videoId, title, channel, true);
+            }
+          }
+        }, 400);
+      }
+    }, true);
+  }
+
+  // Initialize listeners
   window.addEventListener('yt-navigate-finish', handleVideoWatch);
   window.addEventListener('load', handleVideoWatch);
-  setInterval(handleVideoWatch, 2000);
+  setInterval(handleVideoWatch, 2500);
+  setupLikeButtonListener();
 
-  console.log('🧠 [Second Brain] YouTube Watch Sync Active.');
+  console.log('🧠 [Second Brain] YouTube Watch & Like Sync Active.');
 })();

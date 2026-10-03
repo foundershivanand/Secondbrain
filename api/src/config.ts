@@ -15,6 +15,13 @@ export interface Env {
   GITHUB_REPO?: string;
   GITHUB_BRANCH?: string;
   GITHUB_PATH_PREFIX?: string;
+
+  // YouTube Liked Videos & Playlist Sync
+  YOUTUBE_CLIENT_ID?: string;
+  YOUTUBE_CLIENT_SECRET?: string;
+  YOUTUBE_REFRESH_TOKEN?: string;
+  YOUTUBE_PLAYLIST_ID?: string;
+  YOUTUBE_API_KEY?: string;
 }
 
 export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash';

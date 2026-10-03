@@ -15,6 +15,8 @@ import {
   RefreshCw,
   GitBranch,
   ExternalLink,
+  Video,
+  ThumbsUp,
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -33,11 +35,36 @@ export const Settings: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
+  // YouTube Sync State
+  const [ytStatus, setYtStatus] = useState<{
+    connected: boolean;
+    mode: 'oauth_liked' | 'playlist' | 'none';
+    oauthConfigured: boolean;
+    hasRefreshToken: boolean;
+    playlistId: string | null;
+    hasApiKey: boolean;
+    lastSync: any;
+    totalSyncedCount: number;
+  } | null>(null);
+  const [isYtSyncing, setIsYtSyncing] = useState(false);
+  const [ytSyncMessage, setYtSyncMessage] = useState<string | null>(null);
+  const [playlistInput, setPlaylistInput] = useState('');
+  const [isSavingPlaylist, setIsSavingPlaylist] = useState(false);
+
   useEffect(() => {
     setApiEndpoint(localStorage.getItem('sb_api_endpoint') || '');
     setAuthToken(localStorage.getItem('sb_auth_token') || '');
     loadSyncStatus();
+    loadYtStatus();
   }, []);
+
+  const loadYtStatus = async () => {
+    try {
+      const status = await api.getYoutubeSyncStatus();
+      setYtStatus(status);
+      if (status.playlistId) setPlaylistInput(status.playlistId);
+    } catch {}
+  };
 
   const loadSyncStatus = async () => {
     try {
@@ -112,6 +139,35 @@ export const Settings: React.FC = () => {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleTriggerYtSync = async () => {
+    setIsYtSyncing(true);
+    setYtSyncMessage('Polling YouTube Liked videos & extracting concepts with Gemini...');
+    try {
+      const res = await api.triggerYoutubeSync();
+      setYtSyncMessage(`✅ ${res.message}`);
+      loadYtStatus();
+    } catch (err: any) {
+      setYtSyncMessage(`❌ YouTube sync error: ${err.message}`);
+    } finally {
+      setIsYtSyncing(false);
+    }
+  };
+
+  const handleSavePlaylist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingPlaylist(true);
+    try {
+      await api.configureYoutubeSync({ playlist_id: playlistInput });
+      await loadYtStatus();
+      setYtSyncMessage('✅ Playlist ID updated successfully!');
+      setTimeout(() => setYtSyncMessage(null), 3500);
+    } catch (err: any) {
+      setYtSyncMessage(`❌ Failed to save playlist: ${err.message}`);
+    } finally {
+      setIsSavingPlaylist(false);
+    }
   };
 
   const handleTriggerSync = async () => {
@@ -253,6 +309,120 @@ export const Settings: React.FC = () => {
             {importStatus}
           </div>
         )}
+      </div>
+
+      {/* YouTube Watch & Liked Videos Automated Sync */}
+      <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+        <div>
+          <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+            <Video className="w-4 h-4 text-rose-400" />
+            <span>YouTube Liked &amp; Watch History Auto-Sync</span>
+          </h3>
+          <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+            Automatically ingest YouTube videos you like or watch into your Obsidian Vault with AI-extracted core ideas, atomic notes, and architectural takeaways.
+          </p>
+        </div>
+
+        {/* Status & Sync Trigger */}
+        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2.5">
+              <span
+                className={`w-2.5 h-2.5 rounded-full ${
+                  ytStatus?.connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                }`}
+              />
+              <span className="text-xs font-semibold text-slate-200">
+                {ytStatus?.connected
+                  ? (ytStatus.mode === 'oauth_liked'
+                      ? 'Connected via Google OAuth (Liked Videos)'
+                      : `Connected via Playlist (${ytStatus.playlistId || 'Active'})`)
+                  : 'YouTube Sync Not Configured'}
+              </span>
+            </div>
+
+            {ytStatus?.totalSyncedCount !== undefined && (
+              <span className="text-[11px] text-slate-400 font-mono bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+                {ytStatus.totalSyncedCount} YouTube Videos Indexed in Vault
+              </span>
+            )}
+          </div>
+
+          {/* Sync Trigger and Auth Buttons */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <button
+              onClick={handleTriggerYtSync}
+              disabled={isYtSyncing}
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isYtSyncing ? 'animate-spin' : ''}`} />
+              <span>{isYtSyncing ? 'Syncing Liked Videos...' : 'Sync Liked Videos Now'}</span>
+            </button>
+
+            <a
+              href={`${apiEndpoint || 'https://second-brain-api.fitt.workers.dev'}/api/youtube/auth`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-rose-400" />
+              <span>Connect Google Account</span>
+            </a>
+          </div>
+
+          {ytSyncMessage && (
+            <div className="p-3 rounded-xl bg-slate-900 border border-purple-500/30 text-xs text-purple-300 font-medium">
+              {ytSyncMessage}
+            </div>
+          )}
+
+          {ytStatus?.lastSync && (
+            <div className="text-[11px] text-slate-500 space-y-0.5 pt-1">
+              <div>Last Synced: {new Date(ytStatus.lastSync.lastSyncAt).toLocaleString()}</div>
+              <div>Mode: {ytStatus.lastSync.mode} &bull; New Notes Added: {ytStatus.lastSync.newIngested} &bull; Already Indexed: {ytStatus.lastSync.skippedCount}</div>
+            </div>
+          )}
+        </div>
+
+        {/* Playlist ID Setting Form */}
+        <form onSubmit={handleSavePlaylist} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-xs font-semibold text-slate-200 block">YouTube Playlist ID (Zero-OAuth Alternative)</span>
+              <p className="text-[11px] text-slate-500">Sync any unlisted or public playlist (e.g. your "Brain" or "Saved" playlist ID starting with PL...)</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={playlistInput}
+              onChange={(e) => setPlaylistInput(e.target.value)}
+              placeholder="e.g. PLrAXtmErZgOdP_8GzqsJ4VSL822rW8n"
+              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-rose-500"
+            />
+            <button
+              type="submit"
+              disabled={isSavingPlaylist}
+              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition border border-slate-700"
+            >
+              {isSavingPlaylist ? 'Saving...' : 'Save Playlist'}
+            </button>
+          </div>
+        </form>
+
+        {/* Real-time Browser Extension / Tampermonkey */}
+        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2">
+          <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+            <ThumbsUp className="w-3.5 h-3.5 text-rose-400" />
+            <span>Instant Desktop Browser Capture (Userscript)</span>
+          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Install the Second Brain Userscript into <strong>Tampermonkey</strong> or <strong>Violentmonkey</strong> in Chrome/Brave/Firefox. Whenever you click the <strong>Like</strong> thumbs-up button on YouTube or watch a video for 30s, it instantly extracts the core ideas and commits them to your Obsidian vault!
+          </p>
+          <div className="text-[11px] font-mono text-purple-400 pt-1">
+            Script file: <code>scripts/youtube-watcher-userscript.js</code>
+          </div>
+        </div>
       </div>
 
       {/* Obsidian Vault Sync & Zero-Laptop Cloud Sync */}

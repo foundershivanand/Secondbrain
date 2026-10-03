@@ -308,4 +308,67 @@ export const api = {
     }
     return res.json();
   },
+
+  async getYoutubeSyncStatus(): Promise<{
+    connected: boolean;
+    mode: 'oauth_liked' | 'playlist' | 'none';
+    oauthConfigured: boolean;
+    hasRefreshToken: boolean;
+    playlistId: string | null;
+    hasApiKey: boolean;
+    lastSync: {
+      lastSyncAt: string;
+      totalFound: number;
+      newIngested: number;
+      skippedCount: number;
+      mode: string;
+    } | null;
+    totalSyncedCount: number;
+  }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/youtube/status`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to get YouTube sync status');
+    return res.json();
+  },
+
+  async triggerYoutubeSync(playlistId?: string, limit: number = 10): Promise<{
+    success: boolean;
+    mode: string;
+    totalFound: number;
+    newIngested: number;
+    skippedCount: number;
+    syncedNotes: Array<{ title: string; id: string; url: string; core_idea?: string }>;
+    message: string;
+  }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/youtube/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify({ playlist_id: playlistId, limit }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'YouTube sync failed' }));
+      throw new Error(err.error || err.message || 'YouTube sync failed');
+    }
+    return res.json();
+  },
+
+  async configureYoutubeSync(config: { playlist_id?: string; refresh_token?: string }): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/youtube/configure`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(),
+      },
+      body: JSON.stringify(config),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Configuration failed' }));
+      throw new Error(err.error || 'Configuration failed');
+    }
+    return res.json();
+  },
 };

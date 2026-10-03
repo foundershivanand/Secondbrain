@@ -2,11 +2,11 @@
 id: KN-370291
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-630634143370291
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260803-154933.Google%20Play%20Store.png"
-file_size: 378135
-priority: P1
+raw_id: RAW-SRC-630634143370291
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Mobile Apps
   - App Discovery
@@ -31,17 +31,7 @@ This screenshot captures a specific moment or app from the Google Play Store, sa
 
 ## Atomic Knowledge
 
-### Screenshots from app stores like Google Play are often used to bookmark or remember applications, features, or design elements for later review
-
-Screenshots from app stores like Google Play are often used to bookmark or remember applications, features, or design elements for later review.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Organizing screenshots into an 'Ideas' folder indicates a proactive approach to collecting and curating potential tools, solutions, or inspirations
-
-Organizing screenshots into an 'Ideas' folder indicates a proactive approach to collecting and curating potential tools, solutions, or inspirations.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -54,7 +44,7 @@ Organizing screenshots into an 'Ideas' folder indicates a proactive approach to 
 - [ ] Evaluate the captured app/feature for its relevance to current projects, needs, or interests.
 - [ ] Consider downloading or further researching the app/feature if it aligns with current goals.
 
-## Related Topics
+## Related Knowledge
 
 - [[Mobile Apps]]
 - [[App Discovery]]
@@ -62,16 +52,14 @@ Organizing screenshots into an 'Ideas' folder indicates a proactive approach to 
 - [[Idea Curation]]
 - [[Digital Bookmarking]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260803-154933.Google Play Store.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260803-154933.Google Play Store.png`
-- **File Size:** 0.36 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260803-154933.Google%20Play%20Store.png)
+This file was saved to remember a specific app, feature, or idea encountered on the Google Play Store, indicating its potential value for future reference, research, or implementation.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260803-154933.Google Play Store.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260803-154933.Google%20Play%20Store.png) (`/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260803-154933.Google Play Store.png`)
-- [Screenshot_20260803-154933.Google Play Store.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260803-154933.Google%20Play%20Store.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260803-154933.Google Play Store.png`)
-- [Screenshot_20260803-154933.Google Play Store.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260803-154933.Google%20Play%20Store.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260803-154933.Google Play Store.png`)
+## What Changed
+
+This reinforces the mental model of the Google Play Store as a rich source of ideas and tools, and highlights the user's systematic approach to capturing and organizing digital inspirations for later processing.
+
+## Original
+
+No external URL

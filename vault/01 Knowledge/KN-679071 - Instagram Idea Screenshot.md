@@ -2,11 +2,11 @@
 id: KN-679071
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-573471219679071
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233845.Instagram.png"
-file_size: 660288
-priority: P1
+raw_id: RAW-SRC-573471219679071
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Instagram
   - Idea Capture
@@ -31,23 +31,7 @@ A screenshot captured from Instagram and intentionally saved in an 'Ideas' folde
 
 ## Atomic Knowledge
 
-### The presence of 'Ideas' in the file path indicates a user's intent to categorize and retain content for conceptual or actionable purposes
-
-The presence of 'Ideas' in the file path indicates a user's intent to categorize and retain content for conceptual or actionable purposes.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### Instagram is a prevalent platform for sharing diverse visual content, including inspirational posts, informational graphics, and product ideas
-
-Instagram is a prevalent platform for sharing diverse visual content, including inspirational posts, informational graphics, and product ideas.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Screenshots serve as a direct method for capturing ephemeral digital content for later review
-
-Screenshots serve as a direct method for capturing ephemeral digital content for later review.
-
-**Type:** `FACT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -59,25 +43,21 @@ Screenshots serve as a direct method for capturing ephemeral digital content for
 - [ ] Review the content of this screenshot to identify the specific idea, concept, or information it contains.
 - [ ] Categorize the extracted idea into relevant projects or knowledge domains.
 
-## Related Topics
+## Related Knowledge
 
 - [[Instagram]]
 - [[Idea Capture]]
 - [[Visual Information]]
 - [[Knowledge Management]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260730-233845.Instagram.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233845.Instagram.png`
-- **File Size:** 0.63 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233845.Instagram.png)
+Likely saved to capture a specific visual idea, inspiration, or piece of information encountered on Instagram, intended for future reference, development, or integration into a personal knowledge system.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260730-233845.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260730-233845.Instagram.png) (`/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260730-233845.Instagram.png`)
-- [Screenshot_20260730-233845.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233845.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233845.Instagram.png`)
-- [Screenshot_20260730-233845.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260730-233845.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260730-233845.Instagram.png`)
+## What Changed
 
-- **Additional Pointer:** [Screenshot_20260805-163607.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-163607.Instagram.png) (`/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-163607.Instagram.png`)
+This file potentially introduces a new concept, design inspiration, or actionable insight that could influence future thinking or projects, expanding the user's mental models in a specific area.
+
+## Original
+
+No external URL

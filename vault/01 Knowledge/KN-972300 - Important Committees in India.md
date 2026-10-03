@@ -2,11 +2,11 @@
 id: KN-972300
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-140550233972300
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F621706835-Important-committees-in-india-pdf.pdf"
-file_size: 357040
-priority: P1
+raw_id: RAW-SRC-140550233972300
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Indian Governance
   - Public Administration
@@ -32,23 +32,7 @@ This document provides a comprehensive list and overview of significant committe
 
 ## Atomic Knowledge
 
-### Committees in India are often formed to address specific issues, review policies, or recommend reforms across various sectors
-
-Committees in India are often formed to address specific issues, review policies, or recommend reforms across various sectors.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Understanding the role and recommendations of key committees is crucial for comprehending the evolution of Indian public administration and policy-making
-
-Understanding the role and recommendations of key committees is crucial for comprehending the evolution of Indian public administration and policy-making.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### Many committees have played a pivotal role in shaping constitutional amendments, economic policies, educational reforms, and social legislation in India
-
-Many committees have played a pivotal role in shaping constitutional amendments, economic policies, educational reforms, and social legislation in India.
-
-**Type:** `FACT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -60,7 +44,7 @@ Many committees have played a pivotal role in shaping constitutional amendments,
 - [ ] Review specific committees mentioned to understand their historical impact and relevance to current affairs.
 - [ ] Cross-reference committee recommendations with actual policy implementations to analyze their effectiveness.
 
-## Related Topics
+## Related Knowledge
 
 - [[Indian Governance]]
 - [[Public Administration]]
@@ -68,11 +52,14 @@ Many committees have played a pivotal role in shaping constitutional amendments,
 - [[Policy Making]]
 - [[Committees and Commissions]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `621706835-Important-committees-in-india-pdf.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/621706835-Important-committees-in-india-pdf.pdf`
-- **File Size:** 0.34 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F621706835-Important-committees-in-india-pdf.pdf)
+This file was saved as a foundational reference for understanding the structure and evolution of Indian governance through its key committees, providing essential context for policy analysis and historical studies.
+
+## What Changed
+
+This document consolidates knowledge about various Indian committees, providing a structured overview that enhances my mental model of how policy and administrative reforms are initiated and implemented in India.
+
+## Original
+
+No external URL

@@ -2,11 +2,11 @@
 id: KN-428908
 type: knowledge
 source_type: video
-raw_id: RAW-TERABOX-536525427428908
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%20webpage%2FThe%20Odyssey.mp4"
-file_size: 75291424
-priority: P1
+raw_id: RAW-SRC-536525427428908
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Greek Mythology
   - Literature
@@ -30,11 +30,7 @@ An epic recounting or adaptation of Homer's ancient Greek epic poem, The Odyssey
 
 ## Atomic Knowledge
 
-### The Odyssey is a foundational epic of Western literature focusing on themes of homecoming, perseverance, and cunning over brute strength
-
-The Odyssey is a foundational epic of Western literature focusing on themes of homecoming, perseverance, and cunning over brute strength.
-
-**Type:** `CONCEPT` | **Confidence:** 99%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -44,18 +40,21 @@ The Odyssey is a foundational epic of Western literature focusing on themes of h
 
 - [ ] Watch the full video file to analyze its specific narrative adaptation and artistic presentation.
 
-## Related Topics
+## Related Knowledge
 
 - [[Greek Mythology]]
 - [[Literature]]
 - [[Epic Poetry]]
 - [[Ancient History]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `The Odyssey.mp4`
-- **Original Path:** `/From webpage/The Odyssey.mp4`
-- **File Size:** 71.80 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%20webpage%2FThe%20Odyssey.mp4)
+Saved as a media resource covering a major literary and historical epic for personal study or entertainment.
+
+## What Changed
+
+Expands the vault's collection of classical literature adaptations and mythological narratives.
+
+## Original
+
+No external URL

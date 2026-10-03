@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-113916
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMTasEHSdACSaDpsmAtVi8AAdFywIljAALoIgACUBYIVq69xDneNvhLPQQ"
-importance: 7
+importance: 8
 confidence: 0.95
 topics:
   - Micro-learning
@@ -31,27 +31,7 @@ Utilizing the high-frequency habit of checking a smartphone lockscreen as an amb
 
 ## Atomic Knowledge
 
-### Lockscreen widgets can be leveraged for passive micro-learning by displaying educational content during high-frequency phone-unlocking habits
-
-Lockscreen widgets can be leveraged for passive micro-learning by displaying educational content during high-frequency phone-unlocking habits.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### The app 'Word of the Day: Vocab Builder' targets users wanting to expand their vocabulary through daily passive exposure
-
-The app 'Word of the Day: Vocab Builder' targets users wanting to expand their vocabulary through daily passive exposure.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Ambient learning on high-frequency touchpoints lowers the cognitive friction of habit formation and learning
-
-Ambient learning on high-frequency touchpoints lowers the cognitive friction of habit formation and learning.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-## My Thoughts
-
-Using the lockscreen for passive learning is a brilliant way to hijack screen time and turn a potential distraction into a self-improvement tool.
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -62,11 +42,6 @@ Using the lockscreen for passive learning is a brilliant way to hijack screen ti
 
 - [ ] Explore lockscreen widget APIs on iOS and Android for building micro-learning tools.
 - [ ] Test a lockscreen-based vocabulary or flashcard widget to evaluate retention rates of passive learning.
-
-## Product & SaaS Opportunities
-
-- 💡 A lockscreen-based flashcard app that syncs with personal Anki or Obsidian spaced-repetition databases.
-- 💡 An ambient learning widget for developers that displays code snippets, terminal shortcuts, or system design patterns on the lockscreen.
 
 ## Related Knowledge
 

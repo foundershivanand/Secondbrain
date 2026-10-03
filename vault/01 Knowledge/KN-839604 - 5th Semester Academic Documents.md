@@ -2,11 +2,11 @@
 id: KN-839604
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-983818077839604
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F5thSem.pdf"
-file_size: 170321
-priority: P1
+raw_id: RAW-SRC-983818077839604
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Academics
   - Coursework
@@ -31,17 +31,7 @@ This PDF likely contains academic materials, notes, assignments, or syllabi pert
 
 ## Atomic Knowledge
 
-### Academic curricula are typically structured into semesters or terms
-
-Academic curricula are typically structured into semesters or terms.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### PDFs are a standard format for distributing educational content due to their consistent formatting across devices
-
-PDFs are a standard format for distributing educational content due to their consistent formatting across devices.
-
-**Type:** `FACT` | **Confidence:** 95%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -53,7 +43,7 @@ PDFs are a standard format for distributing educational content due to their con
 - [ ] Review the contents of this PDF to identify specific subjects, assignments, or key learning objectives from the 5th semester.
 - [ ] Integrate specific knowledge points from this document into relevant subject-based notes.
 
-## Related Topics
+## Related Knowledge
 
 - [[Academics]]
 - [[Coursework]]
@@ -61,11 +51,14 @@ PDFs are a standard format for distributing educational content due to their con
 - [[Education]]
 - [[Study Materials]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `5thSem.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/5thSem.pdf`
-- **File Size:** 0.16 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F5thSem.pdf)
+This file was saved to retain important academic records, course materials, or study resources from the 5th semester, ensuring they are available for future reference, review, or administrative needs.
+
+## What Changed
+
+This reinforces the mental model of organizing knowledge chronologically and by academic period, highlighting the value of digital archives for educational progression and review.
+
+## Original
+
+No external URL

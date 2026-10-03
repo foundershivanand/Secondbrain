@@ -1,7 +1,7 @@
 ---
-category: History, Governance & Politics
 id: KN-338304
 type: knowledge
+category: History, Governance & Politics
 source_type: pdf
 raw_id: RAW-338304
 storage: telegram

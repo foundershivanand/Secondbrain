@@ -5,8 +5,8 @@ source_type: screenshot
 raw_id: RAW-548648
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMVasEHS2VYQc91vBlpGsoAAarJ_x1eAALqIgACUBYIVqSbMmoPJ2UrPQQ"
-importance: 7
-confidence: 0.9
+importance: 8
+confidence: 0.95
 topics:
   - UI/UX Design
   - AI Agents
@@ -32,23 +32,7 @@ A mobile application design concept that transforms unstructured user travel ide
 
 ## Atomic Knowledge
 
-### Combining unstructured text input with structured tag filters (interests, vibes) allows AI planners to capture both specific user nuances and general preferences
-
-Combining unstructured text input with structured tag filters (interests, vibes) allows AI planners to capture both specific user nuances and general preferences.
-
-**Type:** `CONCEPT` | **Confidence:** 90%
-
-### Integrating a chronological timeline directly alongside a map visualization reduces cognitive load for users navigating complex daily itineraries
-
-Integrating a chronological timeline directly alongside a map visualization reduces cognitive load for users navigating complex daily itineraries.
-
-**Type:** `INSIGHT` | **Confidence:** 95%
-
-### Route optimization is a critical feature for travel planners to ensure generated itineraries are geographically logical and physically feasible
-
-Route optimization is a critical feature for travel planners to ensure generated itineraries are geographically logical and physically feasible.
-
-**Type:** `CLAIM` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -58,11 +42,6 @@ Route optimization is a critical feature for travel planners to ensure generated
 ## Actions
 
 - [ ] Analyze the API capabilities of mapping services (like Mapbox or Google Maps) combined with LLMs to see how easily 'route optimization' can be programmatically triggered based on AI-generated waypoints.
-
-## Product & SaaS Opportunities
-
-- 💡 An AI-native travel planning API that takes unstructured text, geolocates the mentioned places, and returns a geographically optimized itinerary JSON.
-- 💡 A travel itinerary UI kit for Figma featuring map integrations, timeline components, and tag selectors.
 
 ## Related Knowledge
 

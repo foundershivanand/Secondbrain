@@ -53,7 +53,21 @@ export async function processIngestion(
   const knowledgeId = `KN-${rawIdNum}`;
   const rawId = input.rawId || `RAW-${rawIdNum}`;
 
-  // 1. Content Sanitization & Deduplication Hash
+  // 1. YouTube oEmbed metadata enrichment
+  let enrichedTitle = input.title;
+  let videoChannel: string | undefined;
+  if ((input.sourceType === 'youtube' || input.url?.includes('youtube.com') || input.url?.includes('youtu.be')) && input.url) {
+    try {
+      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(input.url)}&format=json`);
+      if (oembedRes.ok) {
+        const oembedData: any = await oembedRes.json();
+        if (oembedData.title) enrichedTitle = oembedData.title;
+        if (oembedData.author_name) videoChannel = oembedData.author_name;
+      }
+    } catch {}
+  }
+
+  // Content Sanitization & Deduplication Hash
   const cleanText = input.text ? sanitizeUntrustedInput(input.text) : '';
   const hashPayload = `${input.sourceType}:${input.url || input.rawUrl || ''}:${cleanText.slice(0, 500)}`;
   const contentHash = await sha256(hashPayload);
@@ -119,7 +133,7 @@ export async function processIngestion(
     id: sourceId,
     raw_id: rawId,
     source_type: input.sourceType,
-    title: input.title || (input.url ? `Link: ${input.url}` : cleanText.slice(0, 40)) || 'Unprocessed Input',
+    title: enrichedTitle || input.title || (input.url ? `Link: ${input.url}` : cleanText.slice(0, 40)) || 'Unprocessed Input',
     original_url: input.url || null,
     raw_storage: input.rawStorage || (input.url ? 'web' : 'local'),
     raw_file_id: input.rawFileId || null,
@@ -145,8 +159,12 @@ export async function processIngestion(
     if (jobId) await db.updateJobStatus(jobId, 'PROCESSING');
 
     // 4. Run Gemini Structured Extraction
+    const extractionText = cleanText 
+      ? (videoChannel ? `${cleanText}\nTitle: ${enrichedTitle}\nChannel: ${videoChannel}` : cleanText)
+      : (videoChannel ? `Video Title: ${enrichedTitle}\nChannel / Creator: ${videoChannel}` : (enrichedTitle ? `Video Title: ${enrichedTitle}` : undefined));
+
     const extraction = await extractKnowledgeWithGemini(env, {
-      text: cleanText,
+      text: extractionText,
       url: input.url || input.rawUrl,
       mimeType: input.mimeType,
       base64Data: input.base64Data,

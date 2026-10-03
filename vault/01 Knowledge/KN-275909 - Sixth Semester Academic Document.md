@@ -2,11 +2,11 @@
 id: KN-275909
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-424940132275909
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F6thSem.pdf"
-file_size: 169780
-priority: P1
+raw_id: RAW-SRC-424940132275909
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Education
   - Academics
@@ -29,11 +29,7 @@ An academic document related to the 6th semester curriculum, coursework, or admi
 
 ## Atomic Knowledge
 
-### Sixth-semester documents outline advanced undergraduate coursework and final-stage requirements
-
-Sixth-semester documents outline advanced undergraduate coursework and final-stage requirements.
-
-**Type:** `FACT` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -43,17 +39,20 @@ Sixth-semester documents outline advanced undergraduate coursework and final-sta
 
 - [ ] Review the document contents to extract specific course codes, syllabi, or administrative deadlines.
 
-## Related Topics
+## Related Knowledge
 
 - [[Education]]
 - [[Academics]]
 - [[Coursework]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `6thSem.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/6thSem.pdf`
-- **File Size:** 0.16 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2F6thSem.pdf)
+To maintain a digital record of 6th-semester academic materials for reference during the term.
+
+## What Changed
+
+Centralizes academic planning and documentation in the personal knowledge vault.
+
+## Original
+
+No external URL

@@ -2,11 +2,11 @@
 id: KN-306022
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-720617866306022
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-163603.Instagram.png"
-file_size: 2016456
-priority: P1
+raw_id: RAW-SRC-720617866306022
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Knowledge Capture
   - Idea Management
@@ -30,23 +30,7 @@ A screenshot captured from Instagram and saved into an 'Ideas' folder, indicatin
 
 ## Atomic Knowledge
 
-### Screenshots from social media platforms like Instagram can be used as a method for capturing and preserving ideas or information
-
-Screenshots from social media platforms like Instagram can be used as a method for capturing and preserving ideas or information.
-
-**Type:** `FACT` | **Confidence:** 90%
-
-### Organizing captured digital content into specific folders, such as 'Ideas', enhances knowledge management and retrievability
-
-Organizing captured digital content into specific folders, such as 'Ideas', enhances knowledge management and retrievability.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### The act of saving content to an 'Ideas' folder implies a deliberate intent to revisit or utilize the information later
-
-The act of saving content to an 'Ideas' folder implies a deliberate intent to revisit or utilize the information later.
-
-**Type:** `CLAIM` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -58,21 +42,21 @@ The act of saving content to an 'Ideas' folder implies a deliberate intent to re
 - [ ] Review the actual content of the screenshot to extract the specific idea, concept, or information it contains.
 - [ ] Categorize the extracted idea further based on its subject matter to integrate it into relevant knowledge domains.
 
-## Related Topics
+## Related Knowledge
 
 - [[Knowledge Capture]]
 - [[Idea Management]]
 - [[Social Media Content]]
 - [[Digital Curation]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260805-163603.Instagram.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-163603.Instagram.png`
-- **File Size:** 1.92 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-163603.Instagram.png)
+This file was saved to capture an idea, piece of information, or inspiration encountered on Instagram, indicating its perceived value for future reference, learning, or creative application.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260805-163603.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-163603.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-163603.Instagram.png`)
+## What Changed
+
+This reinforces the mental model that valuable knowledge and ideas can originate from diverse sources, including social media, and that a systematic approach to capturing these is crucial for personal knowledge growth.
+
+## Original
+
+No external URL

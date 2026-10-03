@@ -31,23 +31,7 @@ ScreenZen reduces compulsive app usage and doomscrolling by introducing intentio
 
 ## Atomic Knowledge
 
-### Introducing intentional friction, such as timed pauses or cognitive tasks, can disrupt compulsive digital habits like doomscrolling
-
-Introducing intentional friction, such as timed pauses or cognitive tasks, can disrupt compulsive digital habits like doomscrolling.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### ScreenZen tracks how many times user-configured friction successfully prevents an app open event
-
-ScreenZen tracks how many times user-configured friction successfully prevents an app open event.
-
-**Type:** `FACT` | **Confidence:** 99%
-
-### Requiring users to solve a math equation before opening an app acts as a cognitive speed bump to break automatic behavior loops
-
-Requiring users to solve a math equation before opening an app acts as a cognitive speed bump to break automatic behavior loops.
-
-**Type:** `ACTION` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -58,11 +42,6 @@ Requiring users to solve a math equation before opening an app acts as a cogniti
 
 - [ ] Install ScreenZen or a similar app-blocking tool to configure a 5-second pause on high-distraction apps.
 - [ ] Set up a cognitive barrier (like a math puzzle) for apps used compulsively during work hours.
-
-## Product & SaaS Opportunities
-
-- 💡 A browser extension that forces a 10-second breathing exercise before opening specified distracting URLs.
-- 💡 An API or SDK for developers to build 'mindful friction' directly into their own productivity apps.
 
 ## Related Knowledge
 

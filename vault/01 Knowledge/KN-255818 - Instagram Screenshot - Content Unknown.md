@@ -2,11 +2,11 @@
 id: KN-255818
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-162872621255818
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-120028.Instagram.png"
-file_size: 728536
-priority: P1
+raw_id: RAW-SRC-162872621255818
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Instagram
   - Screenshots
@@ -30,23 +30,7 @@ A mobile screenshot from Instagram, saved in a folder designated for 'Ideas', su
 
 ## Atomic Knowledge
 
-### The file 'Screenshot_20260805-120028
-
-The file 'Screenshot_20260805-120028.Instagram.png' is a digital image captured as a screenshot.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### The screenshot originated from the Instagram platform, as indicated by the filename
-
-The screenshot originated from the Instagram platform, as indicated by the filename.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### The screenshot was stored in a folder labeled 'Ideas', implying its content was considered valuable or inspirational by the user
-
-The screenshot was stored in a folder labeled 'Ideas', implying its content was considered valuable or inspirational by the user.
-
-**Type:** `FACT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -57,21 +41,21 @@ The screenshot was stored in a folder labeled 'Ideas', implying its content was 
 
 - [ ] Review the actual image content of 'Screenshot_20260805-120028.Instagram.png' to extract specific knowledge, identify the 'idea', or determine if it falls under personal media rules.
 
-## Related Topics
+## Related Knowledge
 
 - [[Instagram]]
 - [[Screenshots]]
 - [[Content Curation]]
 - [[Digital Organization]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260805-120028.Instagram.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-120028.Instagram.png`
-- **File Size:** 0.69 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-120028.Instagram.png)
+Presumably saved because its content represented an 'idea', inspiration, or piece of information the user wanted to retain from Instagram, given its placement in the 'Ideas' folder.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260805-120028.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-120028.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-120028.Instagram.png`)
+## What Changed
+
+Without access to the image content, no specific mental models are shifted. This entry serves as a placeholder and a prompt to investigate the actual screenshot for its intended 'idea'.
+
+## Original
+
+No external URL

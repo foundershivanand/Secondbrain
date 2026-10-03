@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-275478
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMZasEHTcOdSEKYQ-ANQ7_--zsWRZcAAu0iAAJQFghWoAuNG36Ckq89BA"
-importance: 5
+importance: 8
 confidence: 0.95
 topics:
   - Digital Minimalism
@@ -31,17 +31,7 @@ Declutter an iPhone home screen by moving rarely used apps to the App Library in
 
 ## Atomic Knowledge
 
-### Moving rarely used apps to the iOS App Library declutters the home screen while keeping the apps installed
-
-Moving rarely used apps to the iOS App Library declutters the home screen while keeping the apps installed.
-
-**Type:** `ACTION` | **Confidence:** 95%
-
-### The 'Remove from Home Screen' option hides an app from the main view without deleting its data
-
-The 'Remove from Home Screen' option hides an app from the main view without deleting its data.
-
-**Type:** `FACT` | **Confidence:** 99%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -50,10 +40,6 @@ The 'Remove from Home Screen' option hides an app from the main view without del
 ## Actions
 
 - [ ] Review iPhone home screen and move non-essential, rarely used apps to the App Library.
-
-## Product & SaaS Opportunities
-
-- 💡 An app or shortcut that analyzes app usage frequency and automatically suggests which apps to hide or move to the App Library.
 
 ## Related Knowledge
 

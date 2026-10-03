@@ -2,11 +2,11 @@
 id: KN-038290
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-595129652038290
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233826.Instagram.png"
-file_size: 666123
-priority: P1
+raw_id: RAW-SRC-595129652038290
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Instagram
   - Ideas
@@ -30,7 +30,7 @@ This file is a screenshot from Instagram, explicitly saved in an 'Ideas' folder,
 
 ## Atomic Knowledge
 
-No atomic items extracted.
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -42,25 +42,21 @@ No atomic items extracted.
 - [ ] Review the actual image content of 'Screenshot_20260730-233826.Instagram.png' to extract specific knowledge, text, or visual concepts.
 - [ ] Update this note with detailed information once the content is analyzed.
 
-## Related Topics
+## Related Knowledge
 
 - [[Instagram]]
 - [[Ideas]]
 - [[Screenshot]]
 - [[Knowledge Capture]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260730-233826.Instagram.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233826.Instagram.png`
-- **File Size:** 0.64 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233826.Instagram.png)
+This file was saved because the user explicitly placed it in an 'Ideas' folder, indicating it contains content from Instagram that is considered valuable for conceptual understanding, inspiration, or future reference.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260730-233826.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260730-233826.Instagram.png) (`/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260730-233826.Instagram.png`)
-- [Screenshot_20260730-233826.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233826.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233826.Instagram.png`)
-- [Screenshot_20260730-233826.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FScreenshots%2FScreenshot_20260730-233826.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Screenshots/Screenshot_20260730-233826.Instagram.png`)
-- [Screenshot_20260730-233826.Instagram (1).png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233826.Instagram%20(1).png) (`/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233826.Instagram (1).png`)
-- [Screenshot_20260730-233826.Instagram (2).png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260730-233826.Instagram%20(2).png) (`/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260730-233826.Instagram (2).png`)
+## What Changed
+
+No immediate change to mental models without the specific content. However, it establishes a placeholder for a potential new idea or insight that the user deemed important enough to save.
+
+## Original
+
+No external URL

@@ -24,14 +24,14 @@ updated_at: 2026-10-03
 - Strictly distinguish user thoughts from AI-generated suggestions
 
 ## Recent Learning
+- Intentional friction (e.g., pauses, math puzzles, physical challenges, or forced cooldowns) is a highly effective behavioral design pattern for breaking compulsive digital habits and promoting digital wellness.
+- Gamification mechanics for digital wellbeing should leverage emotional stakes, such as visual decay (e.g., rotting avatars), loss aversion (e.g., crashing a virtual plane), or positive reinforcement (e.g., virtual pets), to shift user experience from restriction to engagement.
 - Shift from 'hard-blocking' to 'intentional friction' in digital wellness: Users are moving away from binary app-blocking toward psychological gates (intent prompts, physical challenges, and gamified negative reinforcement).
 - Ambient UI/UX: High-frequency mobile habits (unlocking, home screen viewing) are being repurposed as primary interfaces for micro-learning and habit-building.
 - The 'Idea Capture' bottleneck: Historical notes show a high volume of 'Instagram/Play Store' screenshots saved as 'Ideas' without synthesis, contrasting with the recent, highly structured atomic notes.
 - Lock screen widgets are highly effective vectors for passive micro-learning and ambient habit-building, leveraging high-frequency phone unlocking habits to deliver low-friction educational content.
 - To minimize digital distraction and declutter iOS home screens, limit widgets to 1-2 highly functional tools and use 'Remove from Home Screen' to relegate unused apps to the App Library without losing data.
 - Effective AI planning UIs transition users smoothly from unstructured text inputs to highly structured, interactive visual outputs (like maps and timelines).
-- Hierarchical compression (M0 to M5) allows unlimited perceived memory within free Cloudflare D1 limits
-- Nightly memory consolidation prevents transient debugging chatter from entering permanent memory
 
 ## Current Interests
 - **AI agents**: Interest score 0.95 (Trend: increasing)

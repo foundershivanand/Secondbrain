@@ -17,8 +17,14 @@ import {
   ExternalLink,
   Video,
   ThumbsUp,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  Shield,
+  Play,
 } from 'lucide-react';
 import { api } from '../services/api';
+import { YouTubePlaylistItem } from '../types';
 
 export const Settings: React.FC = () => {
   const [apiEndpoint, setApiEndpoint] = useState('');
@@ -35,21 +41,17 @@ export const Settings: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
-  // YouTube Sync State
-  const [ytStatus, setYtStatus] = useState<{
-    connected: boolean;
-    mode: 'oauth_liked' | 'playlist' | 'none';
-    oauthConfigured: boolean;
-    hasRefreshToken: boolean;
-    playlistId: string | null;
-    hasApiKey: boolean;
-    lastSync: any;
-    totalSyncedCount: number;
-  } | null>(null);
+  // YouTube Sync & Playlists State
+  const [ytStatus, setYtStatus] = useState<any>(null);
+  const [playlists, setPlaylists] = useState<YouTubePlaylistItem[]>([]);
   const [isYtSyncing, setIsYtSyncing] = useState(false);
   const [ytSyncMessage, setYtSyncMessage] = useState<string | null>(null);
   const [playlistInput, setPlaylistInput] = useState('');
   const [isSavingPlaylist, setIsSavingPlaylist] = useState(false);
+  const [clientIdInput, setClientIdInput] = useState('');
+  const [clientSecretInput, setClientSecretInput] = useState('');
+  const [isSavingOAuth, setIsSavingOAuth] = useState(false);
+  const [showAdvancedYt, setShowAdvancedYt] = useState(false);
 
   useEffect(() => {
     setApiEndpoint(localStorage.getItem('sb_api_endpoint') || '');
@@ -63,6 +65,11 @@ export const Settings: React.FC = () => {
       const status = await api.getYoutubeSyncStatus();
       setYtStatus(status);
       if (status.playlistId) setPlaylistInput(status.playlistId);
+      if (status.playlists) setPlaylists(status.playlists);
+      const plRes = await api.getYoutubePlaylists().catch(() => null);
+      if (plRes && plRes.playlists) {
+        setPlaylists(plRes.playlists);
+      }
     } catch {}
   };
 
@@ -141,17 +148,64 @@ export const Settings: React.FC = () => {
     reader.readAsText(file);
   };
 
-  const handleTriggerYtSync = async () => {
+  const handleSyncLiked = async () => {
     setIsYtSyncing(true);
     setYtSyncMessage('Polling YouTube Liked videos & extracting concepts with Gemini...');
     try {
-      const res = await api.triggerYoutubeSync();
+      const res = await api.triggerYoutubeSync({ target: 'liked', limit: 50 });
       setYtSyncMessage(`✅ ${res.message}`);
       loadYtStatus();
     } catch (err: any) {
       setYtSyncMessage(`❌ YouTube sync error: ${err.message}`);
     } finally {
       setIsYtSyncing(false);
+    }
+  };
+
+  const handleSyncPlaylists = async () => {
+    setIsYtSyncing(true);
+    setYtSyncMessage('Syncing user playlists from YouTube profile & ingesting videos...');
+    try {
+      const res = await api.triggerYoutubeSync({ target: 'playlists', limit: 50 });
+      setYtSyncMessage(`✅ ${res.message}`);
+      loadYtStatus();
+    } catch (err: any) {
+      setYtSyncMessage(`❌ Playlist sync error: ${err.message}`);
+    } finally {
+      setIsYtSyncing(false);
+    }
+  };
+
+  const handleSyncSinglePlaylist = async (playlistId: string) => {
+    setIsYtSyncing(true);
+    setYtSyncMessage(`Syncing videos from playlist (${playlistId})...`);
+    try {
+      const res = await api.triggerYoutubeSync({ playlistId, limit: 25 });
+      setYtSyncMessage(`✅ ${res.message}`);
+      loadYtStatus();
+    } catch (err: any) {
+      setYtSyncMessage(`❌ Sync error: ${err.message}`);
+    } finally {
+      setIsYtSyncing(false);
+    }
+  };
+
+  const handleSaveOAuthCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clientIdInput.trim() || !clientSecretInput.trim()) return;
+    setIsSavingOAuth(true);
+    try {
+      await api.configureYoutubeSync({
+        client_id: clientIdInput.trim(),
+        client_secret: clientSecretInput.trim(),
+      });
+      await loadYtStatus();
+      setYtSyncMessage('✅ Google OAuth credentials saved! You can now click "Connect Google Account" below.');
+      setTimeout(() => setYtSyncMessage(null), 4000);
+    } catch (err: any) {
+      setYtSyncMessage(`❌ Failed to save credentials: ${err.message}`);
+    } finally {
+      setIsSavingOAuth(false);
     }
   };
 
@@ -311,19 +365,19 @@ export const Settings: React.FC = () => {
         )}
       </div>
 
-      {/* YouTube Watch & Liked Videos Automated Sync */}
+      {/* YouTube Profile, Liked Videos & Playlists */}
       <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center space-x-2">
             <Video className="w-4 h-4 text-rose-400" />
-            <span>YouTube Liked &amp; Watch History Auto-Sync</span>
+            <span>YouTube Profile, Liked Videos &amp; Playlists</span>
           </h3>
           <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-            Automatically ingest YouTube videos you like or watch into your Obsidian Vault with AI-extracted core ideas, atomic notes, and architectural takeaways.
+            Access and query all your liked videos and profile playlists with AI-extracted core ideas, atomic notes, and architectural takeaways.
           </p>
         </div>
 
-        {/* Status & Sync Trigger */}
+        {/* Status & Quick Sync Actions */}
         <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2.5">
@@ -334,36 +388,45 @@ export const Settings: React.FC = () => {
               />
               <span className="text-xs font-semibold text-slate-200">
                 {ytStatus?.connected
-                  ? (ytStatus.mode === 'oauth_liked'
-                      ? 'Connected via Google OAuth (Liked Videos)'
+                  ? (ytStatus.mode === 'oauth' || ytStatus.mode === 'oauth_liked'
+                      ? 'Connected to YouTube Profile (Liked Videos & Playlists)'
                       : `Connected via Playlist (${ytStatus.playlistId || 'Active'})`)
-                  : 'YouTube Sync Not Configured'}
+                  : 'YouTube Sync Not Connected'}
               </span>
             </div>
 
-            {ytStatus?.totalSyncedCount !== undefined && (
-              <span className="text-[11px] text-slate-400 font-mono bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
-                {ytStatus.totalSyncedCount} YouTube Videos Indexed in Vault
-              </span>
-            )}
+            <div className="flex items-center space-x-2 text-[11px] font-mono text-slate-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+              <span>{ytStatus?.totalSyncedCount ?? 0} Videos</span>
+              <span>•</span>
+              <span className="text-purple-300">{playlists.length || ytStatus?.playlistsCount || 0} Playlists</span>
+            </div>
           </div>
 
           {/* Sync Trigger and Auth Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
             <button
-              onClick={handleTriggerYtSync}
+              onClick={handleSyncLiked}
               disabled={isYtSyncing}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isYtSyncing ? 'animate-spin' : ''}`} />
-              <span>{isYtSyncing ? 'Syncing Liked Videos...' : 'Sync Liked Videos Now'}</span>
+              <span>{isYtSyncing ? 'Syncing...' : 'Sync Liked Videos'}</span>
+            </button>
+
+            <button
+              onClick={handleSyncPlaylists}
+              disabled={isYtSyncing}
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isYtSyncing ? 'animate-spin' : ''}`} />
+              <span>{isYtSyncing ? 'Syncing...' : 'Sync Playlists'}</span>
             </button>
 
             <a
               href={`${apiEndpoint || 'https://second-brain-api.fitt.workers.dev'}/api/youtube/auth`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
             >
               <ExternalLink className="w-3.5 h-3.5 text-rose-400" />
               <span>Connect Google Account</span>
@@ -384,44 +447,158 @@ export const Settings: React.FC = () => {
           )}
         </div>
 
-        {/* Playlist ID Setting Form */}
-        <form onSubmit={handleSavePlaylist} className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span className="text-xs font-semibold text-slate-200 block">YouTube Playlist ID (Zero-OAuth Alternative)</span>
-              <p className="text-[11px] text-slate-500">Sync any unlisted or public playlist (e.g. your "Brain" or "Saved" playlist ID starting with PL...)</p>
+        {/* User Playlists List */}
+        {playlists.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+                Profile Playlists ({playlists.length})
+              </span>
+              <span className="text-[11px] text-slate-500">
+                You can ask Brain Chat about any of these playlists
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {playlists.map((pl) => (
+                <div
+                  key={pl.id}
+                  className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition flex items-start justify-between gap-3"
+                >
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-bold text-slate-200 truncate">
+                        {pl.title}
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                        {pl.item_count} videos
+                      </span>
+                    </div>
+                    {pl.description && (
+                      <p className="text-[11px] text-slate-500 line-clamp-1">
+                        {pl.description}
+                      </p>
+                    )}
+                    <div className="flex items-center space-x-2 pt-0.5">
+                      <span className="text-[10px] text-slate-400 capitalize">
+                        {pl.privacy_status}
+                      </span>
+                      <a
+                        href={pl.playlist_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center space-x-0.5"
+                      >
+                        <span>Open</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleSyncSinglePlaylist(pl.id)}
+                    disabled={isYtSyncing}
+                    className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition text-[11px]"
+                    title="Sync videos from this playlist"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={playlistInput}
-              onChange={(e) => setPlaylistInput(e.target.value)}
-              placeholder="e.g. PLrAXtmErZgOdP_8GzqsJ4VSL822rW8n"
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-rose-500"
-            />
-            <button
-              type="submit"
-              disabled={isSavingPlaylist}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition border border-slate-700"
-            >
-              {isSavingPlaylist ? 'Saving...' : 'Save Playlist'}
-            </button>
-          </div>
-        </form>
+        )}
 
-        {/* Real-time Browser Extension / Tampermonkey */}
-        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-2">
-          <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
-            <ThumbsUp className="w-3.5 h-3.5 text-rose-400" />
-            <span>Instant Desktop Browser Capture (Userscript)</span>
-          </div>
-          <p className="text-[11px] text-slate-400 leading-relaxed">
-            Install the Second Brain Userscript into <strong>Tampermonkey</strong> or <strong>Violentmonkey</strong> in Chrome/Brave/Firefox. Whenever you click the <strong>Like</strong> thumbs-up button on YouTube or watch a video for 30s, it instantly extracts the core ideas and commits them to your Obsidian vault!
-          </p>
-          <div className="text-[11px] font-mono text-purple-400 pt-1">
-            Script file: <code>scripts/youtube-watcher-userscript.js</code>
-          </div>
+        {/* Collapsible Advanced Configuration */}
+        <div className="border-t border-slate-800/80 pt-3">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedYt(!showAdvancedYt)}
+            className="flex items-center justify-between w-full text-xs font-semibold text-slate-400 hover:text-slate-200 transition py-1"
+          >
+            <span>Advanced YouTube Configuration (OAuth App, Custom Playlist &amp; Userscript)</span>
+            {showAdvancedYt ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+
+          {showAdvancedYt && (
+            <div className="space-y-4 pt-3 animate-fade-in">
+              {/* Google OAuth Credentials Form */}
+              <form onSubmit={handleSaveOAuthCredentials} className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+                <div>
+                  <span className="text-xs font-semibold text-slate-200 block">Google Cloud OAuth Credentials</span>
+                  <p className="text-[11px] text-slate-500">
+                    Enter your Google Client ID and Secret to enable one-click Google OAuth without CLI.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={clientIdInput}
+                    onChange={(e) => setClientIdInput(e.target.value)}
+                    placeholder="Google Client ID (e.g. 1234...apps.googleusercontent.com)"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-purple-500"
+                  />
+                  <input
+                    type="password"
+                    value={clientSecretInput}
+                    onChange={(e) => setClientSecretInput(e.target.value)}
+                    placeholder="Google Client Secret"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-[10px] text-slate-500">
+                    Authorized redirect URI: <code className="text-slate-400">https://second-brain-api.fitt.workers.dev/api/youtube/callback</code>
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={isSavingOAuth}
+                    className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-xs font-bold text-white transition shadow"
+                  >
+                    {isSavingOAuth ? 'Saving...' : 'Save Credentials'}
+                  </button>
+                </div>
+              </form>
+
+              {/* Playlist ID Setting Form */}
+              <form onSubmit={handleSavePlaylist} className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
+                <div>
+                  <span className="text-xs font-semibold text-slate-200 block">Custom YouTube Playlist ID (Zero-OAuth Alternative)</span>
+                  <p className="text-[11px] text-slate-500">Sync any unlisted or public playlist (starts with PL...)</p>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={playlistInput}
+                    onChange={(e) => setPlaylistInput(e.target.value)}
+                    placeholder="e.g. PLrAXtmErZgOdP_8GzqsJ4VSL822rW8n"
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-rose-500"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSavingPlaylist}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition border border-slate-700"
+                  >
+                    {isSavingPlaylist ? 'Saving...' : 'Save Playlist'}
+                  </button>
+                </div>
+              </form>
+
+              {/* Desktop Browser Userscript */}
+              <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-2">
+                <div className="flex items-center space-x-2 text-xs font-bold text-slate-200">
+                  <ThumbsUp className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Instant Desktop Browser Capture (Userscript)</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Install the Second Brain Userscript into <strong>Tampermonkey</strong> in Chrome/Brave. Clicking the YouTube <strong>Like</strong> button automatically extracts ideas and saves them to your vault!
+                </p>
+                <div className="text-[11px] font-mono text-purple-400 pt-0.5">
+                  Script file: <code>scripts/youtube-watcher-userscript.js</code>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

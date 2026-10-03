@@ -3,12 +3,23 @@ import { Database } from '../db';
 import { processIngestion } from '../pipeline/ingestion';
 import { jsonResponse, errorResponse } from '../utils/response';
 
-interface YouTubeVideoItem {
+export interface YouTubeVideoItem {
   videoId: string;
   title: string;
   channel?: string;
   url: string;
   publishedAt?: string;
+  playlistTitle?: string;
+}
+
+export interface YouTubePlaylistItem {
+  id: string;
+  title: string;
+  description: string;
+  itemCount: number;
+  privacyStatus: string;
+  thumbnailUrl?: string;
+  playlistUrl: string;
 }
 
 /**
@@ -46,11 +57,11 @@ function parseYouTubeRss(xml: string): YouTubeVideoItem[] {
 }
 
 /**
- * Get active OAuth Access Token using stored or configured Refresh Token
+ * Get active OAuth Access Token using stored or configured credentials
  */
-async function getOAuthAccessToken(env: Env, db: Database): Promise<string | null> {
-  const clientId = env.YOUTUBE_CLIENT_ID;
-  const clientSecret = env.YOUTUBE_CLIENT_SECRET;
+export async function getOAuthAccessToken(env: Env, db: Database): Promise<string | null> {
+  const clientId = env.YOUTUBE_CLIENT_ID || (await db.getKV('youtube_client_id'));
+  const clientSecret = env.YOUTUBE_CLIENT_SECRET || (await db.getKV('youtube_client_secret'));
 
   if (!clientId || !clientSecret) {
     return null;
@@ -98,37 +109,140 @@ async function getOAuthAccessToken(env: Env, db: Database): Promise<string | nul
 }
 
 /**
- * Fetch Liked Videos list using OAuth Access Token
+ * Fetch ALL Liked Videos using OAuth Access Token with pagination
  */
-async function fetchOAuthLikedVideos(accessToken: string, maxResults: number = 15): Promise<YouTubeVideoItem[]> {
-  const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=LL&maxResults=${maxResults}`;
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+export async function fetchOAuthLikedVideos(
+  accessToken: string,
+  maxTotal: number = 200
+): Promise<YouTubeVideoItem[]> {
+  const allVideos: YouTubeVideoItem[] = [];
+  let nextPageToken: string | undefined = undefined;
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`YouTube API returned ${res.status}: ${errText}`);
-  }
+  do {
+    const pageSize = Math.min(50, maxTotal - allVideos.length);
+    let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=LL&maxResults=${pageSize}`;
+    if (nextPageToken) {
+      url += `&pageToken=${encodeURIComponent(nextPageToken)}`;
+    }
 
-  const data: any = await res.json();
-  const items = data.items || [];
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
-  return items.map((item: any) => ({
-    videoId: item.snippet?.resourceId?.videoId || item.contentDetails?.videoId,
-    title: item.snippet?.title || 'YouTube Video',
-    channel: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle,
-    url: `https://www.youtube.com/watch?v=${item.snippet?.resourceId?.videoId || item.contentDetails?.videoId}`,
-    publishedAt: item.snippet?.publishedAt,
-  })).filter((v: YouTubeVideoItem) => Boolean(v.videoId));
+    if (!res.ok) {
+      const errText = await res.text();
+      // If LL playlist is empty or restricted, break cleanly
+      console.warn(`YouTube Liked Videos API response ${res.status}:`, errText);
+      break;
+    }
+
+    const data: any = await res.json();
+    const items = data.items || [];
+
+    for (const item of items) {
+      const videoId = item.snippet?.resourceId?.videoId || item.contentDetails?.videoId;
+      if (videoId) {
+        allVideos.push({
+          videoId,
+          title: item.snippet?.title || 'YouTube Liked Video',
+          channel: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle,
+          url: `https://www.youtube.com/watch?v=${videoId}`,
+          publishedAt: item.snippet?.publishedAt,
+          playlistTitle: 'Liked Videos',
+        });
+      }
+    }
+
+    nextPageToken = data.nextPageToken;
+  } while (nextPageToken && allVideos.length < maxTotal);
+
+  return allVideos;
 }
 
 /**
- * Fetch Playlist Videos (via API key or RSS fallback)
+ * Fetch ALL Playlists on user's YouTube profile (mine=true)
  */
-async function fetchPlaylistVideos(playlistId: string, apiKey?: string, maxResults: number = 15): Promise<YouTubeVideoItem[]> {
+export async function fetchUserPlaylists(
+  accessToken: string,
+  db?: Database
+): Promise<YouTubePlaylistItem[]> {
+  const playlists: YouTubePlaylistItem[] = [];
+  let nextPageToken: string | undefined = undefined;
+
+  do {
+    let url = `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails,status&mine=true&maxResults=50`;
+    if (nextPageToken) {
+      url += `&pageToken=${encodeURIComponent(nextPageToken)}`;
+    }
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!res.ok) {
+      console.warn('Failed to fetch user playlists from YouTube API:', await res.text());
+      break;
+    }
+
+    const data: any = await res.json();
+    const items = data.items || [];
+
+    for (const pl of items) {
+      const plItem: YouTubePlaylistItem = {
+        id: pl.id,
+        title: pl.snippet?.title || 'Untitled Playlist',
+        description: pl.snippet?.description || '',
+        itemCount: pl.contentDetails?.itemCount || 0,
+        privacyStatus: pl.status?.privacyStatus || 'public',
+        thumbnailUrl: pl.snippet?.thumbnails?.medium?.url || pl.snippet?.thumbnails?.default?.url,
+        playlistUrl: `https://www.youtube.com/playlist?list=${pl.id}`,
+      };
+
+      playlists.push(plItem);
+
+      if (db) {
+        await db.saveYouTubePlaylist(plItem);
+      }
+    }
+
+    nextPageToken = data.nextPageToken;
+  } while (nextPageToken);
+
+  if (db && playlists.length > 0) {
+    await db.setKV('youtube_playlists', JSON.stringify(playlists));
+  }
+
+  return playlists;
+}
+
+/**
+ * Fetch Playlist Videos (via API key, OAuth, or RSS fallback)
+ */
+async function fetchPlaylistVideos(
+  playlistId: string,
+  apiKey?: string,
+  accessToken?: string | null,
+  maxResults: number = 30
+): Promise<YouTubeVideoItem[]> {
+  // If access token available, use authenticated endpoint
+  if (accessToken) {
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${Math.min(maxResults, 50)}`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (res.ok) {
+      const data: any = await res.json();
+      return (data.items || []).map((item: any) => ({
+        videoId: item.snippet?.resourceId?.videoId || item.contentDetails?.videoId,
+        title: item.snippet?.title || 'YouTube Video',
+        channel: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle,
+        url: `https://www.youtube.com/watch?v=${item.snippet?.resourceId?.videoId || item.contentDetails?.videoId}`,
+        publishedAt: item.snippet?.publishedAt,
+      })).filter((v: YouTubeVideoItem) => Boolean(v.videoId));
+    }
+  }
+
+  // API Key fallback
   if (apiKey) {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${maxResults}&key=${apiKey}`;
     const res = await fetch(url);
@@ -157,40 +271,70 @@ async function fetchPlaylistVideos(playlistId: string, apiKey?: string, maxResul
 }
 
 /**
- * Core YouTube Synchronizer: Polls videos, deduplicates against D1, and passes new ones to Gemini & Obsidian
+ * Core YouTube Synchronizer:
+ * Ingests videos into D1 & Gemini knowledge notes with deduplication
  */
 export async function syncYouTubeVideos(
   env: Env,
   db: Database,
-  maxVideos: number = 10,
-  overridePlaylistId?: string
+  maxVideos: number = 25,
+  options?: {
+    overridePlaylistId?: string;
+    target?: 'liked' | 'playlists' | 'all';
+  }
 ): Promise<{
   success: boolean;
   totalFound: number;
   newIngested: number;
   skippedCount: number;
+  playlistsSynced?: number;
   syncedNotes: Array<{ title: string; id: string; url: string; core_idea?: string }>;
-  mode: 'oauth_liked' | 'playlist' | 'none';
+  mode: 'oauth_liked' | 'oauth_all' | 'playlist' | 'none';
 }> {
   let videos: YouTubeVideoItem[] = [];
-  let mode: 'oauth_liked' | 'playlist' | 'none' = 'none';
+  let mode: 'oauth_liked' | 'oauth_all' | 'playlist' | 'none' = 'none';
+  let playlistsSynced = 0;
 
-  // 1. Try Google OAuth for Liked Videos (playlistId = 'LL')
   const accessToken = await getOAuthAccessToken(env, db);
+
+  // 1. If connected via OAuth, fetch liked videos and user profile playlists
   if (accessToken) {
     try {
-      videos = await fetchOAuthLikedVideos(accessToken, maxVideos);
-      mode = 'oauth_liked';
+      const target = options?.target || 'all';
+
+      // Always fetch & update profile playlists when OAuth is active
+      if (target === 'playlists' || target === 'all') {
+        const playlists = await fetchUserPlaylists(accessToken, db);
+        playlistsSynced = playlists.length;
+
+        // Fetch videos from the first few playlists
+        for (const pl of playlists.slice(0, 5)) {
+          if (pl.id && pl.itemCount > 0) {
+            const plVideos = await fetchPlaylistVideos(pl.id, env.YOUTUBE_API_KEY, accessToken, 10);
+            plVideos.forEach((v) => {
+              v.playlistTitle = pl.title;
+              videos.push(v);
+            });
+          }
+        }
+      }
+
+      if (target === 'liked' || target === 'all') {
+        const likedVideos = await fetchOAuthLikedVideos(accessToken, maxVideos);
+        videos.push(...likedVideos);
+      }
+
+      mode = target === 'all' ? 'oauth_all' : 'oauth_liked';
     } catch (e) {
-      console.warn('Failed to fetch OAuth liked videos, attempting playlist fallback:', e);
+      console.warn('OAuth YouTube fetch encountered an issue:', e);
     }
   }
 
-  // 2. Fallback to Playlist ID if OAuth not available or returned no items
+  // 2. Playlist ID fallback (manual playlist or zero-OAuth configured)
   if (videos.length === 0) {
-    const playlistId = overridePlaylistId || env.YOUTUBE_PLAYLIST_ID || (await db.getKV('youtube_playlist_id'));
+    const playlistId = options?.overridePlaylistId || env.YOUTUBE_PLAYLIST_ID || (await db.getKV('youtube_playlist_id'));
     if (playlistId) {
-      videos = await fetchPlaylistVideos(playlistId, env.YOUTUBE_API_KEY, maxVideos);
+      videos = await fetchPlaylistVideos(playlistId, env.YOUTUBE_API_KEY, accessToken, maxVideos);
       mode = 'playlist';
     }
   }
@@ -201,16 +345,24 @@ export async function syncYouTubeVideos(
       totalFound: 0,
       newIngested: 0,
       skippedCount: 0,
+      playlistsSynced: 0,
       syncedNotes: [],
       mode: 'none',
     };
   }
 
+  // Deduplicate against each other in the batch
+  const uniqueVideos = new Map<string, YouTubeVideoItem>();
+  for (const v of videos) {
+    if (v.videoId && !uniqueVideos.has(v.videoId)) {
+      uniqueVideos.set(v.videoId, v);
+    }
+  }
+
   const syncedNotes: Array<{ title: string; id: string; url: string; core_idea?: string }> = [];
   let skippedCount = 0;
 
-  // Process videos sequentially to respect Gemini rate limits
-  for (const video of videos) {
+  for (const video of uniqueVideos.values()) {
     if (!video.videoId || video.title === 'Private video' || video.title === 'Deleted video') {
       skippedCount++;
       continue;
@@ -224,14 +376,15 @@ export async function syncYouTubeVideos(
     }
 
     try {
-      console.log(`🎬 [YouTube Sync] Ingesting: ${video.title} (${video.videoId})`);
+      const provenanceNote = video.playlistTitle
+        ? `Playlist: "${video.playlistTitle}" • Channel: ${video.channel || 'YouTube'}`
+        : `Channel: ${video.channel || 'YouTube'} (YouTube Liked Video)`;
+
       const result = await processIngestion(env, db, {
         sourceType: 'youtube',
         url: video.url,
         title: video.title,
-        userNote: video.channel
-          ? `Channel: ${video.channel} (Auto-synced from YouTube Liked Videos)`
-          : 'Auto-synced from YouTube Liked Videos',
+        userNote: provenanceNote,
         importance: 7,
       });
 
@@ -253,18 +406,20 @@ export async function syncYouTubeVideos(
   // Save sync state in D1 KV
   const syncState = {
     lastSyncAt: new Date().toISOString(),
-    totalFound: videos.length,
+    totalFound: uniqueVideos.size,
     newIngested: syncedNotes.length,
     skippedCount,
+    playlistsSynced,
     mode,
   };
   await db.setKV('youtube_sync_state', JSON.stringify(syncState));
 
   return {
     success: true,
-    totalFound: videos.length,
+    totalFound: uniqueVideos.size,
     newIngested: syncedNotes.length,
     skippedCount,
+    playlistsSynced,
     syncedNotes,
     mode,
   };
@@ -284,34 +439,48 @@ export async function handleYouTubeRoutes(
 
   // 1. GET /api/youtube/status - Check connection & sync state
   if (request.method === 'GET' && action === 'status') {
-    const hasClientId = Boolean(env.YOUTUBE_CLIENT_ID && env.YOUTUBE_CLIENT_SECRET);
+    const clientId = env.YOUTUBE_CLIENT_ID || (await db.getKV('youtube_client_id'));
+    const clientSecret = env.YOUTUBE_CLIENT_SECRET || (await db.getKV('youtube_client_secret'));
+    const hasClientId = Boolean(clientId && clientSecret);
     const envRefreshToken = Boolean(env.YOUTUBE_REFRESH_TOKEN);
     const dbTokenRaw = await db.getKV('youtube_oauth_token');
     const hasDbToken = Boolean(dbTokenRaw);
     const playlistId = env.YOUTUBE_PLAYLIST_ID || (await db.getKV('youtube_playlist_id')) || null;
     const syncStateRaw = await db.getKV('youtube_sync_state');
 
-    // Count how many youtube sources currently exist in D1
-    const stats = await db.listSources(100, 0);
-    const youtubeSourcesCount = stats.filter((s) => s.source_type === 'youtube').length;
+    // Count youtube sources and playlists in D1
+    const youtubeSources = await db.getYouTubeSources(100);
+    const playlists = await db.listYouTubePlaylists();
 
     return jsonResponse({
       connected: (hasClientId && (envRefreshToken || hasDbToken)) || Boolean(playlistId),
-      mode: (hasClientId && (envRefreshToken || hasDbToken)) ? 'oauth_liked' : (playlistId ? 'playlist' : 'none'),
+      mode: (hasClientId && (envRefreshToken || hasDbToken)) ? 'oauth' : (playlistId ? 'playlist' : 'none'),
       oauthConfigured: hasClientId,
       hasRefreshToken: envRefreshToken || hasDbToken,
       playlistId,
       hasApiKey: Boolean(env.YOUTUBE_API_KEY),
       lastSync: syncStateRaw ? JSON.parse(syncStateRaw) : null,
-      totalSyncedCount: youtubeSourcesCount,
+      totalSyncedCount: youtubeSources.length,
+      playlistsCount: playlists.length,
+      playlists: playlists.slice(0, 10),
     });
   }
 
-  // 2. GET /api/youtube/auth - Redirect user to Google OAuth Consent Screen
+  // 2. GET /api/youtube/playlists - Return all playlists on user's YouTube profile
+  if (request.method === 'GET' && action === 'playlists') {
+    const playlists = await db.listYouTubePlaylists();
+    return jsonResponse({
+      success: true,
+      count: playlists.length,
+      playlists,
+    });
+  }
+
+  // 3. GET /api/youtube/auth - Redirect user to Google OAuth Consent Screen
   if (request.method === 'GET' && action === 'auth') {
-    const clientId = env.YOUTUBE_CLIENT_ID;
+    const clientId = env.YOUTUBE_CLIENT_ID || (await db.getKV('youtube_client_id'));
     if (!clientId) {
-      return errorResponse('YOUTUBE_CLIENT_ID not configured in Cloudflare environment', 400);
+      return errorResponse('Google Client ID not configured. Please enter your Client ID in Settings -> YouTube.', 400);
     }
 
     const redirectUri = `${url.origin}/api/youtube/callback`;
@@ -326,7 +495,7 @@ export async function handleYouTubeRoutes(
     return Response.redirect(googleAuthUrl.toString(), 302);
   }
 
-  // 3. GET /api/youtube/callback - Exchange authorization code for refresh token
+  // 4. GET /api/youtube/callback - Exchange authorization code for refresh token
   if (request.method === 'GET' && action === 'callback') {
     const code = url.searchParams.get('code');
     const error = url.searchParams.get('error');
@@ -339,8 +508,8 @@ export async function handleYouTubeRoutes(
       </body></html>`, { headers: { 'Content-Type': 'text/html' } });
     }
 
-    const clientId = env.YOUTUBE_CLIENT_ID;
-    const clientSecret = env.YOUTUBE_CLIENT_SECRET;
+    const clientId = env.YOUTUBE_CLIENT_ID || (await db.getKV('youtube_client_id'));
+    const clientSecret = env.YOUTUBE_CLIENT_SECRET || (await db.getKV('youtube_client_secret'));
     const redirectUri = `${url.origin}/api/youtube/callback`;
 
     try {
@@ -372,16 +541,21 @@ export async function handleYouTubeRoutes(
         }));
       }
 
+      // Immediately fetch user playlists so the bot knows all profile playlists
+      if (tokenData.access_token) {
+        await fetchUserPlaylists(tokenData.access_token, db).catch(() => {});
+      }
+
       return new Response(`<html>
         <body style="font-family: system-ui, -apple-system, sans-serif; padding: 3rem 1.5rem; background: #0b0f19; color: #e2e8f0; text-align: center;">
           <div style="max-width: 480px; margin: 0 auto; background: #131b2e; border: 1px solid #1e293b; border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
             <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
-            <h2 style="color: #c084fc; margin-bottom: 0.75rem;">YouTube Liked Videos Connected!</h2>
+            <h2 style="color: #c084fc; margin-bottom: 0.75rem;">YouTube Profile Connected!</h2>
             <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
-              Your Second Brain will now continuously fetch newly liked YouTube videos, extract atomic ideas and insights using Gemini, and commit them directly to your Obsidian vault.
+              Your Second Brain now has full access to your <strong>Liked Videos</strong> and <strong>Playlists</strong>. You can ask your AI bot what videos you watched, query concepts from any playlist, and view all playlists on your profile!
             </p>
             <a href="https://second-brain-web-83u.pages.dev/settings" style="display: inline-block; background: #9333ea; color: #ffffff; padding: 0.75rem 1.5rem; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
-              Open Second Brain Settings
+              Return to Second Brain
             </a>
           </div>
         </body>
@@ -391,7 +565,7 @@ export async function handleYouTubeRoutes(
     }
   }
 
-  // 4. POST /api/youtube/sync or /api/sync/youtube - Trigger sync of Liked / Playlist videos
+  // 5. POST /api/youtube/sync - Trigger sync of Liked Videos and/or Playlists
   if (request.method === 'POST' && (action === 'sync' || action === 'trigger' || !action)) {
     try {
       let body: any = {};
@@ -399,8 +573,13 @@ export async function handleYouTubeRoutes(
         body = await request.json();
       } catch {}
 
-      const maxLimit = Math.min(Number(body.limit) || 10, 50);
-      const result = await syncYouTubeVideos(env, db, maxLimit, body.playlist_id);
+      const maxLimit = Math.min(Number(body.limit) || 25, 200);
+      const target = body.target || 'all';
+
+      const result = await syncYouTubeVideos(env, db, maxLimit, {
+        overridePlaylistId: body.playlist_id,
+        target,
+      });
 
       return jsonResponse({
         success: result.success,
@@ -408,10 +587,11 @@ export async function handleYouTubeRoutes(
         totalFound: result.totalFound,
         newIngested: result.newIngested,
         skippedCount: result.skippedCount,
+        playlistsSynced: result.playlistsSynced,
         syncedNotes: result.syncedNotes,
         message: result.mode === 'none'
-          ? 'Neither Google OAuth nor YouTube Playlist ID is configured. Please configure credentials in Settings.'
-          : `Synced ${result.newIngested} new videos to Obsidian vault (${result.skippedCount} skipped as already indexed).`,
+          ? 'Neither Google OAuth nor YouTube Playlist ID is configured. Please configure in Settings.'
+          : `Synced ${result.newIngested} new videos and ${result.playlistsSynced || 0} playlists to your Second Brain.`,
       });
     } catch (syncErr: any) {
       console.error('YouTube sync execution error:', syncErr);
@@ -419,10 +599,72 @@ export async function handleYouTubeRoutes(
     }
   }
 
-  // 5. POST /api/youtube/configure - Save Playlist ID or custom refresh token
+  // 6. POST /api/youtube/import - Direct import of Google Takeout watch-history or playlists JSON
+  if (request.method === 'POST' && action === 'import') {
+    try {
+      const body: any = await request.json();
+      const items = Array.isArray(body) ? body : (body.items || body.videos || []);
+
+      if (!Array.isArray(items) || items.length === 0) {
+        return errorResponse('Expected JSON array of watched videos or playlists.', 400);
+      }
+
+      let importedCount = 0;
+      let skippedCount = 0;
+
+      for (const item of items.slice(0, 100)) {
+        // Handle Google Takeout watch-history format or simple format
+        const title = item.title || item.titleUrl || item.name;
+        const url = item.titleUrl || item.url || (item.videoId ? `https://www.youtube.com/watch?v=${item.videoId}` : null);
+
+        if (!url || !url.includes('youtube.com')) {
+          skippedCount++;
+          continue;
+        }
+
+        const existing = await db.getSourceByUrl(url);
+        if (existing) {
+          skippedCount++;
+          continue;
+        }
+
+        try {
+          const channel = item.subtitles?.[0]?.name || item.channel || item.author;
+          await processIngestion(env, db, {
+            sourceType: 'youtube',
+            url,
+            title: title ? title.replace(/^Watched\s+/i, '') : 'YouTube Watch History',
+            userNote: channel ? `Channel: ${channel} (Imported Watch History)` : 'Imported YouTube Watch History',
+            importance: 6,
+          });
+          importedCount++;
+        } catch {
+          skippedCount++;
+        }
+      }
+
+      return jsonResponse({
+        success: true,
+        importedCount,
+        skippedCount,
+        message: `Successfully imported ${importedCount} videos from YouTube history into your Second Brain.`,
+      });
+    } catch (err: any) {
+      return errorResponse(`Import failed: ${err.message}`, 500);
+    }
+  }
+
+  // 7. POST /api/youtube/configure - Save credentials or custom playlist IDs into D1
   if (request.method === 'POST' && action === 'configure') {
     try {
       const body: any = await request.json();
+
+      if (body.client_id !== undefined) {
+        await db.setKV('youtube_client_id', body.client_id.trim());
+      }
+      if (body.client_secret !== undefined) {
+        await db.setKV('youtube_client_secret', body.client_secret.trim());
+      }
       if (body.playlist_id !== undefined) {
         await db.setKV('youtube_playlist_id', body.playlist_id.trim());
       }
@@ -435,7 +677,7 @@ export async function handleYouTubeRoutes(
 
       return jsonResponse({
         success: true,
-        message: 'YouTube sync configuration updated successfully.',
+        message: 'YouTube configuration saved successfully.',
       });
     } catch (err: any) {
       return errorResponse(err.message, 400);

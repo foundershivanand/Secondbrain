@@ -156,6 +156,8 @@ CRITICAL BEHAVIOR:
 4. Connect topics using [[WikiLinks]] for Obsidian compatibility.
 5. Reference the user's current goals and preferences from the Brain State.
 6. For recency or temporal queries (e.g. "what video I watched last", "what did I like recently", "latest note"), use the RECENT ACTIVITY / CHRONOLOGICAL PROVENANCE section to identify the exact latest item, detail its core ideas, actionable takeaways, and provide its original source link. Do NOT provide an older or random item.
+7. For YouTube profile and playlist queries (e.g. "what playlists do I have", "what playlists on my YouTube profile", "what videos did I watch", "what are my liked videos"):
+   Use the USER'S YOUTUBE PLAYLISTS ON PROFILE and CHRONOLOGICAL PROVENANCE sections to thoroughly list playlists (with title, item count, privacy status, URL) and watched/liked videos. Answer questions directly using the retrieved YouTube records.
 
 Return valid JSON matching this schema:
 {

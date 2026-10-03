@@ -156,3 +156,15 @@ export interface BrainStats {
   relationshipsCount: number;
   mocsCount?: number;
 }
+
+export interface YouTubePlaylistItem {
+  id: string;
+  title: string;
+  description: string;
+  item_count: number;
+  privacy_status: string;
+  thumbnail_url?: string;
+  playlist_url: string;
+  synced_at?: string;
+  created_at?: string;
+}

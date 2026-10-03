@@ -58,10 +58,10 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
   };
 
   const samplePrompts = [
+    'What playlists do I have on my YouTube profile?',
+    'What videos did I watch recently?',
     'What have I learned about AI agent memory?',
-    'What is our stance on storing 100 GB in Obsidian vs raw pointers?',
     'What SaaS and product opportunities were identified?',
-    'Show me the important timestamps for agent architectures',
   ];
 
   const handleSend = async (queryToSend?: string) => {

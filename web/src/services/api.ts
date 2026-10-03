@@ -7,6 +7,7 @@ import {
   SourceRecord,
   RelationshipRecord,
   MapOfContentRecord,
+  YouTubePlaylistItem,
 } from '../types';
 
 export const DEFAULT_WORKER_API = 'https://second-brain-api.fitt.workers.dev';
@@ -325,7 +326,7 @@ export const api = {
 
   async getYoutubeSyncStatus(): Promise<{
     connected: boolean;
-    mode: 'oauth_liked' | 'playlist' | 'none';
+    mode: 'oauth' | 'playlist' | 'none';
     oauthConfigured: boolean;
     hasRefreshToken: boolean;
     playlistId: string | null;
@@ -335,9 +336,12 @@ export const api = {
       totalFound: number;
       newIngested: number;
       skippedCount: number;
+      playlistsSynced?: number;
       mode: string;
     } | null;
     totalSyncedCount: number;
+    playlistsCount?: number;
+    playlists?: YouTubePlaylistItem[];
   }> {
     const res = await fetch(`${getApiBaseUrl()}/api/youtube/status`, {
       headers: getAuthHeader(),
@@ -346,12 +350,29 @@ export const api = {
     return res.json();
   },
 
-  async triggerYoutubeSync(playlistId?: string, limit: number = 10): Promise<{
+  async getYoutubePlaylists(): Promise<{
+    success: boolean;
+    count: number;
+    playlists: YouTubePlaylistItem[];
+  }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/youtube/playlists`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to get YouTube playlists');
+    return res.json();
+  },
+
+  async triggerYoutubeSync(options?: {
+    playlistId?: string;
+    limit?: number;
+    target?: 'liked' | 'playlists' | 'all';
+  }): Promise<{
     success: boolean;
     mode: string;
     totalFound: number;
     newIngested: number;
     skippedCount: number;
+    playlistsSynced?: number;
     syncedNotes: Array<{ title: string; id: string; url: string; core_idea?: string }>;
     message: string;
   }> {
@@ -361,7 +382,11 @@ export const api = {
         'Content-Type': 'application/json',
         ...getAuthHeader(),
       },
-      body: JSON.stringify({ playlist_id: playlistId, limit }),
+      body: JSON.stringify({
+        playlist_id: options?.playlistId,
+        limit: options?.limit || 25,
+        target: options?.target || 'all',
+      }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: 'YouTube sync failed' }));
@@ -370,7 +395,12 @@ export const api = {
     return res.json();
   },
 
-  async configureYoutubeSync(config: { playlist_id?: string; refresh_token?: string }): Promise<{ success: boolean; message: string }> {
+  async configureYoutubeSync(config: {
+    client_id?: string;
+    client_secret?: string;
+    playlist_id?: string;
+    refresh_token?: string;
+  }): Promise<{ success: boolean; message: string }> {
     const res = await fetch(`${getApiBaseUrl()}/api/youtube/configure`, {
       method: 'POST',
       headers: {

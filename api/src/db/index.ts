@@ -481,4 +481,63 @@ export class Database {
       mocsCount: mocs?.count || 0,
     };
   }
+
+  // --- YOUTUBE PLAYLISTS & PROFILE ---
+  async listYouTubePlaylists(): Promise<Array<{
+    id: string;
+    title: string;
+    description: string;
+    item_count: number;
+    privacy_status: string;
+    thumbnail_url: string;
+    playlist_url: string;
+    synced_at: string;
+    created_at: string;
+  }>> {
+    try {
+      const res = await this.db.prepare(`SELECT * FROM youtube_playlists ORDER BY item_count DESC`).all<any>();
+      return res.results || [];
+    } catch {
+      return [];
+    }
+  }
+
+  async saveYouTubePlaylist(pl: {
+    id: string;
+    title: string;
+    description?: string;
+    item_count?: number;
+    privacy_status?: string;
+    thumbnail_url?: string;
+    playlist_url?: string;
+    synced_at?: string;
+  }): Promise<void> {
+    const now = new Date().toISOString();
+    await this.db
+      .prepare(
+        `INSERT OR REPLACE INTO youtube_playlists (id, title, description, item_count, privacy_status, thumbnail_url, playlist_url, synced_at, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM youtube_playlists WHERE id = ?), ?))`
+      )
+      .bind(
+        pl.id,
+        pl.title,
+        pl.description || '',
+        pl.item_count || 0,
+        pl.privacy_status || 'public',
+        pl.thumbnail_url || null,
+        pl.playlist_url || `https://www.youtube.com/playlist?list=${pl.id}`,
+        pl.synced_at || now,
+        pl.id,
+        now
+      )
+      .run();
+  }
+
+  async getYouTubeSources(limit: number = 100): Promise<SourceRecord[]> {
+    const res = await this.db
+      .prepare(`SELECT * FROM sources WHERE source_type = 'youtube' ORDER BY captured_at DESC LIMIT ?`)
+      .bind(limit)
+      .all<SourceRecord>();
+    return res.results || [];
+  }
 }

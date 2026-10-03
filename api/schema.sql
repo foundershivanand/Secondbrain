@@ -115,6 +115,19 @@ CREATE TABLE IF NOT EXISTS mocs (
     updated_at TEXT NOT NULL
 );
 
+-- 9. YouTube Playlists: User profile playlists & sync metadata
+CREATE TABLE IF NOT EXISTS youtube_playlists (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    item_count INTEGER DEFAULT 0,
+    privacy_status TEXT,
+    thumbnail_url TEXT,
+    playlist_url TEXT,
+    synced_at TEXT,
+    created_at TEXT NOT NULL
+);
+
 -- Indexes for lightning fast retrieval and indexing
 CREATE INDEX IF NOT EXISTS idx_sources_status ON sources(status);
 CREATE INDEX IF NOT EXISTS idx_sources_raw_id ON sources(raw_id);

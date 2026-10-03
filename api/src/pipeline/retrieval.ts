@@ -15,6 +15,18 @@ export interface RetrievalResult {
     isYouTubeQuery?: boolean;
     hasNoVideos?: boolean;
   };
+  playlists?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    item_count: number;
+    privacy_status: string;
+    thumbnail_url: string;
+    playlist_url: string;
+    synced_at: string;
+    created_at?: string;
+  }>;
+  isPlaylistQuery?: boolean;
 }
 
 export async function retrieveRelevantContext(
@@ -22,18 +34,25 @@ export async function retrieveRelevantContext(
   userQuery: string
 ): Promise<RetrievalResult> {
   const lowerQuery = userQuery.toLowerCase();
-  const isYouTubeQuery = /\b(youtube|yt|liked|likes)\b/i.test(lowerQuery);
+  const isPlaylistQuery = /\b(playlist|playlists)\b/i.test(lowerQuery);
+  const isYouTubeQuery = /\b(youtube|yt|liked|likes)\b/i.test(lowerQuery) || isPlaylistQuery;
   const isVideoQuery = isYouTubeQuery || /\b(video|watch|watched|watching|seen|viewed)\b/i.test(lowerQuery);
   const isRecencyQuery = /\b(last|latest|recent|recently|newest|yesterday|today|just now|past|previous)\b/i.test(lowerQuery);
 
   const relevantKnowledgeMap = new Map<string, KnowledgeRecord>();
   const atomicStatementsSet = new Set<string>();
   let recentActivity: RetrievalResult['recentActivity'] | undefined;
+  let playlists: any[] = [];
 
-  // 0. Recency Handling: If asking about recent/last videos or recent notes
+  if (isPlaylistQuery || isYouTubeQuery) {
+    playlists = await db.listYouTubePlaylists();
+  }
+
+  // 0. Recency & Video Handling: If asking about videos or playlists or recent notes
   if (isVideoQuery) {
     const sourceTypes = isYouTubeQuery ? ['youtube'] : ['youtube', 'video'];
-    const recentVideos = await db.getRecentSourcesByType(sourceTypes, 5);
+    const limit = /\b(all|list|what videos|which videos|history|liked)\b/i.test(lowerQuery) ? 50 : 15;
+    const recentVideos = await db.getRecentSourcesByType(sourceTypes, limit);
     const videoItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string }> = [];
 
     for (const src of recentVideos) {
@@ -46,6 +65,15 @@ export async function retrieveRelevantContext(
           url: src.original_url || src.raw_url || undefined,
           captured_at: src.captured_at,
           core_idea: k.core_idea,
+          source_type: src.source_type,
+        });
+      } else {
+        videoItems.push({
+          title: src.title || 'Untitled Video',
+          id: src.id,
+          url: src.original_url || src.raw_url || undefined,
+          captured_at: src.captured_at,
+          core_idea: undefined,
           source_type: src.source_type,
         });
       }
@@ -172,6 +200,8 @@ export async function retrieveRelevantContext(
     memories: relevantMemories.length > 0 ? relevantMemories : durableMemories.slice(0, 5),
     sources,
     recentActivity,
+    playlists,
+    isPlaylistQuery,
   };
 }
 
@@ -183,15 +213,25 @@ export async function answerBrainQuery(
   const context = await retrieveRelevantContext(db, userQuery);
   const brainState = await db.getBrainState();
 
-  if (context.knowledgeNotes.length === 0 && context.memories.length === 0 && !brainState) {
+  const hasPlaylists = Boolean(context.playlists && context.playlists.length > 0);
+  const hasRecentVideos = Boolean(context.recentActivity && context.recentActivity.items.length > 0);
+
+  if (
+    context.knowledgeNotes.length === 0 &&
+    context.memories.length === 0 &&
+    !brainState &&
+    !hasPlaylists &&
+    !hasRecentVideos &&
+    !context.isPlaylistQuery
+  ) {
     return {
-      answer: `I searched your Second Brain for **"${userQuery}"**, but could not find any saved knowledge notes or personal memories on this topic yet.\n\nTo build your brain:\n- Capture ideas or screenshots using the **Quick Capture** button\n- Share YouTube links, articles, or PDFs\n- Send notes directly via your Telegram bot`,
+      answer: `I searched your Second Brain for **"${userQuery}"**, but could not find any saved knowledge notes, YouTube playlists, or personal memories on this topic yet.\n\nTo build your brain:\n- Capture ideas or screenshots using the **Quick Capture** button\n- Share YouTube links, articles, or PDFs\n- Connect YouTube in Settings to sync your liked videos and profile playlists\n- Send notes directly via your Telegram bot`,
       sources: [],
       related_topics: [],
       memories_used: [],
       suggested_questions: [
         'How does my Second Brain ingestion pipeline work?',
-        'What are the memory levels M0 through M5?',
+        'What playlists do I have on my YouTube profile?',
       ],
     };
   }
@@ -216,6 +256,24 @@ export async function answerBrainQuery(
     contextBlock += `\n`;
   }
 
+  if (context.isPlaylistQuery || hasPlaylists) {
+    contextBlock += `=== USER'S YOUTUBE PLAYLISTS ON PROFILE ===\n`;
+    if (hasPlaylists) {
+      contextBlock += `The user has ${context.playlists!.length} playlists on their YouTube profile:\n`;
+      context.playlists!.forEach((pl, idx) => {
+        contextBlock += `${idx + 1}. "${pl.title}" (${pl.item_count} videos, privacy: ${pl.privacy_status})\n`;
+        if (pl.description) contextBlock += `   Description: ${pl.description}\n`;
+        contextBlock += `   URL: ${pl.playlist_url}\n`;
+      });
+      contextBlock += `\nCRITICAL INSTRUCTION: If user asks what playlists they have on their YouTube profile, or asks about any specific playlist, list and describe them accurately with links from above.\n\n`;
+    } else {
+      contextBlock += `CRITICAL FACT: The user asked about their YouTube profile playlists, but NO playlists have been synced to the Second Brain yet.\n`;
+      contextBlock += `Explicitly tell the user:\n`;
+      contextBlock += `1. No YouTube playlists have been synced yet.\n`;
+      contextBlock += `2. They can connect their YouTube profile or sync playlists via Settings -> YouTube in the Second Brain Web App.\n\n`;
+    }
+  }
+
   if (context.recentActivity) {
     contextBlock += `=== CHRONOLOGICAL PROVENANCE / RECENT ACTIVITY ===\n`;
     if (context.recentActivity.type === 'video') {
@@ -234,7 +292,7 @@ export async function answerBrainQuery(
           if (item.captured_at) contextBlock += `   Captured / Watched At: ${item.captured_at}\n`;
           if (item.core_idea) contextBlock += `   Core Idea: ${item.core_idea}\n`;
         });
-        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what video I watched last" or asks about the latest/last video watched, the exact answer is: "${context.recentActivity.items[0]?.title}". Present its core ideas, actionable takeaways, and link (${context.recentActivity.items[0]?.url || ''}). Do NOT confuse with older or other videos.\n\n`;
+        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what videos I watched", "what videos did I watch", or asks about their watched/liked videos, present a clear chronological list of these videos with their titles, core takeaways/channels, and links. If user asks "what video I watched last" or asks about the latest/last video watched, the exact answer is: "${context.recentActivity.items[0]?.title}". Present its core ideas, actionable takeaways, and link (${context.recentActivity.items[0]?.url || ''}). Do NOT confuse with older or other videos.\n\n`;
       }
     } else {
       contextBlock += `Order of most recently saved notes (MOST RECENT FIRST):\n`;

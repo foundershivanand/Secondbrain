@@ -2,11 +2,11 @@
 id: KN-857119
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-168933843857119
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2FAffidavit%20Format_copy.pdf"
-file_size: 150534
-priority: P1
+raw_id: RAW-SRC-168933843857119
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Legal Documents
   - Affidavits
@@ -32,29 +32,7 @@ This document provides a standard format for drafting an affidavit, which is a s
 
 ## Atomic Knowledge
 
-### An affidavit is a formal written statement of facts voluntarily made by an affiant or deponent under an oath or affirmation administered by a person authorized to do so by law
-
-An affidavit is a formal written statement of facts voluntarily made by an affiant or deponent under an oath or affirmation administered by a person authorized to do so by law.
-
-**Type:** `FACT` | **Confidence:** 98%
-
-### The deponent is the individual who makes and signs the affidavit, swearing to the truthfulness of its contents
-
-The deponent is the individual who makes and signs the affidavit, swearing to the truthfulness of its contents.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### A Notary Public or other authorized officer must administer the oath and attest to the deponent's signature for an affidavit to be legally valid and admissible
-
-A Notary Public or other authorized officer must administer the oath and attest to the deponent's signature for an affidavit to be legally valid and admissible.
-
-**Type:** `FACT` | **Confidence:** 97%
-
-### Key components of an affidavit include the title, deponent's identification, a clear and concise statement of facts, and a jurat (attestation clause) signed by the administering officer
-
-Key components of an affidavit include the title, deponent's identification, a clear and concise statement of facts, and a jurat (attestation clause) signed by the administering officer.
-
-**Type:** `CONCEPT` | **Confidence:** 96%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -66,7 +44,7 @@ Key components of an affidavit include the title, deponent's identification, a c
 - [ ] Refer to this template when drafting any legal affidavit to ensure all necessary components are included.
 - [ ] Always ensure that an affidavit is properly notarized or attested by an authorized officer after completion.
 
-## Related Topics
+## Related Knowledge
 
 - [[Legal Documents]]
 - [[Affidavits]]
@@ -74,11 +52,14 @@ Key components of an affidavit include the title, deponent's identification, a c
 - [[Notarization]]
 - [[Legal Procedure]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Affidavit Format_copy.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/Affidavit Format_copy.pdf`
-- **File Size:** 0.14 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2FAffidavit%20Format_copy.pdf)
+This file was saved as a reliable template and reference for creating legally compliant affidavits, which are essential for various personal and professional legal requirements.
+
+## What Changed
+
+This document clarifies the specific structural and procedural requirements for drafting a valid affidavit, enhancing the understanding beyond a general concept of a 'sworn statement' to a practical application.
+
+## Original
+
+No external URL

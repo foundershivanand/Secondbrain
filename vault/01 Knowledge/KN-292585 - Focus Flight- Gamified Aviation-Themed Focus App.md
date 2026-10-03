@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-292585
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMpasEMawABIlSt_s2siJC2mrpEw2pDAAL5IgACUBYIVojuo9k4qlWIPQQ"
-importance: 6
+importance: 8
 confidence: 0.95
 topics:
   - Productivity
@@ -32,23 +32,7 @@ Focus Flight is a gamified productivity app that uses an aviation metaphor to pr
 
 ## Atomic Knowledge
 
-### Focus Flight gamifies productivity by framing focus sessions as flights that crash if the user exits the app
-
-Focus Flight gamifies productivity by framing focus sessions as flights that crash if the user exits the app.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Using high-stakes negative reinforcement (like crashing a virtual plane) can deter users from doomscrolling
-
-Using high-stakes negative reinforcement (like crashing a virtual plane) can deter users from doomscrolling.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### Focus Flight features aviation-themed UI elements, including flight paths, boarding passes, and airport codes to represent tasks
-
-Focus Flight features aviation-themed UI elements, including flight paths, boarding passes, and airport codes to represent tasks.
-
-**Type:** `FACT` | **Confidence:** 95%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -59,11 +43,6 @@ Focus Flight features aviation-themed UI elements, including flight paths, board
 
 - [ ] Check out Focus Flight on the App Store to analyze its onboarding and UX flow.
 - [ ] Research other apps in iampascio's list of '8 apps that make doomscrolling annoying'.
-
-## Product & SaaS Opportunities
-
-- 💡 A focus app themed around space exploration where leaving the app causes a rocket to miss its orbit or run out of fuel.
-- 💡 A writing tool where stopping typing for too long causes a virtual castle to crumble (similar to 'Write or Die' but with modern gamified graphics).
 
 ## Related Knowledge
 

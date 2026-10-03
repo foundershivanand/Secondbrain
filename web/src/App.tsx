@@ -10,7 +10,7 @@ import { MemoriesView } from './pages/MemoriesView';
 import { SourcesView } from './pages/SourcesView';
 import { Settings } from './pages/Settings';
 import { api } from './services/api';
-import { BrainStats } from './types';
+import { BrainStats, SourceType } from './types';
 
 export function App() {
   const [activeTab, setActiveTab] = useState('brain');
@@ -53,6 +53,13 @@ export function App() {
     refreshStats();
   }, [activeTab]);
 
+  const [captureType, setCaptureType] = useState<SourceType>('text');
+
+  const handleOpenCapture = (type: SourceType = 'text') => {
+    setCaptureType(type);
+    setIsCaptureOpen(true);
+  };
+
   const handleNavigateTopic = (topic: string) => {
     setSelectedTopic(topic);
     setActiveTab('knowledge');
@@ -64,7 +71,7 @@ export function App() {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenCapture={() => setIsCaptureOpen(true)}
+        onOpenCapture={() => handleOpenCapture('text')}
         stats={stats}
       />
 
@@ -74,11 +81,11 @@ export function App() {
           <BrainChat onNavigateTopic={handleNavigateTopic} />
         )}
         {activeTab === 'inbox' && (
-          <Inbox onOpenCapture={() => setIsCaptureOpen(true)} />
+          <Inbox onOpenCapture={() => handleOpenCapture('text')} />
         )}
         {activeTab === 'knowledge' && (
           <KnowledgeView
-            onOpenCapture={() => setIsCaptureOpen(true)}
+            onOpenCapture={() => handleOpenCapture('text')}
             selectedTopic={selectedTopic}
             onClearTopic={() => setSelectedTopic(undefined)}
           />
@@ -95,6 +102,7 @@ export function App() {
       {/* Quick Capture Modal */}
       <CaptureModal
         isOpen={isCaptureOpen}
+        initialType={captureType}
         initialData={shareData}
         onClose={() => {
           setIsCaptureOpen(false);

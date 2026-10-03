@@ -50,9 +50,32 @@ Extract:
 14. What this knowledge changes compared to older assumptions
 15. Candidate long-term memories
 
+CATEGORY CLASSIFICATION RULE:
+Assign exactly ONE primary "category" from this strictly bounded canonical taxonomy (maximum 30 total across the entire second brain):
+- "Artificial Intelligence & LLMs"
+- "AI Agents & Autonomous Systems"
+- "Software Architecture & Backend"
+- "Web & Mobile Engineering"
+- "SaaS & Product Strategy"
+- "Developer Tools & Automation"
+- "Hardware & Embedded IoT"
+- "Productivity & PKM Systems"
+- "Cybersecurity & Privacy"
+- "Data Engineering & Analytics"
+- "Design & User Experience"
+- "Content Creation & Media"
+- "Finance & Economics"
+- "Mental Models & Philosophy"
+- "Leadership & Career"
+- "General Knowledge & Research"
+
+Always place this exact category as the FIRST item in the "topics" array.
+Only create a new category if it strictly cannot fit into any of the above. Total categories across the vault must never exceed 30.
+
 Return strictly valid JSON matching this schema:
 {
   "title": "Concise title representing the knowledge",
+  "category": "One of the canonical categories above",
   "source_type": "text | screenshot | image | video | pdf | url | youtube | voice | chat_export",
   "core_idea": "Dense, clear summary of the core breakthrough",
   "key_information": ["Point 1", "Point 2"],

@@ -17,7 +17,6 @@ import {
   Square,
   Image as ImageIcon,
   AlertCircle,
-  SwitchCamera,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceType } from '../types';
@@ -34,6 +33,7 @@ interface CaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialType?: SourceType;
   initialData?: { url?: string; text?: string; title?: string } | null;
 }
 
@@ -41,9 +41,10 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialType = 'text',
   initialData,
 }) => {
-  const [activeType, setActiveType] = useState<SourceType>('screenshot');
+  const [activeType, setActiveType] = useState<SourceType>(initialType);
   const [text, setText] = useState('');
   const [url, setUrl] = useState('');
   const [userNote, setUserNote] = useState('');
@@ -146,6 +147,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setIsRecordingAudio(false);
   };
 
+  // Sync activeType when modal opens or initialType changes
+  useEffect(() => {
+    if (isOpen) {
+      if (initialType) setActiveType(initialType);
+      setError(null);
+    }
+  }, [isOpen, initialType]);
+
   // Cleanup on unmount or modal close
   useEffect(() => {
     return () => {
@@ -157,12 +166,12 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   if (!isOpen) return null;
 
   const captureTabs: { type: SourceType; label: string; icon: any }[] = [
-    { type: 'screenshot', label: 'Camera & Photos', icon: Camera },
-    { type: 'text', label: 'Text / Thought', icon: FileText },
-    { type: 'voice', label: 'Voice Memo', icon: Mic },
-    { type: 'youtube', label: 'Video / YouTube', icon: Video },
-    { type: 'pdf', label: 'PDF Document', icon: FileCode },
+    { type: 'text', label: 'Note / Thought', icon: FileText },
+    { type: 'youtube', label: 'YouTube / Video', icon: Video },
     { type: 'url', label: 'Web Article', icon: Link2 },
+    { type: 'screenshot', label: 'Camera & Photos', icon: Camera },
+    { type: 'voice', label: 'Voice Memo', icon: Mic },
+    { type: 'pdf', label: 'PDF Document', icon: FileCode },
     { type: 'raw_pointer', label: 'Cloud Pointer', icon: HardDrive },
   ];
 
@@ -607,7 +616,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                           className="p-2 rounded-full bg-black/60 backdrop-blur-md text-white hover:bg-black/80 transition"
                           title="Switch Camera (Front/Back)"
                         >
-                          <SwitchCamera className="w-4 h-4" />
+                          <RotateCcw className="w-4 h-4" />
                         </button>
                         <button
                           type="button"

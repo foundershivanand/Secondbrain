@@ -17,6 +17,16 @@ interface KnowledgeCardProps {
   onDeleted?: () => void;
 }
 
+function safeJsonArray(val: string | null | undefined): string[] {
+  if (!val) return [];
+  try {
+    const parsed = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed : [String(parsed)];
+  } catch {
+    return val ? [val] : [];
+  }
+}
+
 export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   knowledge,
   onDeleted,
@@ -24,10 +34,10 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const topics: string[] = JSON.parse(knowledge.topics || '[]');
-  const keyInfo: string[] = JSON.parse(knowledge.key_information || '[]');
-  const insights: string[] = JSON.parse(knowledge.insights || '[]');
-  const actions: string[] = JSON.parse(knowledge.actionable_items || '[]');
+  const topics: string[] = safeJsonArray(knowledge.topics);
+  const keyInfo: string[] = safeJsonArray(knowledge.key_information);
+  const insights: string[] = safeJsonArray(knowledge.insights);
+  const actions: string[] = safeJsonArray(knowledge.actionable_items);
 
   const handleCopyMarkdown = async () => {
     try {

@@ -5,8 +5,8 @@ source_type: screenshot
 raw_id: RAW-529015
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMuasEMbArnu2DIy4VrYUhtRmAPIBMAAv4iAAJQFghWoDtNlgABuwcHPQQ"
-importance: 7
-confidence: 0.9
+importance: 8
+confidence: 0.95
 topics:
   - Digital Well-being
   - Gamification
@@ -33,23 +33,7 @@ A gamified screen-time and app-blocking tool that uses a decaying brain avatar t
 
 ## Atomic Knowledge
 
-### Gamifying screen time limits with a decaying visual avatar leverages loss aversion and real-time visual feedback to reduce doomscrolling
-
-Gamifying screen time limits with a decaying visual avatar leverages loss aversion and real-time visual feedback to reduce doomscrolling.
-
-**Type:** `CONCEPT` | **Confidence:** 90%
-
-### The 'Brain Rot' app blocks social media apps to prevent excessive scrolling
-
-The 'Brain Rot' app blocks social media apps to prevent excessive scrolling.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Visualizing the negative impact of habits in real-time is more effective than passive screen-time notifications
-
-Visualizing the negative impact of habits in real-time is more effective than passive screen-time notifications.
-
-**Type:** `CLAIM` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -60,11 +44,6 @@ Visualizing the negative impact of habits in real-time is more effective than pa
 
 - [ ] Research the 'Brain Rot' app to analyze its user retention metrics and platform availability.
 - [ ] Explore gamification mechanics that use negative reinforcement or visual decay for habit-breaking applications.
-
-## Product & SaaS Opportunities
-
-- 💡 A browser extension that visually decays or rusts web pages (like Twitter/X or Reddit) the longer you stay on them.
-- 💡 A fitness app where your avatar gets visibly sluggish or out of shape if you miss consecutive workout days.
 
 ## Related Knowledge
 

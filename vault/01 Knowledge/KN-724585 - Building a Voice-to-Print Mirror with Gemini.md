@@ -5,8 +5,8 @@ source_type: youtube
 raw_id: RAW-724585
 storage: web
 raw_url: "https://www.youtube.com/watch?v=8Xv5BLnXzgI"
-importance: 7
-confidence: 0.9
+importance: 8
+confidence: 0.95
 topics:
   - Ambient Computing
   - Gemini API
@@ -33,27 +33,7 @@ Creating an ambient smart mirror that integrates voice recognition, Gemini LLM p
 
 ## Atomic Knowledge
 
-### Smart mirrors can be extended with physical output devices like thermal printers to create tangible user interfaces
-
-Smart mirrors can be extended with physical output devices like thermal printers to create tangible user interfaces.
-
-**Type:** `CONCEPT` | **Confidence:** 90%
-
-### The Gemini API can parse unstructured voice transcripts into structured formats suitable for receipt-style printing
-
-The Gemini API can parse unstructured voice transcripts into structured formats suitable for receipt-style printing.
-
-**Type:** `FACT` | **Confidence:** 95%
-
-### Voice-to-print workflows enable hands-free generation of physical notes, lists, or reminders in a smart home environment
-
-Voice-to-print workflows enable hands-free generation of physical notes, lists, or reminders in a smart home environment.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-## My Thoughts
-
-The user is interested in practical, creative hardware integrations using the Gemini API, specifically bridging digital AI with physical outputs and ambient computing.
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -65,11 +45,6 @@ The user is interested in practical, creative hardware integrations using the Ge
 - [ ] Explore the Gemini API documentation for audio/voice input processing.
 - [ ] Look up thermal printer libraries (e.g., ESC/POS) compatible with Raspberry Pi or microcontrollers.
 - [ ] Design a basic voice-to-text-to-printer pipeline using Python and Gemini.
-
-## Product & SaaS Opportunities
-
-- 💡 A modular 'AI Receipt Printer' kit for smart homes that prints daily agendas, shopping lists, or motivational quotes via voice.
-- 💡 An open-source library that maps LLM outputs directly to thermal printer formatting (ESC/POS commands).
 
 ## Related Knowledge
 

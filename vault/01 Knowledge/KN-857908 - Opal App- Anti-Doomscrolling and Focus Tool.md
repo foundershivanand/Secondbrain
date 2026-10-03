@@ -5,7 +5,7 @@ source_type: screenshot
 raw_id: RAW-857908
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMsasEMbP7R25PYpnv7iW1AXfKAyk0AAvwiAAJQFghWXUzl_f63r1Y9BA"
-importance: 7
+importance: 8
 confidence: 0.95
 topics:
   - Digital Wellness
@@ -32,23 +32,7 @@ Opal is a digital wellness app designed to proactively block distracting apps, s
 
 ## Atomic Knowledge
 
-### Opal proactively schedules distracting apps to disappear or lock to prevent impulsive access
-
-Opal proactively schedules distracting apps to disappear or lock to prevent impulsive access.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Active friction, such as forced cooldown timers and disappearing apps, is more effective at breaking compulsive habits than passive tracking
-
-Active friction, such as forced cooldown timers and disappearing apps, is more effective at breaking compulsive habits than passive tracking.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### Opal won an Apple Design Award for Social Impact
-
-Opal won an Apple Design Award for Social Impact.
-
-**Type:** `FACT` | **Confidence:** 95%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -58,10 +42,6 @@ Opal won an Apple Design Award for Social Impact.
 ## Actions
 
 - [ ] Test Opal or similar active-intervention blocking tools to reduce compulsive phone checking.
-
-## Product & SaaS Opportunities
-
-- 💡 A browser extension or mobile utility that introduces micro-challenges (e.g., breathing exercises, typing a mindful quote) before unlocking work-distracting websites.
 
 ## Related Knowledge
 

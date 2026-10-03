@@ -5,8 +5,8 @@ source_type: screenshot
 raw_id: RAW-791852
 storage: telegram
 raw_url: "telegram://file/BQACAgUAAxkBAAMaasEHTsyfl1gksJKx6y3WmIy4hWUAAu4iAAJQFghW-CWQ2mZfVWI9BA"
-importance: 7
-confidence: 0.9
+importance: 8
+confidence: 0.95
 topics:
   - Micro-learning
   - UX Design
@@ -31,23 +31,7 @@ Leveraging mobile lock screen widgets and custom wallpapers to facilitate passiv
 
 ## Atomic Knowledge
 
-### Passive learning via lock screen widgets reduces the cognitive friction of vocabulary acquisition
-
-Passive learning via lock screen widgets reduces the cognitive friction of vocabulary acquisition.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
-
-### Seraphic means blissfully serene or angelic in appearance
-
-Seraphic means blissfully serene or angelic in appearance.
-
-**Type:** `FACT` | **Confidence:** 100%
-
-### Integrating educational content into highly-frequented mobile UI elements leverages micro-learning habits
-
-Integrating educational content into highly-frequented mobile UI elements leverages micro-learning habits.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -58,11 +42,6 @@ Integrating educational content into highly-frequented mobile UI elements levera
 
 - [ ] Explore lock screen widget capabilities on iOS/Android for passive information consumption.
 - [ ] Analyze the user retention mechanics of ambient learning apps.
-
-## Product & SaaS Opportunities
-
-- 💡 A lock screen widget app for learning programming syntax, design patterns, or API shortcuts.
-- 💡 An ambient flashcard widget that cycles through custom user-defined facts or language vocabulary on the lock screen.
 
 ## Related Knowledge
 

@@ -2,11 +2,11 @@
 id: KN-809801
 type: knowledge
 source_type: screenshot
-raw_id: RAW-TERABOX-895413275809801
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-120031.Instagram.png"
-file_size: 683112
-priority: P1
+raw_id: RAW-SRC-895413275809801
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Content Curation
   - Digital Archiving
@@ -32,17 +32,7 @@ A screenshot captured from Instagram and intentionally saved into an 'Ideas' fol
 
 ## Atomic Knowledge
 
-### Content saved into an 'Ideas' folder typically signifies the user's intent to curate inspiration, knowledge, or actionable concepts
-
-Content saved into an 'Ideas' folder typically signifies the user's intent to curate inspiration, knowledge, or actionable concepts.
-
-**Type:** `FACT` | **Confidence:** 90%
-
-### Social media platforms like Instagram serve as sources for diverse content, including visual inspiration, informational graphics, and textual insights
-
-Social media platforms like Instagram serve as sources for diverse content, including visual inspiration, informational graphics, and textual insights.
-
-**Type:** `FACT` | **Confidence:** 85%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -54,7 +44,7 @@ Social media platforms like Instagram serve as sources for diverse content, incl
 - [ ] Review the actual content of the screenshot to extract specific ideas, visuals, or text that prompted its saving.
 - [ ] Categorize the specific content of the Instagram post once known (e.g., design inspiration, quote, tutorial).
 
-## Related Topics
+## Related Knowledge
 
 - [[Content Curation]]
 - [[Digital Archiving]]
@@ -62,14 +52,14 @@ Social media platforms like Instagram serve as sources for diverse content, incl
 - [[Social Media]]
 - [[Knowledge Management]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Screenshot_20260805-120031.Instagram.png`
-- **Original Path:** `/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-120031.Instagram.png`
-- **File Size:** 0.65 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-120031.Instagram.png)
+This file was saved because the user identified specific content on Instagram as an 'idea' or inspiration, warranting its capture and categorization for future reference or application.
 
-### Alternate / Duplicate Pointers in TeraBox
-- [Screenshot_20260805-120031.Instagram.png](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FDownload%2FTeraBox%2FDownload%2FFrom%EF%BC%9Amoto%20g64%205G%2FDCIM%2FPictures%2FIdeas%2FScreenshot_20260805-120031.Instagram.png) (`/From：moto g64 5G/DCIM/Download/TeraBox/Download/From：moto g64 5G/DCIM/Pictures/Ideas/Screenshot_20260805-120031.Instagram.png`)
+## What Changed
+
+This reinforces the understanding that valuable knowledge and inspiration can be found and curated from ephemeral social media content, and that user-defined organizational structures are key indicators of content intent.
+
+## Original
+
+No external URL

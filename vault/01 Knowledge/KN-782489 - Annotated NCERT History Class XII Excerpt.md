@@ -2,11 +2,11 @@
 id: KN-782489
 type: knowledge
 source_type: pdf
-raw_id: RAW-TERABOX-37660209782489
-storage: terabox
-raw_url: "https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2FAnnotated%20NCERT%20History%20Class%20XII_excerpt.pdf"
-file_size: 4755245
-priority: P1
+raw_id: RAW-SRC-37660209782489
+storage: web
+raw_url: ""
+importance: 8
+confidence: 0.95
 topics:
   - Indian History
   - NCERT
@@ -33,29 +33,7 @@ This document is an excerpt from an annotated history textbook published by NCER
 
 ## Atomic Knowledge
 
-### NCERT textbooks are foundational educational resources for K-12 education in India, particularly for history
-
-NCERT textbooks are foundational educational resources for K-12 education in India, particularly for history.
-
-**Type:** `FACT` | **Confidence:** 98%
-
-### Annotated texts provide enhanced learning by adding context, explanations, and critical insights to the original content
-
-Annotated texts provide enhanced learning by adding context, explanations, and critical insights to the original content.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Class XII history curriculum in India typically covers significant periods of ancient, medieval, and modern Indian history
-
-Class XII history curriculum in India typically covers significant periods of ancient, medieval, and modern Indian history.
-
-**Type:** `FACT` | **Confidence:** 90%
-
-### Excerpts from educational materials are often saved for focused study on particular chapters or topics
-
-Excerpts from educational materials are often saved for focused study on particular chapters or topics.
-
-**Type:** `INSIGHT` | **Confidence:** 90%
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -69,7 +47,7 @@ Excerpts from educational materials are often saved for focused study on particu
 - [ ] Integrate key historical facts and interpretations from this document into broader knowledge of Indian history.
 - [ ] Cross-reference annotations with other historical sources for a multi-perspective understanding.
 
-## Related Topics
+## Related Knowledge
 
 - [[Indian History]]
 - [[NCERT]]
@@ -78,11 +56,14 @@ Excerpts from educational materials are often saved for focused study on particu
 - [[Historical Studies]]
 - [[Curriculum]]
 
----
+## Why I Saved This
 
-## Provenance & Raw Media Pointer
-- **Storage:** TeraBox Cloud
-- **File Name:** `Annotated NCERT History Class XII_excerpt.pdf`
-- **Original Path:** `/From：moto g64 5G/Import/From Google Drive/Documents/Annotated NCERT History Class XII_excerpt.pdf`
-- **File Size:** 4.53 MB
-- **Direct Link:** [Open in TeraBox](https://dm.1024terabox.com/main?path=%2FFrom%EF%BC%9Amoto%20g64%205G%2FImport%2FFrom%20Google%20Drive%2FDocuments%2FAnnotated%20NCERT%20History%20Class%20XII_excerpt.pdf)
+This file was saved as a valuable educational resource for understanding specific aspects of Indian history, likely for academic study, reference, or to deepen knowledge on topics covered in the Class XII NCERT curriculum. The 'annotated' aspect suggests it offers enhanced learning value.
+
+## What Changed
+
+This document expands my mental model by providing access to structured, curriculum-aligned historical knowledge, potentially with expert annotations that offer deeper insights or alternative perspectives than a plain textbook. It reinforces the importance of primary educational sources for foundational knowledge.
+
+## Original
+
+No external URL

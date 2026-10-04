@@ -133,10 +133,15 @@ CREATE INDEX IF NOT EXISTS idx_sources_status ON sources(status);
 CREATE INDEX IF NOT EXISTS idx_sources_raw_id ON sources(raw_id);
 CREATE INDEX IF NOT EXISTS idx_sources_priority ON sources(priority);
 CREATE INDEX IF NOT EXISTS idx_sources_content_hash ON sources(content_hash);
+CREATE INDEX IF NOT EXISTS idx_sources_original_url ON sources(original_url);
+CREATE INDEX IF NOT EXISTS idx_sources_source_type_captured_at ON sources(source_type, captured_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sources_channel_id ON sources(channel_id);
 CREATE INDEX IF NOT EXISTS idx_knowledge_source_id ON knowledge(source_id);
 CREATE INDEX IF NOT EXISTS idx_knowledge_created_at ON knowledge(created_at);
+CREATE INDEX IF NOT EXISTS idx_knowledge_type_created_at ON knowledge(knowledge_type, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_atomic_knowledge_kid ON atomic_knowledge(knowledge_id);
 CREATE INDEX IF NOT EXISTS idx_relationships_from ON relationships(from_id);
 CREATE INDEX IF NOT EXISTS idx_relationships_to ON relationships(to_id);
 CREATE INDEX IF NOT EXISTS idx_memories_status ON memories(status);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON processing_jobs(status);
+

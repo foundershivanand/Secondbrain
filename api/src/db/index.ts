@@ -98,6 +98,27 @@ export class Database {
     return res.results || [];
   }
 
+  async updateSourceCapturedAt(id: string, capturedAt: string, channelId?: string): Promise<void> {
+    if (channelId) {
+      await this.db
+        .prepare(`UPDATE sources SET captured_at = ?, channel_id = ? WHERE id = ?`)
+        .bind(capturedAt, channelId, id)
+        .run();
+    } else {
+      await this.db
+        .prepare(`UPDATE sources SET captured_at = ? WHERE id = ?`)
+        .bind(capturedAt, id)
+        .run();
+    }
+  }
+
+  async updateKnowledgeTimestamp(sourceId: string, timestamp: string): Promise<void> {
+    await this.db
+      .prepare(`UPDATE knowledge SET updated_at = ?, created_at = ? WHERE source_id = ?`)
+      .bind(timestamp, timestamp, sourceId)
+      .run();
+  }
+
   async getRecentSourcesByType(sourceTypes: string[], limit: number = 5): Promise<SourceRecord[]> {
     if (sourceTypes.length === 0) return [];
 
@@ -105,12 +126,12 @@ export class Database {
       const res = await this.db
         .prepare(
           `SELECT * FROM sources 
-           WHERE source_type = 'youtube'
+           WHERE (source_type = 'youtube'
               OR original_url LIKE '%youtube.com%'
               OR original_url LIKE '%youtu.be%'
               OR raw_url LIKE '%youtube.com%'
-              OR raw_url LIKE '%youtu.be%'
-              OR title LIKE '%.YouTube%'
+              OR raw_url LIKE '%youtu.be%')
+             AND (title NOT LIKE 'Screenshot_%.png' AND title NOT LIKE 'Duplicate of: Screenshot_%')
            ORDER BY captured_at DESC LIMIT ?`
         )
         .bind(limit)
@@ -139,7 +160,7 @@ export class Database {
             OR k.my_thought LIKE '%Category: youtube%'
             OR k.my_thought LIKE '%[youtube]%')
            AND (k.title NOT LIKE 'Screenshot_%.png' AND k.title NOT LIKE 'Duplicate of: Screenshot_%')
-         ORDER BY k.created_at DESC LIMIT ?`
+         ORDER BY COALESCE(s.captured_at, k.created_at) DESC LIMIT ?`
       )
       .bind(limit)
       .all<KnowledgeRecord>();

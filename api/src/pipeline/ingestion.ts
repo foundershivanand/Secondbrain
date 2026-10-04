@@ -31,6 +31,7 @@ export interface IngestionInput {
   userNote?: string;   // Explicit user thought
   importance?: number;
   priority?: IngestionPriority; // 'P0', 'P1', 'P2', 'P3', 'P4'
+  capturedAt?: string;
 }
 
 export interface IngestionResult {
@@ -47,7 +48,7 @@ export async function processIngestion(
   input: IngestionInput,
   jobId?: string
 ): Promise<IngestionResult> {
-  const now = new Date().toISOString();
+  const now = input.capturedAt || new Date().toISOString();
   const rawIdNum = Math.floor(100000 + Math.random() * 900000);
   const sourceId = `SRC-${rawIdNum}`;
   const knowledgeId = `KN-${rawIdNum}`;

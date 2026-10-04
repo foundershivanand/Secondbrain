@@ -60,23 +60,36 @@ function parseYouTubeRss(xml: string): YouTubeVideoItem[] {
  * Get active OAuth Access Token using stored or configured credentials
  */
 export async function getOAuthAccessToken(env: Env, db: Database): Promise<string | null> {
-  const clientId = env.YOUTUBE_CLIENT_ID || (await db.getKV('youtube_client_id'));
-  const clientSecret = env.YOUTUBE_CLIENT_SECRET || (await db.getKV('youtube_client_secret'));
+  let clientId: string | null | undefined = env.YOUTUBE_CLIENT_ID;
+  if (!clientId) {
+    try {
+      clientId = await db.getKV('youtube_client_id');
+    } catch {}
+  }
+
+  let clientSecret: string | null | undefined = env.YOUTUBE_CLIENT_SECRET;
+  if (!clientSecret) {
+    try {
+      clientSecret = await db.getKV('youtube_client_secret');
+    } catch {}
+  }
 
   if (!clientId || !clientSecret) {
     return null;
   }
 
   // Refresh token from Env or D1 KV
-  let refreshToken = env.YOUTUBE_REFRESH_TOKEN;
+  let refreshToken: string | null | undefined = env.YOUTUBE_REFRESH_TOKEN;
   if (!refreshToken) {
-    const stored = await db.getKV('youtube_oauth_token');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        refreshToken = parsed.refresh_token;
-      } catch {}
-    }
+    try {
+      const stored = await db.getKV('youtube_oauth_token');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          refreshToken = parsed.refresh_token;
+        } catch {}
+      }
+    } catch {}
   }
 
   if (!refreshToken) {
@@ -368,7 +381,13 @@ export async function syncYouTubeVideos(
     try {
       const target = options?.target || 'all';
 
-      // Always fetch & update profile playlists when OAuth is active
+      // 1a. Always fetch Liked Videos FIRST so user's liked videos have highest chronological recency
+      if (target === 'liked' || target === 'all') {
+        const likedVideos = await fetchOAuthLikedVideos(accessToken, maxVideos);
+        videos.push(...likedVideos);
+      }
+
+      // 1b. Always fetch & update profile playlists when OAuth is active
       if (target === 'playlists' || target === 'all') {
         const playlists = await fetchUserPlaylists(accessToken, db);
         playlistsSynced = playlists.length;
@@ -383,11 +402,6 @@ export async function syncYouTubeVideos(
             });
           }
         }
-      }
-
-      if (target === 'liked' || target === 'all') {
-        const likedVideos = await fetchOAuthLikedVideos(accessToken, maxVideos);
-        videos.push(...likedVideos);
       }
 
       mode = target === 'all' ? 'oauth_all' : 'oauth_liked';
@@ -417,7 +431,7 @@ export async function syncYouTubeVideos(
     };
   }
 
-  // Deduplicate against each other in the batch
+  // Deduplicate against each other in the batch (preserves liked videos prioritized first)
   const uniqueVideos = new Map<string, YouTubeVideoItem>();
   for (const v of videos) {
     if (v.videoId && !uniqueVideos.has(v.videoId)) {
@@ -434,9 +448,21 @@ export async function syncYouTubeVideos(
       continue;
     }
 
+    const isLikedVideo = video.playlistTitle === 'Liked Videos';
+
     // Check if already captured in D1
     const existing = await db.getSourceByUrl(video.url);
     if (existing) {
+      // If this video has an actual like/publish timestamp, update captured_at if newer or if liked
+      if (video.publishedAt) {
+        const existingTime = new Date(existing.captured_at || 0).getTime();
+        const newTime = new Date(video.publishedAt).getTime();
+        if (newTime > existingTime || isLikedVideo) {
+          const effectiveTime = video.publishedAt;
+          await db.updateSourceCapturedAt(existing.id, effectiveTime, isLikedVideo ? 'liked_videos' : undefined);
+          await db.updateKnowledgeTimestamp(existing.id, effectiveTime);
+        }
+      }
       skippedCount++;
       continue;
     }
@@ -452,6 +478,8 @@ export async function syncYouTubeVideos(
         title: video.title,
         userNote: provenanceNote,
         importance: 7,
+        channelId: isLikedVideo ? 'liked_videos' : undefined,
+        capturedAt: video.publishedAt || new Date().toISOString(),
       });
 
       if (!result.isDuplicate) {
@@ -505,18 +533,31 @@ export async function handleYouTubeRoutes(
 
   // 1. GET /api/youtube/status - Check connection & sync state
   if (request.method === 'GET' && action === 'status') {
-    const clientId = env.YOUTUBE_CLIENT_ID || (await db.getKV('youtube_client_id'));
-    const clientSecret = env.YOUTUBE_CLIENT_SECRET || (await db.getKV('youtube_client_secret'));
+    let clientId: string | null | undefined = env.YOUTUBE_CLIENT_ID;
+    if (!clientId) {
+      try { clientId = await db.getKV('youtube_client_id'); } catch {}
+    }
+    let clientSecret: string | null | undefined = env.YOUTUBE_CLIENT_SECRET;
+    if (!clientSecret) {
+      try { clientSecret = await db.getKV('youtube_client_secret'); } catch {}
+    }
     const hasClientId = Boolean(clientId && clientSecret);
     const envRefreshToken = Boolean(env.YOUTUBE_REFRESH_TOKEN);
-    const dbTokenRaw = await db.getKV('youtube_oauth_token');
+    let dbTokenRaw: string | null = null;
+    try { dbTokenRaw = await db.getKV('youtube_oauth_token'); } catch {}
     const hasDbToken = Boolean(dbTokenRaw);
-    const playlistId = env.YOUTUBE_PLAYLIST_ID || (await db.getKV('youtube_playlist_id')) || null;
-    const syncStateRaw = await db.getKV('youtube_sync_state');
+    let playlistId = env.YOUTUBE_PLAYLIST_ID || null;
+    if (!playlistId) {
+      try { playlistId = (await db.getKV('youtube_playlist_id')) || null; } catch {}
+    }
+    let syncStateRaw: string | null = null;
+    try { syncStateRaw = await db.getKV('youtube_sync_state'); } catch {}
 
     // Count youtube sources and playlists in D1
-    const youtubeSources = await db.getYouTubeSources(100);
-    const playlists = await db.listYouTubePlaylists();
+    let youtubeSources: any[] = [];
+    try { youtubeSources = await db.getYouTubeSources(100); } catch {}
+    let playlists: any[] = [];
+    try { playlists = await db.listYouTubePlaylists(); } catch {}
 
     return jsonResponse({
       connected: (hasClientId && (envRefreshToken || hasDbToken)) || Boolean(playlistId),
@@ -534,7 +575,8 @@ export async function handleYouTubeRoutes(
 
   // 2. GET /api/youtube/playlists - Return all playlists on user's YouTube profile
   if (request.method === 'GET' && action === 'playlists') {
-    const playlists = await db.listYouTubePlaylists();
+    let playlists: any[] = [];
+    try { playlists = await db.listYouTubePlaylists(); } catch {}
     return jsonResponse({
       success: true,
       count: playlists.length,

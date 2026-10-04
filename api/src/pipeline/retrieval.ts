@@ -1,8 +1,9 @@
 import { Env } from '../config';
 import { Database } from '../db';
-import { ChatResponse, CitationSource, KnowledgeRecord, MemoryRecord } from '../types';
+import { ChatResponse, CitationSource, KnowledgeRecord, MemoryRecord, SourceRecord } from '../types';
 import { callGemini, cleanAndParseJson } from '../ai/gemini';
 import { CHAT_SYNTHESIS_PROMPT } from '../ai/prompts';
+import { getOAuthAccessToken, fetchOAuthLikedVideos } from '../routes/youtube-sync';
 
 export interface RetrievalResult {
   knowledgeNotes: KnowledgeRecord[];
@@ -11,7 +12,7 @@ export interface RetrievalResult {
   sources: CitationSource[];
   recentActivity?: {
     type: 'video' | 'general';
-    items: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string }>;
+    items: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string; isLiked?: boolean }>;
     isYouTubeQuery?: boolean;
     hasNoVideos?: boolean;
   };
@@ -31,10 +32,12 @@ export interface RetrievalResult {
 
 export async function retrieveRelevantContext(
   db: Database,
-  userQuery: string
+  userQuery: string,
+  env?: Env
 ): Promise<RetrievalResult> {
   const lowerQuery = userQuery.toLowerCase();
   const isPlaylistQuery = /\b(playlist|playlists)\b/i.test(lowerQuery);
+  const isLikedQuery = /\b(liked|likes|favorite|favorites)\b/i.test(lowerQuery);
   const isYouTubeQuery = /\b(youtube|yt|liked|likes)\b/i.test(lowerQuery) || isPlaylistQuery;
   const isVideoQuery = isYouTubeQuery || /\b(video|watch|watched|watching|seen|viewed)\b/i.test(lowerQuery);
   const isRecencyQuery = /\b(last|latest|recent|recently|newest|yesterday|today|just now|past|previous)\b/i.test(lowerQuery);
@@ -45,37 +48,118 @@ export async function retrieveRelevantContext(
   let playlists: any[] = [];
 
   if (isPlaylistQuery || isYouTubeQuery) {
-    playlists = await db.listYouTubePlaylists();
+    try {
+      playlists = await db.listYouTubePlaylists();
+    } catch (e) {
+      console.warn('D1 listYouTubePlaylists skipped:', e);
+    }
   }
 
   // 0. Recency & Video Handling: If asking about videos or playlists or recent notes
   if (isVideoQuery) {
     const sourceTypes = isYouTubeQuery ? ['youtube'] : ['youtube', 'video'];
     const limit = /\b(all|list|what videos|which videos|history|liked)\b/i.test(lowerQuery) ? 50 : 15;
-    const recentVideos = await db.getRecentSourcesByType(sourceTypes, limit);
-    const videoItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string }> = [];
+    let recentVideos: SourceRecord[] = [];
+    try {
+      recentVideos = await db.getRecentSourcesByType(sourceTypes, limit);
+    } catch (e) {
+      console.warn('D1 getRecentSourcesByType skipped:', e);
+    }
+    const videoItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string; isLiked?: boolean }> = [];
+
+    // 0a. If Google OAuth is connected and asking about YouTube / liked videos, fetch live liked videos directly from Google
+    if (env && (isLikedQuery || isYouTubeQuery)) {
+      try {
+        const accessToken = await getOAuthAccessToken(env, db);
+        if (accessToken) {
+          const liveLiked = await fetchOAuthLikedVideos(accessToken, 5);
+          for (const lv of liveLiked) {
+            let k: KnowledgeRecord | null = null;
+            try {
+              const src = await db.getSourceByUrl(lv.url);
+              if (src) {
+                k = await db.getKnowledgeBySourceId(src.id);
+                // Keep captured_at updated with the exact like timestamp
+                if (lv.publishedAt && src.captured_at !== lv.publishedAt) {
+                  await db.updateSourceCapturedAt(src.id, lv.publishedAt, 'liked_videos');
+                  await db.updateKnowledgeTimestamp(src.id, lv.publishedAt);
+                }
+              }
+            } catch {}
+
+            if (k) {
+              relevantKnowledgeMap.set(k.id, k);
+            } else {
+              const virtualNote: KnowledgeRecord = {
+                id: `KN-YT-${lv.videoId}`,
+                source_id: `SRC-YT-${lv.videoId}`,
+                title: lv.title,
+                knowledge_type: 'youtube',
+                core_idea: `User liked YouTube video: "${lv.title}" from channel ${lv.channel || 'YouTube'}.`,
+                key_information: '[]',
+                insights: '[]',
+                my_thought: `Liked Video (Live Google Sync)`,
+                actionable_items: '[]',
+                topics: JSON.stringify(['YouTube', 'Liked Video']),
+                entities: '[]',
+                tags: JSON.stringify(['youtube', 'liked-video']),
+                confidence: 1.0,
+                importance: 8,
+                why_saved: 'User clicked Like on YouTube',
+                what_changed: 'Real-time liked video from YouTube API',
+                markdown_path: `01 Knowledge/YouTube/${lv.videoId}.md`,
+                created_at: lv.publishedAt || new Date().toISOString(),
+                updated_at: lv.publishedAt || new Date().toISOString(),
+              };
+              relevantKnowledgeMap.set(virtualNote.id, virtualNote);
+            }
+
+            videoItems.push({
+              title: k?.title || lv.title,
+              id: k?.id || `KN-YT-${lv.videoId}`,
+              url: lv.url,
+              captured_at: lv.publishedAt || new Date().toISOString(),
+              core_idea: k?.core_idea || `User liked YouTube video: "${lv.title}" from channel ${lv.channel || 'YouTube'}.`,
+              source_type: 'youtube',
+              isLiked: true,
+            });
+          }
+        }
+      } catch (oauthErr) {
+        console.warn('Real-time YouTube liked videos fetch skipped:', oauthErr);
+      }
+    }
 
     // Query knowledge notes associated with YouTube as well
-    const ytKnowledge = await db.getYouTubeKnowledge(limit);
-    for (const k of ytKnowledge) {
-      if (!relevantKnowledgeMap.has(k.id)) {
-        relevantKnowledgeMap.set(k.id, k);
-      }
-      let srcUrl: string | undefined = undefined;
-      if (k.source_id) {
-        const src = await db.getSourceById(k.source_id);
-        if (src) {
-          srcUrl = src.original_url || src.raw_url || undefined;
+    try {
+      const ytKnowledge = await db.getYouTubeKnowledge(limit);
+      for (const k of ytKnowledge) {
+        if (!relevantKnowledgeMap.has(k.id)) {
+          relevantKnowledgeMap.set(k.id, k);
         }
+        let srcUrl: string | undefined = undefined;
+        let isLikedFromSrc = false;
+        if (k.source_id) {
+          try {
+            const src = await db.getSourceById(k.source_id);
+            if (src) {
+              srcUrl = src.original_url || src.raw_url || undefined;
+              isLikedFromSrc = src.channel_id === 'liked_videos';
+            }
+          } catch {}
+        }
+        videoItems.push({
+          title: k.title,
+          id: k.id,
+          url: srcUrl,
+          captured_at: k.created_at,
+          core_idea: k.core_idea,
+          source_type: k.knowledge_type || 'youtube',
+          isLiked: Boolean(isLikedFromSrc || (k.my_thought && k.my_thought.includes('Liked Video'))),
+        });
       }
-      videoItems.push({
-        title: k.title,
-        id: k.id,
-        url: srcUrl,
-        captured_at: k.created_at,
-        core_idea: k.core_idea,
-        source_type: k.knowledge_type || 'youtube',
-      });
+    } catch (e) {
+      console.warn('D1 getYouTubeKnowledge skipped:', e);
     }
 
     for (const src of recentVideos) {
@@ -83,7 +167,11 @@ export async function retrieveRelevantContext(
       if (src.title && (src.title.includes('Screenshot_') || src.title.includes('.YouTube.png'))) {
         continue;
       }
-      const k = await db.getKnowledgeBySourceId(src.id);
+      const isLiked = src.channel_id === 'liked_videos';
+      let k: KnowledgeRecord | null = null;
+      try {
+        k = await db.getKnowledgeBySourceId(src.id);
+      } catch {}
       if (k) {
         relevantKnowledgeMap.set(k.id, k);
         const existingIdx = videoItems.findIndex((v) => v.id === k.id || v.title === k.title);
@@ -94,6 +182,7 @@ export async function retrieveRelevantContext(
           captured_at: src.captured_at || k.created_at,
           core_idea: k.core_idea,
           source_type: src.source_type,
+          isLiked: Boolean(isLiked || (k.my_thought && k.my_thought.includes('Liked Video'))),
         };
         if (existingIdx >= 0) {
           videoItems[existingIdx] = itemObj;
@@ -109,6 +198,7 @@ export async function retrieveRelevantContext(
             captured_at: src.captured_at,
             core_idea: undefined,
             source_type: src.source_type,
+            isLiked,
           });
         }
       }
@@ -117,6 +207,15 @@ export async function retrieveRelevantContext(
     // Sort by recency (most recent first)
     videoItems.sort((a, b) => new Date(b.captured_at || 0).getTime() - new Date(a.captured_at || 0).getTime());
 
+    // If user specifically asked about liked videos, bring verified liked videos to the top
+    if (isLikedQuery) {
+      videoItems.sort((a, b) => {
+        if (a.isLiked && !b.isLiked) return -1;
+        if (!a.isLiked && b.isLiked) return 1;
+        return new Date(b.captured_at || 0).getTime() - new Date(a.captured_at || 0).getTime();
+      });
+    }
+
     recentActivity = {
       type: 'video',
       items: videoItems,
@@ -124,24 +223,28 @@ export async function retrieveRelevantContext(
       hasNoVideos: videoItems.length === 0,
     };
   } else if (isRecencyQuery) {
-    const recentNotes = await db.getRecentKnowledge(5);
-    const noteItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string }> = [];
-    for (const k of recentNotes) {
-      if (!relevantKnowledgeMap.has(k.id)) {
-        relevantKnowledgeMap.set(k.id, k);
+    try {
+      const recentNotes = await db.getRecentKnowledge(5);
+      const noteItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string }> = [];
+      for (const k of recentNotes) {
+        if (!relevantKnowledgeMap.has(k.id)) {
+          relevantKnowledgeMap.set(k.id, k);
+        }
+        noteItems.push({
+          title: k.title,
+          id: k.id,
+          captured_at: k.created_at,
+          core_idea: k.core_idea,
+        });
       }
-      noteItems.push({
-        title: k.title,
-        id: k.id,
-        captured_at: k.created_at,
-        core_idea: k.core_idea,
-      });
-    }
-    if (noteItems.length > 0) {
-      recentActivity = {
-        type: 'general',
-        items: noteItems,
-      };
+      if (noteItems.length > 0) {
+        recentActivity = {
+          type: 'general',
+          items: noteItems,
+        };
+      }
+    } catch (e) {
+      console.warn('D1 getRecentKnowledge skipped:', e);
     }
   }
 
@@ -152,38 +255,53 @@ export async function retrieveRelevantContext(
     .filter((w) => w.length > 2 && !['what', 'how', 'when', 'where', 'which', 'about', 'know', 'tell', 'that'].includes(w));
 
   // 1. Search knowledge notes matching keywords or concise overall query
-  if (userQuery.trim().length > 0 && userQuery.trim().length <= 30 && !userQuery.includes(' ')) {
-    const directMatches = await db.searchKnowledge(userQuery.trim(), 10);
-    for (const k of directMatches) {
-      relevantKnowledgeMap.set(k.id, k);
+  try {
+    if (userQuery.trim().length > 0 && userQuery.trim().length <= 30 && !userQuery.includes(' ')) {
+      const directMatches = await db.searchKnowledge(userQuery.trim(), 10);
+      for (const k of directMatches) {
+        relevantKnowledgeMap.set(k.id, k);
+      }
     }
-  }
 
-  for (const word of keywords.slice(0, 5)) {
-    if (word.length > 2) {
-      const wordMatches = await db.searchKnowledge(word, 5);
-      for (const k of wordMatches) {
-        if (!relevantKnowledgeMap.has(k.id)) {
-          relevantKnowledgeMap.set(k.id, k);
+    for (const word of keywords.slice(0, 5)) {
+      if (word.length > 2) {
+        const wordMatches = await db.searchKnowledge(word, 5);
+        for (const k of wordMatches) {
+          if (!relevantKnowledgeMap.has(k.id)) {
+            relevantKnowledgeMap.set(k.id, k);
+          }
         }
       }
     }
+  } catch (e) {
+    console.warn('D1 searchKnowledge skipped:', e);
   }
 
   // 2. Search atomic knowledge statements (M2 level)
-  for (const word of keywords.slice(0, 4)) {
-    const atomicMatches = await db.searchAtomicKnowledge(word, 8);
-    for (const a of atomicMatches) {
-      atomicStatementsSet.add(`• [${a.concept_type}] ${a.statement} (confidence: ${Math.round(a.confidence * 100)}%)`);
-      if (a.knowledge_id && !relevantKnowledgeMap.has(a.knowledge_id)) {
-        const parentK = await db.getKnowledgeById(a.knowledge_id);
-        if (parentK) relevantKnowledgeMap.set(parentK.id, parentK);
+  try {
+    for (const word of keywords.slice(0, 4)) {
+      const atomicMatches = await db.searchAtomicKnowledge(word, 8);
+      for (const a of atomicMatches) {
+        atomicStatementsSet.add(`• [${a.concept_type}] ${a.statement} (confidence: ${Math.round(a.confidence * 100)}%)`);
+        if (a.knowledge_id && !relevantKnowledgeMap.has(a.knowledge_id)) {
+          try {
+            const parentK = await db.getKnowledgeById(a.knowledge_id);
+            if (parentK) relevantKnowledgeMap.set(parentK.id, parentK);
+          } catch {}
+        }
       }
     }
+  } catch (e) {
+    console.warn('D1 searchAtomicKnowledge skipped:', e);
   }
 
   // 3. Fetch durable long-term personal memories (M4 level)
-  const durableMemories = await db.getDurableMemories(20);
+  let durableMemories: MemoryRecord[] = [];
+  try {
+    durableMemories = await db.getDurableMemories(20);
+  } catch (e) {
+    console.warn('D1 getDurableMemories skipped:', e);
+  }
   const relevantMemories = durableMemories.filter((m) => {
     const content = m.content.toLowerCase();
     return keywords.some((k) => content.includes(k));
@@ -231,13 +349,15 @@ export async function retrieveRelevantContext(
     let rawId: string | null = null;
 
     if (k.source_id) {
-      const src = await db.getSourceById(k.source_id);
-      if (src) {
-        originalUrl = src.original_url;
-        rawStorage = src.raw_storage;
-        rawUrl = src.raw_url;
-        rawId = src.raw_id || null;
-      }
+      try {
+        const src = await db.getSourceById(k.source_id);
+        if (src) {
+          originalUrl = src.original_url;
+          rawStorage = src.raw_storage;
+          rawUrl = src.raw_url;
+          rawId = src.raw_id || null;
+        }
+      } catch {}
     }
 
     sources.push({
@@ -268,8 +388,13 @@ export async function answerBrainQuery(
   db: Database,
   userQuery: string
 ): Promise<ChatResponse> {
-  const context = await retrieveRelevantContext(db, userQuery);
-  const brainState = await db.getBrainState();
+  const context = await retrieveRelevantContext(db, userQuery, env);
+  let brainState: any = null;
+  try {
+    brainState = await db.getBrainState();
+  } catch (e) {
+    console.warn('D1 getBrainState skipped:', e);
+  }
 
   const hasPlaylists = Boolean(context.playlists && context.playlists.length > 0);
   const hasRecentVideos = Boolean(context.recentActivity && context.recentActivity.items.length > 0);
@@ -309,7 +434,7 @@ export async function answerBrainQuery(
       contextBlock += `Recent Learning: ${brainState.recent_learning.join('; ')}\n`;
     }
     if (brainState.current_interests?.length) {
-      contextBlock += `Interests: ${brainState.current_interests.map((i) => `${i.topic} (score: ${i.interest_score})`).join(', ')}\n`;
+      contextBlock += `Interests: ${brainState.current_interests.map((i: any) => `${i.topic} (score: ${i.interest_score})`).join(', ')}\n`;
     }
     contextBlock += `\n`;
   }
@@ -345,12 +470,12 @@ export async function answerBrainQuery(
       } else {
         contextBlock += `Order of most recently captured/watched/liked videos (MOST RECENT FIRST):\n`;
         context.recentActivity.items.forEach((item, idx) => {
-          contextBlock += `${idx + 1}. [${idx === 0 ? 'LATEST / LAST WATCHED' : `Earlier Video #${idx}`}] "${item.title}" (${item.source_type || 'video'})\n`;
+          contextBlock += `${idx + 1}. [${idx === 0 ? 'LATEST / LAST WATCHED OR LIKED' : `Earlier Video #${idx}`}] "${item.title}" (${item.source_type || 'video'})${item.isLiked ? ' [USER LIKED VIDEO]' : ''}\n`;
           if (item.url) contextBlock += `   Original URL: ${item.url}\n`;
-          if (item.captured_at) contextBlock += `   Captured / Watched At: ${item.captured_at}\n`;
+          if (item.captured_at) contextBlock += `   Captured / Watched / Liked At: ${item.captured_at}\n`;
           if (item.core_idea) contextBlock += `   Core Idea: ${item.core_idea}\n`;
         });
-        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what was the last video i liked", "explain that to me", "what videos did I watch", "what is my latest video", or any question about their YouTube videos:
+        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what was the last video i liked", "what is the latest video", "what was the last video I watched", "explain that to me", "what videos did I watch", or any question about their YouTube videos:
 1. NEVER ask the user to paste or provide a URL. You have full access to their synced YouTube videos and notes above.
 2. The exact latest/last video is: "${context.recentActivity.items[0]?.title}".
 3. Directly state this video's title and URL (${context.recentActivity.items[0]?.url || 'No URL'}).

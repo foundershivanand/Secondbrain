@@ -15,7 +15,7 @@ topics:
   - Habit Formation
   - Mobile Apps
 source_id: SRC-791852
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Passive Vocabulary Learning via Lock Screen Widgets

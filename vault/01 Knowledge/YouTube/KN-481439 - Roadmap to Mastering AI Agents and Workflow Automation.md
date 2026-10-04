@@ -35,7 +35,27 @@ A practical 11-step roadmap to gain a competitive edge in the AI landscape by co
 
 ## Atomic Knowledge
 
-No atomic knowledge blocks extracted.
+### Self-hosting n8n on Docker provides a cost-effective, private environment for orchestrating AI workflows
+
+Self-hosting n8n on Docker provides a cost-effective, private environment for orchestrating AI workflows.
+
+**Type:** `CONCEPT` | **Confidence:** 90%
+
+### Ollama enables running local LLMs, reducing dependency on external APIs for development and testing
+
+Ollama enables running local LLMs, reducing dependency on external APIs for development and testing.
+
+**Type:** `FACT` | **Confidence:** 95%
+
+### Replicating proven SaaS products using AI agents is a viable strategy for building lean, highly automated businesses
+
+Replicating proven SaaS products using AI agents is a viable strategy for building lean, highly automated businesses.
+
+**Type:** `CLAIM` | **Confidence:** 80%
+
+## My Thoughts
+
+[Category: youtube]
 
 ## Insights
 
@@ -47,6 +67,11 @@ No atomic knowledge blocks extracted.
 - [ ] Install Docker and self-host n8n.
 - [ ] Set up Ollama locally and pull a model like Llama 3 or Mistral.
 - [ ] Build a prototype AI agent inside n8n connecting a local LLM to an external API.
+
+## Product & SaaS Opportunities
+
+- 💡 A template marketplace or boilerplate for self-hosted n8n AI agents integrated with Ollama.
+- 💡 A micro-SaaS that packages common n8n workflows into one-click deployable Docker containers.
 
 ## Related Knowledge
 

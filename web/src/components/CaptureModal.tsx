@@ -381,11 +381,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           const item = photos[i];
           setLoadingStep(`Analyzing photo ${i + 1}/${photos.length}...`);
 
+          const isYt = category?.toLowerCase() === 'youtube' || (userNote && userNote.toLowerCase().includes('youtube'));
+          const noteCtx = category ? `[Category: ${category}] ${userNote || contentText || ''}`.trim() : (userNote || contentText || undefined);
+
           try {
             const res = await api.capture({
-              source_type: 'screenshot',
+              source_type: isYt ? 'youtube' : 'screenshot',
               title: contentTitle || undefined,
-              user_note: userNote || contentText || undefined,
+              user_note: noteCtx,
               importance,
               base64_data: item.base64,
               mime_type: item.mime,
@@ -425,6 +428,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
 
         const isYoutubeItem =
           activeType === 'youtube' ||
+          category?.toLowerCase() === 'youtube' ||
           (url && (url.includes('youtube.com') || url.includes('youtu.be')));
 
         const effectiveCategory = isYoutubeItem ? 'YouTube' : category;

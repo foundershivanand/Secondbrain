@@ -61,10 +61,17 @@ export async function retrieveRelevantContext(
       if (!relevantKnowledgeMap.has(k.id)) {
         relevantKnowledgeMap.set(k.id, k);
       }
+      let srcUrl: string | undefined = undefined;
+      if (k.source_id) {
+        const src = await db.getSourceById(k.source_id);
+        if (src) {
+          srcUrl = src.original_url || src.raw_url || undefined;
+        }
+      }
       videoItems.push({
         title: k.title,
         id: k.id,
-        url: undefined,
+        url: srcUrl,
         captured_at: k.created_at,
         core_idea: k.core_idea,
         source_type: k.knowledge_type || 'youtube',
@@ -72,6 +79,10 @@ export async function retrieveRelevantContext(
     }
 
     for (const src of recentVideos) {
+      // Exclude Android system screenshot files from being treated as video watch history
+      if (src.title && (src.title.includes('Screenshot_') || src.title.includes('.YouTube.png'))) {
+        continue;
+      }
       const k = await db.getKnowledgeBySourceId(src.id);
       if (k) {
         relevantKnowledgeMap.set(k.id, k);
@@ -80,7 +91,7 @@ export async function retrieveRelevantContext(
           title: k.title,
           id: k.id,
           url: src.original_url || src.raw_url || undefined,
-          captured_at: src.captured_at,
+          captured_at: src.captured_at || k.created_at,
           core_idea: k.core_idea,
           source_type: src.source_type,
         };
@@ -102,6 +113,9 @@ export async function retrieveRelevantContext(
         }
       }
     }
+
+    // Sort by recency (most recent first)
+    videoItems.sort((a, b) => new Date(b.captured_at || 0).getTime() - new Date(a.captured_at || 0).getTime());
 
     recentActivity = {
       type: 'video',
@@ -186,16 +200,18 @@ export async function retrieveRelevantContext(
     }
   }
 
-  // If this is a video/YouTube-specific query and we found video notes, prioritize them
+  // If this is a video/YouTube-specific query and we found video notes, isolate video notes to prevent irrelevant context
   if (isVideoQuery && knowledgeNotes.length > 0) {
-    for (const k of relevantKnowledgeMap.values()) {
-      const isYt =
+    const videoKnowledgeOnly = knowledgeNotes.filter(
+      (k) =>
         k.knowledge_type === 'youtube' ||
         (k.markdown_path && k.markdown_path.includes('YouTube')) ||
-        (k.title && k.title.includes('YouTube'));
-      if (isYt && !knowledgeNotes.some((n) => n.id === k.id)) {
-        knowledgeNotes.push(k);
-      }
+        (k.my_thought && k.my_thought.toLowerCase().includes('youtube')) ||
+        (recentActivity?.items && recentActivity.items.some((v) => v.id === k.id || v.title === k.title))
+    );
+    if (videoKnowledgeOnly.length > 0) {
+      knowledgeNotes.length = 0;
+      knowledgeNotes.push(...videoKnowledgeOnly);
     }
   } else {
     for (const k of relevantKnowledgeMap.values()) {

@@ -202,7 +202,26 @@ export function resolveCategoryName(item: {
   topics?: string[] | string;
   core_idea?: string;
   knowledge_type?: string;
+  source_type?: string;
+  my_thought?: string | null;
+  user_note?: string | null;
 }): string {
+  // 0. Explicit User Category Tag Check: e.g. [Category: youtube] or [Category: Artificial Intelligence & LLMs]
+  const noteContext = [item.my_thought || '', item.user_note || ''].join(' ');
+  const categoryTagMatch = noteContext.match(/\[Category:\s*([^\]]+)\]/i);
+  if (categoryTagMatch) {
+    const rawTag = categoryTagMatch[1].trim().toLowerCase();
+    const matchedCanonical = CANONICAL_CATEGORIES.find(
+      (c) => c.name.toLowerCase() === rawTag || c.id.toLowerCase() === rawTag
+    );
+    if (matchedCanonical) {
+      return matchedCanonical.name;
+    }
+    if (rawTag.includes('youtube')) {
+      return 'YouTube';
+    }
+  }
+
   let topicList: string[] = [];
   if (Array.isArray(item.topics)) {
     topicList = item.topics;
@@ -220,14 +239,20 @@ export function resolveCategoryName(item: {
     item.title || '',
     item.core_idea || '',
     item.knowledge_type || '',
+    item.source_type || '',
+    item.my_thought || '',
+    item.user_note || '',
     ...topicList,
   ].join(' ').toLowerCase();
 
-  // 0. Dedicated YouTube folder rule: all items from YouTube belong exclusively to 'YouTube'
+  // 1. Dedicated YouTube folder rule: all items from YouTube belong exclusively to 'YouTube'
   if (
     item.knowledge_type === 'youtube' ||
+    item.source_type === 'youtube' ||
     (item.title && (item.title.toLowerCase().includes('youtube') || item.title.toLowerCase().includes('.youtube.'))) ||
     (item.core_idea && item.core_idea.toLowerCase().includes('youtube')) ||
+    (item.my_thought && item.my_thought.toLowerCase().includes('youtube')) ||
+    (item.user_note && item.user_note.toLowerCase().includes('youtube')) ||
     topicList.some((t) => t.toLowerCase().includes('youtube'))
   ) {
     return 'YouTube';

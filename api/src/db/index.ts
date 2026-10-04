@@ -131,17 +131,14 @@ export class Database {
       .prepare(
         `SELECT k.* FROM knowledge k
          LEFT JOIN sources s ON k.source_id = s.id
-         WHERE k.knowledge_type = 'youtube'
-            OR k.markdown_path LIKE '%YouTube%'
+         WHERE (k.knowledge_type = 'youtube'
+            OR k.markdown_path LIKE '%/YouTube/%'
             OR s.source_type = 'youtube'
-            OR s.original_url LIKE '%youtube%'
+            OR s.original_url LIKE '%youtube.com%'
             OR s.original_url LIKE '%youtu.be%'
-            OR s.raw_url LIKE '%youtube%'
-            OR s.raw_url LIKE '%youtu.be%'
-            OR s.title LIKE '%.YouTube%'
-            OR k.title LIKE '%.YouTube%'
-            OR k.why_saved LIKE '%youtube%'
-            OR k.why_saved LIKE '%liked video%'
+            OR k.my_thought LIKE '%Category: youtube%'
+            OR k.my_thought LIKE '%[youtube]%')
+           AND (k.title NOT LIKE 'Screenshot_%.png' AND k.title NOT LIKE 'Duplicate of: Screenshot_%')
          ORDER BY k.created_at DESC LIMIT ?`
       )
       .bind(limit)
@@ -592,12 +589,10 @@ export class Database {
     const res = await this.db
       .prepare(
         `SELECT * FROM sources 
-         WHERE source_type = 'youtube' 
+         WHERE (source_type = 'youtube' 
             OR original_url LIKE '%youtube.com%' 
-            OR original_url LIKE '%youtu.be%'
-            OR raw_url LIKE '%youtube.com%'
-            OR raw_url LIKE '%youtu.be%'
-            OR title LIKE '%.YouTube%'
+            OR original_url LIKE '%youtu.be%')
+           AND (title NOT LIKE 'Screenshot_%.png' AND title NOT LIKE 'Duplicate of: Screenshot_%')
          ORDER BY captured_at DESC LIMIT ?`
       )
       .bind(limit)

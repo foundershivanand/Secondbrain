@@ -11,6 +11,8 @@ export function generateObsidianMarkdown(
     topics: extraction.topics,
     core_idea: extraction.core_idea,
     knowledge_type: extraction.source_type,
+    source_type: source?.source_type || extraction.source_type,
+    my_thought: extraction.my_thought || null,
   });
 
   const sanitizedTitle = (extraction.title || 'Untitled')

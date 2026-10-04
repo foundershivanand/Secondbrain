@@ -53,10 +53,18 @@ export async function processIngestion(
   const knowledgeId = `KN-${rawIdNum}`;
   const rawId = input.rawId || `RAW-${rawIdNum}`;
 
-  // 1. YouTube oEmbed metadata enrichment
+  // 1. YouTube detection & oEmbed metadata enrichment
+  const isYouTube =
+    input.sourceType === 'youtube' ||
+    Boolean(input.url && (input.url.includes('youtube.com') || input.url.includes('youtu.be'))) ||
+    Boolean(input.userNote && /\[Category:\s*youtube\]/i.test(input.userNote)) ||
+    Boolean(input.userNote && /\byoutube\b/i.test(input.userNote) && input.rawStorage !== 'terabox');
+
+  const effectiveSourceType: SourceType = isYouTube ? 'youtube' : input.sourceType;
+
   let enrichedTitle = input.title;
   let videoChannel: string | undefined;
-  if ((input.sourceType === 'youtube' || input.url?.includes('youtube.com') || input.url?.includes('youtu.be')) && input.url) {
+  if ((isYouTube || input.url?.includes('youtube.com') || input.url?.includes('youtu.be')) && input.url) {
     try {
       const oembedRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(input.url)}&format=json`);
       if (oembedRes.ok) {
@@ -69,7 +77,7 @@ export async function processIngestion(
 
   // Content Sanitization & Deduplication Hash
   const cleanText = input.text ? sanitizeUntrustedInput(input.text) : '';
-  const hashPayload = `${input.sourceType}:${input.url || input.rawUrl || ''}:${cleanText.slice(0, 500)}`;
+  const hashPayload = `${effectiveSourceType}:${input.url || input.rawUrl || ''}:${cleanText.slice(0, 500)}`;
   const contentHash = await sha256(hashPayload);
 
   // Check for duplicate source
@@ -132,7 +140,7 @@ export async function processIngestion(
   const sourceRecord: SourceRecord = {
     id: sourceId,
     raw_id: rawId,
-    source_type: input.sourceType,
+    source_type: effectiveSourceType,
     title: enrichedTitle || input.title || (input.url ? `Link: ${input.url}` : cleanText.slice(0, 40)) || 'Unprocessed Input',
     original_url: input.url || null,
     raw_storage: input.rawStorage || (input.url ? 'web' : 'local'),
@@ -169,7 +177,7 @@ export async function processIngestion(
       mimeType: input.mimeType,
       base64Data: input.base64Data,
       fileUri: input.fileUri,
-      sourceType: input.sourceType,
+      sourceType: effectiveSourceType,
       userNote: input.userNote,
     });
 
@@ -226,7 +234,7 @@ export async function processIngestion(
       id: knowledgeId,
       source_id: sourceId,
       title: extraction.title || 'Untitled Knowledge',
-      knowledge_type: extraction.source_type || input.sourceType,
+      knowledge_type: isYouTube ? 'youtube' : (extraction.source_type || effectiveSourceType),
       core_idea: extraction.core_idea || '',
       key_information: JSON.stringify(extraction.key_information || []),
       insights: JSON.stringify(extraction.insights || []),

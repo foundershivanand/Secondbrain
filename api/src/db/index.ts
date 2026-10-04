@@ -100,11 +100,52 @@ export class Database {
 
   async getRecentSourcesByType(sourceTypes: string[], limit: number = 5): Promise<SourceRecord[]> {
     if (sourceTypes.length === 0) return [];
+
+    if (sourceTypes.includes('youtube')) {
+      const res = await this.db
+        .prepare(
+          `SELECT * FROM sources 
+           WHERE source_type = 'youtube'
+              OR original_url LIKE '%youtube.com%'
+              OR original_url LIKE '%youtu.be%'
+              OR raw_url LIKE '%youtube.com%'
+              OR raw_url LIKE '%youtu.be%'
+              OR title LIKE '%.YouTube%'
+           ORDER BY captured_at DESC LIMIT ?`
+        )
+        .bind(limit)
+        .all<SourceRecord>();
+      return res.results || [];
+    }
+
     const placeholders = sourceTypes.map(() => '?').join(',');
     const res = await this.db
       .prepare(`SELECT * FROM sources WHERE source_type IN (${placeholders}) ORDER BY captured_at DESC LIMIT ?`)
       .bind(...sourceTypes, limit)
       .all<SourceRecord>();
+    return res.results || [];
+  }
+
+  async getYouTubeKnowledge(limit: number = 25): Promise<KnowledgeRecord[]> {
+    const res = await this.db
+      .prepare(
+        `SELECT k.* FROM knowledge k
+         LEFT JOIN sources s ON k.source_id = s.id
+         WHERE k.knowledge_type = 'youtube'
+            OR k.markdown_path LIKE '%YouTube%'
+            OR s.source_type = 'youtube'
+            OR s.original_url LIKE '%youtube%'
+            OR s.original_url LIKE '%youtu.be%'
+            OR s.raw_url LIKE '%youtube%'
+            OR s.raw_url LIKE '%youtu.be%'
+            OR s.title LIKE '%.YouTube%'
+            OR k.title LIKE '%.YouTube%'
+            OR k.why_saved LIKE '%youtube%'
+            OR k.why_saved LIKE '%liked video%'
+         ORDER BY k.created_at DESC LIMIT ?`
+      )
+      .bind(limit)
+      .all<KnowledgeRecord>();
     return res.results || [];
   }
 
@@ -204,16 +245,23 @@ export class Database {
   }
 
   async searchKnowledge(searchTerm: string, limit: number = 20): Promise<KnowledgeRecord[]> {
-    const pattern = `%${searchTerm}%`;
-    const res = await this.db
-      .prepare(
-        `SELECT * FROM knowledge 
-         WHERE title LIKE ? OR core_idea LIKE ? OR topics LIKE ? OR key_information LIKE ? OR my_thought LIKE ?
-         ORDER BY importance DESC, created_at DESC LIMIT ?`
-      )
-      .bind(pattern, pattern, pattern, pattern, pattern, limit)
-      .all<KnowledgeRecord>();
-    return res.results || [];
+    const clean = searchTerm.trim().replace(/['"%;_\\]/g, ' ').trim().slice(0, 35);
+    if (!clean) return [];
+    try {
+      const pattern = `%${clean}%`;
+      const res = await this.db
+        .prepare(
+          `SELECT * FROM knowledge 
+           WHERE title LIKE ? OR core_idea LIKE ? OR topics LIKE ? OR key_information LIKE ? OR my_thought LIKE ?
+           ORDER BY importance DESC, created_at DESC LIMIT ?`
+        )
+        .bind(pattern, pattern, pattern, pattern, pattern, limit)
+        .all<KnowledgeRecord>();
+      return res.results || [];
+    } catch (err) {
+      console.warn('searchKnowledge query error (handled gracefully):', err);
+      return [];
+    }
   }
 
   async deleteKnowledge(id: string): Promise<void> {
@@ -241,16 +289,23 @@ export class Database {
   }
 
   async searchAtomicKnowledge(searchTerm: string, limit: number = 30): Promise<AtomicKnowledgeItem[]> {
-    const pattern = `%${searchTerm}%`;
-    const res = await this.db
-      .prepare(
-        `SELECT * FROM atomic_knowledge 
-         WHERE statement LIKE ?
-         ORDER BY confidence DESC, created_at DESC LIMIT ?`
-      )
-      .bind(pattern, limit)
-      .all<AtomicKnowledgeItem>();
-    return res.results || [];
+    const clean = searchTerm.trim().replace(/['"%;_\\]/g, ' ').trim().slice(0, 35);
+    if (!clean) return [];
+    try {
+      const pattern = `%${clean}%`;
+      const res = await this.db
+        .prepare(
+          `SELECT * FROM atomic_knowledge 
+           WHERE statement LIKE ?
+           ORDER BY confidence DESC, created_at DESC LIMIT ?`
+        )
+        .bind(pattern, limit)
+        .all<AtomicKnowledgeItem>();
+      return res.results || [];
+    } catch (err) {
+      console.warn('searchAtomicKnowledge query error (handled gracefully):', err);
+      return [];
+    }
   }
 
   // --- RELATIONSHIPS ---
@@ -535,7 +590,16 @@ export class Database {
 
   async getYouTubeSources(limit: number = 100): Promise<SourceRecord[]> {
     const res = await this.db
-      .prepare(`SELECT * FROM sources WHERE source_type = 'youtube' ORDER BY captured_at DESC LIMIT ?`)
+      .prepare(
+        `SELECT * FROM sources 
+         WHERE source_type = 'youtube' 
+            OR original_url LIKE '%youtube.com%' 
+            OR original_url LIKE '%youtu.be%'
+            OR raw_url LIKE '%youtube.com%'
+            OR raw_url LIKE '%youtu.be%'
+            OR title LIKE '%.YouTube%'
+         ORDER BY captured_at DESC LIMIT ?`
+      )
       .bind(limit)
       .all<SourceRecord>();
     return res.results || [];

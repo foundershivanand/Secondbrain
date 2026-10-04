@@ -219,11 +219,20 @@ export async function fetchUserPlaylists(
  * Fetch Playlist Videos (via API key, OAuth, or RSS fallback)
  */
 async function fetchPlaylistVideos(
-  playlistId: string,
+  rawPlaylistId: string,
   apiKey?: string,
   accessToken?: string | null,
   maxResults: number = 30
 ): Promise<YouTubeVideoItem[]> {
+  let playlistId = rawPlaylistId.trim();
+  if (playlistId.includes('list=')) {
+    const m = playlistId.match(/list=([a-zA-Z0-9_-]+)/);
+    if (m) playlistId = m[1];
+  } else if (playlistId.includes('/channel/') || playlistId.includes('/c/') || playlistId.includes('/@')) {
+    const m = playlistId.match(/\/(UC[a-zA-Z0-9_-]+)/);
+    if (m) playlistId = m[1];
+  }
+
   // If access token available, use authenticated endpoint
   if (accessToken) {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${playlistId}&maxResults=${Math.min(maxResults, 50)}`;
@@ -259,15 +268,23 @@ async function fetchPlaylistVideos(
   }
 
   // Zero-auth RSS feed fallback (supports playlist_id or channel_id)
-  const param = playlistId.startsWith('UC') ? `channel_id=${playlistId}` : `playlist_id=${playlistId}`;
-  const rssUrl = `https://www.youtube.com/feeds/videos.xml?${param}`;
-  const rssRes = await fetch(rssUrl);
-  if (!rssRes.ok) {
-    throw new Error(`Failed to fetch YouTube playlist RSS feed: HTTP ${rssRes.status}`);
+  try {
+    const param = playlistId.startsWith('UC') ? `channel_id=${playlistId}` : `playlist_id=${playlistId}`;
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?${param}`;
+    const rssRes = await fetch(rssUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+      },
+    });
+    if (rssRes.ok) {
+      const xmlText = await rssRes.text();
+      return parseYouTubeRss(xmlText).slice(0, maxResults);
+    }
+  } catch (err) {
+    console.warn(`RSS playlist fetch error for ${playlistId}:`, err);
   }
 
-  const xmlText = await rssRes.text();
-  return parseYouTubeRss(xmlText).slice(0, maxResults);
+  return [];
 }
 
 /**
@@ -577,7 +594,7 @@ export async function handleYouTubeRoutes(
       const target = body.target || 'all';
 
       const result = await syncYouTubeVideos(env, db, maxLimit, {
-        overridePlaylistId: body.playlist_id,
+        overridePlaylistId: body.playlist_id || body.playlistId,
         target,
       });
 
@@ -665,8 +682,9 @@ export async function handleYouTubeRoutes(
       if (body.client_secret !== undefined) {
         await db.setKV('youtube_client_secret', body.client_secret.trim());
       }
-      if (body.playlist_id !== undefined) {
-        await db.setKV('youtube_playlist_id', body.playlist_id.trim());
+      if (body.playlist_id !== undefined || body.playlistId !== undefined) {
+        const pId = (body.playlist_id !== undefined ? body.playlist_id : body.playlistId || '').trim();
+        await db.setKV('youtube_playlist_id', pId);
       }
       if (body.refresh_token) {
         await db.setKV('youtube_oauth_token', JSON.stringify({

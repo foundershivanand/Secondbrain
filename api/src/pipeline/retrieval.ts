@@ -55,27 +55,51 @@ export async function retrieveRelevantContext(
     const recentVideos = await db.getRecentSourcesByType(sourceTypes, limit);
     const videoItems: Array<{ title: string; id: string; url?: string; captured_at?: string; core_idea?: string; source_type?: string }> = [];
 
+    // Query knowledge notes associated with YouTube as well
+    const ytKnowledge = await db.getYouTubeKnowledge(limit);
+    for (const k of ytKnowledge) {
+      if (!relevantKnowledgeMap.has(k.id)) {
+        relevantKnowledgeMap.set(k.id, k);
+      }
+      videoItems.push({
+        title: k.title,
+        id: k.id,
+        url: undefined,
+        captured_at: k.created_at,
+        core_idea: k.core_idea,
+        source_type: k.knowledge_type || 'youtube',
+      });
+    }
+
     for (const src of recentVideos) {
       const k = await db.getKnowledgeBySourceId(src.id);
       if (k) {
         relevantKnowledgeMap.set(k.id, k);
-        videoItems.push({
+        const existingIdx = videoItems.findIndex((v) => v.id === k.id || v.title === k.title);
+        const itemObj = {
           title: k.title,
           id: k.id,
           url: src.original_url || src.raw_url || undefined,
           captured_at: src.captured_at,
           core_idea: k.core_idea,
           source_type: src.source_type,
-        });
+        };
+        if (existingIdx >= 0) {
+          videoItems[existingIdx] = itemObj;
+        } else {
+          videoItems.push(itemObj);
+        }
       } else {
-        videoItems.push({
-          title: src.title || 'Untitled Video',
-          id: src.id,
-          url: src.original_url || src.raw_url || undefined,
-          captured_at: src.captured_at,
-          core_idea: undefined,
-          source_type: src.source_type,
-        });
+        if (!videoItems.some((v) => v.id === src.id || v.title === src.title)) {
+          videoItems.push({
+            title: src.title || 'Untitled Video',
+            id: src.id,
+            url: src.original_url || src.raw_url || undefined,
+            captured_at: src.captured_at,
+            core_idea: undefined,
+            source_type: src.source_type,
+          });
+        }
       }
     }
 
@@ -113,17 +137,21 @@ export async function retrieveRelevantContext(
     .split(/\s+/)
     .filter((w) => w.length > 2 && !['what', 'how', 'when', 'where', 'which', 'about', 'know', 'tell', 'that'].includes(w));
 
-  // 1. Search knowledge notes matching keywords or overall query
-  const directMatches = await db.searchKnowledge(userQuery, 10);
-  for (const k of directMatches) {
-    relevantKnowledgeMap.set(k.id, k);
+  // 1. Search knowledge notes matching keywords or concise overall query
+  if (userQuery.trim().length > 0 && userQuery.trim().length <= 30 && !userQuery.includes(' ')) {
+    const directMatches = await db.searchKnowledge(userQuery.trim(), 10);
+    for (const k of directMatches) {
+      relevantKnowledgeMap.set(k.id, k);
+    }
   }
 
-  for (const word of keywords.slice(0, 4)) {
-    const wordMatches = await db.searchKnowledge(word, 5);
-    for (const k of wordMatches) {
-      if (!relevantKnowledgeMap.has(k.id)) {
-        relevantKnowledgeMap.set(k.id, k);
+  for (const word of keywords.slice(0, 5)) {
+    if (word.length > 2) {
+      const wordMatches = await db.searchKnowledge(word, 5);
+      for (const k of wordMatches) {
+        if (!relevantKnowledgeMap.has(k.id)) {
+          relevantKnowledgeMap.set(k.id, k);
+        }
       }
     }
   }
@@ -157,9 +185,23 @@ export async function retrieveRelevantContext(
       }
     }
   }
-  for (const k of relevantKnowledgeMap.values()) {
-    if (!knowledgeNotes.some((n) => n.id === k.id)) {
-      knowledgeNotes.push(k);
+
+  // If this is a video/YouTube-specific query and we found video notes, prioritize them
+  if (isVideoQuery && knowledgeNotes.length > 0) {
+    for (const k of relevantKnowledgeMap.values()) {
+      const isYt =
+        k.knowledge_type === 'youtube' ||
+        (k.markdown_path && k.markdown_path.includes('YouTube')) ||
+        (k.title && k.title.includes('YouTube'));
+      if (isYt && !knowledgeNotes.some((n) => n.id === k.id)) {
+        knowledgeNotes.push(k);
+      }
+    }
+  } else {
+    for (const k of relevantKnowledgeMap.values()) {
+      if (!knowledgeNotes.some((n) => n.id === k.id)) {
+        knowledgeNotes.push(k);
+      }
     }
   }
 
@@ -292,7 +334,12 @@ export async function answerBrainQuery(
           if (item.captured_at) contextBlock += `   Captured / Watched At: ${item.captured_at}\n`;
           if (item.core_idea) contextBlock += `   Core Idea: ${item.core_idea}\n`;
         });
-        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what videos I watched", "what videos did I watch", or asks about their watched/liked videos, present a clear chronological list of these videos with their titles, core takeaways/channels, and links. If user asks "what video I watched last" or asks about the latest/last video watched, the exact answer is: "${context.recentActivity.items[0]?.title}". Present its core ideas, actionable takeaways, and link (${context.recentActivity.items[0]?.url || ''}). Do NOT confuse with older or other videos.\n\n`;
+        contextBlock += `\nCRITICAL INSTRUCTION: If user asks "what was the last video i liked", "explain that to me", "what videos did I watch", "what is my latest video", or any question about their YouTube videos:
+1. NEVER ask the user to paste or provide a URL. You have full access to their synced YouTube videos and notes above.
+2. The exact latest/last video is: "${context.recentActivity.items[0]?.title}".
+3. Directly state this video's title and URL (${context.recentActivity.items[0]?.url || 'No URL'}).
+4. Dedicate your entire response to thoroughly explaining this video: its core idea, technical/architectural breakthroughs, key concepts, actionable takeaways, and why it was saved.
+5. Do NOT list or bring up unrelated notes, academic PDFs, or offline media. Focus entirely on explaining the video requested.\n\n`;
       }
     } else {
       contextBlock += `Order of most recently saved notes (MOST RECENT FIRST):\n`;

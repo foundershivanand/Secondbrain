@@ -126,10 +126,12 @@ ${extraction.what_changed || 'Refined understanding of this domain.'}
 ${rawSourceLink}
 `;
 
+  const folder = categoryName === 'YouTube' ? '01 Knowledge/YouTube' : `01 Knowledge/${categoryName}`;
+
   return {
     filename,
     content: markdown,
-    folder: `01 Knowledge/${categoryName}`,
+    folder,
     category: categoryName,
   };
 }

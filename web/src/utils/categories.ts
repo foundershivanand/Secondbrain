@@ -13,6 +13,16 @@ export interface CategoryDef {
 
 export const CANONICAL_CATEGORIES: CategoryDef[] = [
   {
+    id: 'youtube',
+    name: 'YouTube',
+    icon: '▶️',
+    color: 'text-rose-400 border-rose-500/30 bg-rose-500/10',
+    keywords: [
+      'youtube', 'youtu.be', 'liked video', 'liked videos', 'playlist', 'playlists',
+      'channel', 'video watch', 'watch history', 'youtube video', 'video'
+    ],
+  },
+  {
     id: 'ai-llms',
     name: 'Artificial Intelligence & LLMs',
     icon: '🤖',
@@ -219,6 +229,7 @@ export function resolveNoteCategory(note: {
   core_idea?: string;
   knowledge_type?: string;
   markdown_path?: string | null;
+  [key: string]: any;
 }): CategoryDef {
   // 0. If markdown_path already contains a category folder, check match
   if (note.markdown_path) {
@@ -249,6 +260,22 @@ export function resolveNoteCategory(note: {
     note.knowledge_type || '',
     ...topicList,
   ].join(' ').toLowerCase();
+
+  // 0. Dedicated YouTube folder rule: all items from YouTube belong exclusively to the 'YouTube' folder
+  const youtubeCat = CANONICAL_CATEGORIES.find((c) => c.id === 'youtube')!;
+  if (
+    note.knowledge_type === 'youtube' ||
+    note.source_type === 'youtube' ||
+    (note.original_url && (note.original_url.includes('youtube.com') || note.original_url.includes('youtu.be'))) ||
+    (note.raw_url && (note.raw_url.includes('youtube.com') || note.raw_url.includes('youtu.be'))) ||
+    (note.url && (note.url.includes('youtube.com') || note.url.includes('youtu.be'))) ||
+    (note.markdown_path && (note.markdown_path.toLowerCase().includes('/youtube/') || note.markdown_path.toLowerCase().includes('youtube'))) ||
+    (note.user_note && note.user_note.toLowerCase().includes('youtube')) ||
+    (note.title && (note.title.toLowerCase().includes('youtube') || note.title.toLowerCase().includes('.youtube.'))) ||
+    topicList.some((t) => t.toLowerCase().includes('youtube'))
+  ) {
+    return youtubeCat;
+  }
 
   // 1. Direct match on existing category name in topics
   for (const cat of CANONICAL_CATEGORIES) {

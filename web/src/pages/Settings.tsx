@@ -433,6 +433,38 @@ export const Settings: React.FC = () => {
             </a>
           </div>
 
+          {/* Direct Playlist ID Syncer (Zero OAuth Required) */}
+          <div className="pt-2 border-t border-slate-800/80 space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-300">Custom YouTube Playlist ID (Zero-OAuth Alternative)</span>
+              <span className="text-[11px] text-slate-500">Public or unlisted playlists (starts with PL...)</span>
+            </div>
+            <form onSubmit={handleSavePlaylist} className="flex gap-2">
+              <input
+                type="text"
+                value={playlistInput}
+                onChange={(e) => setPlaylistInput(e.target.value)}
+                placeholder="e.g. PLrAXtmErZgOdP_8GzqsJ4VSL822rW8n"
+                className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-rose-500"
+              />
+              <button
+                type="submit"
+                disabled={isSavingPlaylist || !playlistInput.trim()}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-bold text-white transition border border-slate-700 shrink-0"
+              >
+                {isSavingPlaylist ? 'Saving...' : 'Save'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSyncSinglePlaylist(playlistInput)}
+                disabled={isYtSyncing || !playlistInput.trim()}
+                className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-xs font-bold text-white transition shadow shrink-0"
+              >
+                Sync Now
+              </button>
+            </form>
+          </div>
+
           {ytSyncMessage && (
             <div className="p-3 rounded-xl bg-slate-900 border border-purple-500/30 text-xs text-purple-300 font-medium">
               {ytSyncMessage}

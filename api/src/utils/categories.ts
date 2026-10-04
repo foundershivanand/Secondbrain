@@ -12,6 +12,15 @@ export interface CategoryDef {
 
 export const CANONICAL_CATEGORIES: CategoryDef[] = [
   {
+    id: 'youtube',
+    name: 'YouTube',
+    icon: '▶️',
+    keywords: [
+      'youtube', 'youtu.be', 'liked video', 'liked videos', 'playlist', 'playlists',
+      'channel', 'video watch', 'watch history', 'youtube video', 'video'
+    ],
+  },
+  {
     id: 'ai-llms',
     name: 'Artificial Intelligence & LLMs',
     icon: '🤖',
@@ -213,6 +222,16 @@ export function resolveCategoryName(item: {
     item.knowledge_type || '',
     ...topicList,
   ].join(' ').toLowerCase();
+
+  // 0. Dedicated YouTube folder rule: all items from YouTube belong exclusively to 'YouTube'
+  if (
+    item.knowledge_type === 'youtube' ||
+    (item.title && (item.title.toLowerCase().includes('youtube') || item.title.toLowerCase().includes('.youtube.'))) ||
+    (item.core_idea && item.core_idea.toLowerCase().includes('youtube')) ||
+    topicList.some((t) => t.toLowerCase().includes('youtube'))
+  ) {
+    return 'YouTube';
+  }
 
   for (const cat of CANONICAL_CATEGORIES) {
     if (topicList.some((t) => t.toLowerCase() === cat.name.toLowerCase() || t.toLowerCase() === cat.id)) {

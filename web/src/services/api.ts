@@ -138,10 +138,11 @@ export const api = {
     return res.json();
   },
 
-  async getKnowledgeList(topic?: string): Promise<{ items: KnowledgeRecord[]; count: number }> {
-    const url = topic
-      ? `${getApiBaseUrl()}/api/knowledge?topic=${encodeURIComponent(topic)}`
-      : `${getApiBaseUrl()}/api/knowledge`;
+  async getKnowledgeList(topic?: string, limit: number = 100): Promise<{ items: KnowledgeRecord[]; count: number }> {
+    const params = new URLSearchParams();
+    if (topic) params.set('topic', topic);
+    if (limit) params.set('limit', String(limit));
+    const url = `${getApiBaseUrl()}/api/knowledge?${params.toString()}`;
     const res = await fetch(url, { headers: getAuthHeader() });
     if (!res.ok) throw new Error('Failed to fetch knowledge list');
     return res.json();

@@ -52,7 +52,7 @@ export default {
     // 4. Public OAuth Handlers (Google YouTube OAuth redirect & callback)
     if (pathname === '/api/youtube/auth' || pathname === '/api/youtube/callback') {
       const pathParts = pathname.replace(/^\/api\/youtube\/?/, '').split('/').filter(Boolean);
-      return handleYouTubeRoutes(request, env, db, pathParts);
+      return await handleYouTubeRoutes(request, env, db, pathParts);
     }
 
     // 5. Authentication Check for API routes (if env.AUTH_TOKEN is configured)

@@ -12,7 +12,7 @@ export async function handleKnowledge(request: Request, db: Database, pathParts:
     }
 
     const url = new URL(request.url);
-    const limit = Number(url.searchParams.get('limit')) || 50;
+    const limit = Math.min(Number(url.searchParams.get('limit')) || 100, 1000);
     const offset = Number(url.searchParams.get('offset')) || 0;
     const topic = url.searchParams.get('topic') || undefined;
 

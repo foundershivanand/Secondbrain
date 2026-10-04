@@ -84,7 +84,11 @@ export async function handleCapture(request: Request, env: Env, db: Database): P
     }
 
     if (!input.text && !input.url && !input.base64Data && !input.rawUrl) {
-      return errorResponse('Empty capture. Provide text, url, file, or raw_url.', 400);
+      if (input.title) {
+        input.text = input.title;
+      } else {
+        return errorResponse('Empty capture. Provide text, title, url, file, or raw_url.', 400);
+      }
     }
 
     const result = await processIngestion(env, db, input);

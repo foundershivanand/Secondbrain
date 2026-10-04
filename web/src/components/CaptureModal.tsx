@@ -57,6 +57,17 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const [rawStorage, setRawStorage] = useState('web');
   const [rawUrl, setRawUrl] = useState('');
 
+  // Sync state whenever modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      if (initialType) setActiveType(initialType);
+      if (defaultCategory !== undefined) setCategory(defaultCategory);
+      setError(null);
+      setSuccessToast(null);
+      setIsLoading(false);
+    }
+  }, [isOpen, initialType, defaultCategory]);
+
   // Prefill when opened via Share Target or URL params
   useEffect(() => {
     if (initialData) {
@@ -339,8 +350,26 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   };
 
   // 4. Submission
-  const handleCapture = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCapture = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (isLoading) return;
+
+    let contentText = text.trim();
+    const contentTitle = title.trim();
+    if (activeType === 'text' && !contentText && contentTitle) {
+      contentText = contentTitle;
+    }
+
+    if (activeType === 'text' && !contentText) {
+      setError('Please enter a note or title.');
+      return;
+    }
+
+    if ((activeType === 'url' || activeType === 'youtube') && !url.trim()) {
+      setError('Please enter a valid URL.');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setBatchResults([]);
@@ -355,8 +384,8 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           try {
             const res = await api.capture({
               source_type: 'screenshot',
-              title: title.trim() || undefined,
-              user_note: userNote || text || undefined,
+              title: contentTitle || undefined,
+              user_note: userNote || contentText || undefined,
               importance,
               base64_data: item.base64,
               mime_type: item.mime,
@@ -394,14 +423,20 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           payloadMime = recordedAudioMime;
         }
 
-        const noteContext = category
-          ? `[Category: ${category}] ${userNote || ''}`.trim()
+        const isYoutubeItem =
+          activeType === 'youtube' ||
+          (url && (url.includes('youtube.com') || url.includes('youtu.be')));
+
+        const effectiveCategory = isYoutubeItem ? 'YouTube' : category;
+
+        const noteContext = effectiveCategory
+          ? `[Category: ${effectiveCategory}] ${userNote || ''}`.trim()
           : userNote || undefined;
 
         const result = await api.capture({
-          source_type: activeType,
-          title: title.trim() || undefined,
-          text: text.trim() || undefined,
+          source_type: isYoutubeItem ? 'youtube' : activeType,
+          title: contentTitle || undefined,
+          text: contentText || undefined,
           url: url.trim() || undefined,
           user_note: noteContext,
           importance,
@@ -510,41 +545,41 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
         </div>
 
         {/* Form Body - Scrollable */}
-        <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain">
-          {successToast ? (
-            <div className="py-8 text-center space-y-3">
-              <div className="w-12 h-12 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-white">{successToast}</h3>
-              <p className="text-xs text-slate-400">Vault synced and linked in your Second Brain.</p>
+        {successToast ? (
+          <div className="p-8 text-center space-y-3 flex-1 flex flex-col justify-center items-center">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
-          ) : batchResults.length > 0 ? (
-            <div className="py-4 space-y-3">
-              <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Processed {batchResults.length} photos</span>
-              </div>
-              <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1.5 max-h-48 overflow-y-auto">
-                {batchResults.map((res, i) => (
-                  <div key={i} className="flex justify-between items-center py-1 border-b border-slate-800/60 last:border-0">
-                    <span className="text-slate-300 truncate max-w-xs">{res.title}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-                      Indexed
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="w-full py-2 rounded-xl bg-purple-600 text-white text-xs font-bold"
-              >
-                Done
-              </button>
+            <h3 className="text-sm font-bold text-white">{successToast}</h3>
+            <p className="text-xs text-slate-400">Vault synced and linked in your Second Brain.</p>
+          </div>
+        ) : batchResults.length > 0 ? (
+          <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain space-y-3">
+            <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Processed {batchResults.length} photos</span>
             </div>
-          ) : (
-            <form id="capture-form" onSubmit={handleCapture} className="space-y-3.5">
+            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1.5 max-h-48 overflow-y-auto">
+              {batchResults.map((res, i) => (
+                <div key={i} className="flex justify-between items-center py-1 border-b border-slate-800/60 last:border-0">
+                  <span className="text-slate-300 truncate max-w-xs">{res.title}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+                    Indexed
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={resetForm}
+              className="w-full py-2 rounded-xl bg-purple-600 text-white text-xs font-bold"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <form id="capture-form" onSubmit={handleCapture} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain space-y-3.5">
               {/* NOTE / TEXT TAB */}
               {activeType === 'text' && (
                 <div className="space-y-2.5">
@@ -873,47 +908,45 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                   {error}
                 </div>
               )}
-            </form>
-          )}
-        </div>
+            </div>
 
-        {/* Modal Sticky Footer - Always Visible Above Keyboard */}
-        {!successToast && batchResults.length === 0 && (
-          <div className="p-3 sm:px-5 sm:py-3 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between shrink-0 pb-safe">
-            <button
-              type="button"
-              onClick={resetForm}
-              disabled={isLoading}
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
-            >
-              Cancel
-            </button>
+            {/* Modal Sticky Footer - Always Visible Inside Form */}
+            <div className="p-3 sm:px-5 sm:py-3 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between shrink-0 pb-safe">
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={isLoading}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+              >
+                Cancel
+              </button>
 
-            <button
-              type="submit"
-              form="capture-form"
-              disabled={
-                isLoading ||
-                isProcessingMedia ||
-                (activeType === 'screenshot' && photos.length === 0 && !text) ||
-                (activeType === 'text' && !text.trim()) ||
-                ((activeType === 'url' || activeType === 'youtube') && !url.trim())
-              }
-              className="flex items-center space-x-1.5 px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-purple-600/30 transition active:scale-95"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>{loadingStep || 'Saving...'}</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{activeType === 'text' ? 'Save Note' : 'Capture'}</span>
-                </>
-              )}
-            </button>
-          </div>
+              <button
+                type="submit"
+                onClick={(e) => handleCapture(e)}
+                disabled={
+                  isLoading ||
+                  isProcessingMedia ||
+                  (activeType === 'screenshot' && photos.length === 0 && !text) ||
+                  (activeType === 'text' && !text.trim() && !title.trim()) ||
+                  ((activeType === 'url' || activeType === 'youtube') && !url.trim())
+                }
+                className="flex items-center space-x-1.5 px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-purple-600/30 transition active:scale-95"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>{loadingStep || 'Saving...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{activeType === 'text' ? 'Save Note' : 'Capture'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         )}
       </div>
     </div>

@@ -2,7 +2,7 @@
 id: MEM-CURRENT-CONTEXT
 type: memory
 category: current_context
-updated_at: 2026-10-03
+updated_at: 2026-10-04
 ---
 
 # ⚡ Current Context (Brain State)
@@ -24,14 +24,14 @@ updated_at: 2026-10-03
 - Strictly distinguish user thoughts from AI-generated suggestions
 
 ## Recent Learning
+- The 'Idea Capture' bottleneck: Historical notes are dominated by passive, un-synthesized screenshots (Instagram/Play Store), whereas recent notes show a transition to high-density, atomic, and actionable knowledge.
+- The 'Friction-as-Feature' paradigm: Digital wellness is moving from 'blocking' (negative) to 'intentional gates' (positive/cognitive), where the barrier to entry is the product itself.
+- A clear shift in digital wellness product design away from binary, easily bypassed 'hard-blocking' mechanisms toward psychological 'intentional friction' (e.g., physical challenges, cognitive gates, and high-stakes gamification like visual decay or loss aversion).
+- Repurposing high-frequency, low-intent mobile habits (like unlocking the phone or viewing the home screen) into high-value, passive micro-learning and habit-building interfaces (Ambient UI/UX).
+- The Second Brain API supports programmatic note ingestion via standard HTTP clients, enabling automated workflows and external integrations.
 - Intentional friction (e.g., pauses, math puzzles, physical challenges, or forced cooldowns) is a highly effective behavioral design pattern for breaking compulsive digital habits and promoting digital wellness.
 - Gamification mechanics for digital wellbeing should leverage emotional stakes, such as visual decay (e.g., rotting avatars), loss aversion (e.g., crashing a virtual plane), or positive reinforcement (e.g., virtual pets), to shift user experience from restriction to engagement.
 - Shift from 'hard-blocking' to 'intentional friction' in digital wellness: Users are moving away from binary app-blocking toward psychological gates (intent prompts, physical challenges, and gamified negative reinforcement).
-- Ambient UI/UX: High-frequency mobile habits (unlocking, home screen viewing) are being repurposed as primary interfaces for micro-learning and habit-building.
-- The 'Idea Capture' bottleneck: Historical notes show a high volume of 'Instagram/Play Store' screenshots saved as 'Ideas' without synthesis, contrasting with the recent, highly structured atomic notes.
-- Lock screen widgets are highly effective vectors for passive micro-learning and ambient habit-building, leveraging high-frequency phone unlocking habits to deliver low-friction educational content.
-- To minimize digital distraction and declutter iOS home screens, limit widgets to 1-2 highly functional tools and use 'Remove from Home Screen' to relegate unused apps to the App Library without losing data.
-- Effective AI planning UIs transition users smoothly from unstructured text inputs to highly structured, interactive visual outputs (like maps and timelines).
 
 ## Current Interests
 - **AI agents**: Interest score 0.95 (Trend: increasing)
@@ -40,9 +40,12 @@ updated_at: 2026-10-03
 
 ## Open Questions & Knowledge Gaps
 - What is the best batch ingestion cadence for importing large Google Takeout YouTube watch histories?
+- How to bridge the gap between 'passive' lock-screen micro-learning and 'active' intentional friction gates without causing user fatigue.
+- Technical implementation of a 'Self-Improving Agent' on Cloudflare Workers/D1: How to manage the vector database and evaluation harness within the constraints of a serverless environment.
+- Technical limitations and refresh-rate constraints of iOS Lock Screen and Home Screen widgets when delivering dynamic, stateful micro-learning content.
+- The exact API schema and payload requirements for the newly deployed Cloudflare Workers/D1 Second Brain ingestion endpoint to support automated external pipelines.
 - How to bridge the gap between 'raw visual inspiration' (the 100GB+ library of screenshots) and 'atomic knowledge notes' (the 2-10KB target) without manual intervention.
 - The effectiveness of 'negative reinforcement' (e.g., crashing a plane) vs 'positive reinforcement' (e.g., growing a garden) for long-term habit retention in high-stress users.
-- Long-term benchmark of YouTube chapter extraction vs full Whisper transcript analysis
 
 ## Recent Decisions
 - Decided to use D1 as operational index database and Obsidian Markdown files as portable source of truth

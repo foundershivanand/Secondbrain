@@ -15,7 +15,7 @@ topics:
   - Behavioral Design
   - Screen Time
 source_id: SRC-857908
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Opal App: Anti-Doomscrolling and Focus Tool

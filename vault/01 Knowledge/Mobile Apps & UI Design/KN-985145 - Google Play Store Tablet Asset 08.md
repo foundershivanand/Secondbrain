@@ -13,7 +13,7 @@ topics:
   - UI Design
   - Marketing Assets
 source_id: SRC-238355405985145
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Google Play Store Tablet Asset 08

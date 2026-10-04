@@ -13,7 +13,7 @@ topics:
   - UI/UX Design
   - Marketing Assets
 source_id: SRC-59015284271761
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Play Store Tablet Screenshot Asset

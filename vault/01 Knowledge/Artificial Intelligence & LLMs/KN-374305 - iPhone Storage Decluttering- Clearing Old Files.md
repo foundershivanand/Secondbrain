@@ -15,7 +15,7 @@ topics:
   - iOS
   - Digital Minimalism
 source_id: SRC-374305
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # iPhone Storage Decluttering: Clearing Old Files

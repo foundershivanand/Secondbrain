@@ -6,8 +6,8 @@ source_type: youtube
 raw_id: RAW-395984
 storage: web
 raw_url: "https://www.youtube.com/watch?v=P-wyRJb6LWM"
-importance: 9
-confidence: 0.98
+importance: 8
+confidence: 0.95
 topics:
   - Productivity & PKM Systems
   - Well-being
@@ -32,27 +32,7 @@ True productivity is not achieved by constant work, but by integrating high-qual
 
 ## Atomic Knowledge
 
-### Rest is a physiological necessity for cognitive function and long-term productivity
-
-Rest is a physiological necessity for cognitive function and long-term productivity.
-
-**Type:** `FACT` | **Confidence:** 98%
-
-### The 'Seven Types of Rest' framework provides a comprehensive approach to avoiding burnout
-
-The 'Seven Types of Rest' framework provides a comprehensive approach to avoiding burnout.
-
-**Type:** `CONCEPT` | **Confidence:** 95%
-
-### Intentional rest periods should be scheduled as rigorously as work tasks
-
-Intentional rest periods should be scheduled as rigorously as work tasks.
-
-**Type:** `ACTION` | **Confidence:** 90%
-
-## My Thoughts
-
-I need to audit my current schedule to see if I am actually resting or just switching to low-effort consumption.
+No atomic knowledge blocks extracted.
 
 ## Insights
 
@@ -64,10 +44,6 @@ I need to audit my current schedule to see if I am actually resting or just swit
 - [ ] Identify which of the seven types of rest I am currently lacking.
 - [ ] Schedule 15-minute 'active rest' blocks between deep work sessions.
 - [ ] Implement a 'digital sunset' to improve sleep quality.
-
-## Product & SaaS Opportunities
-
-- 💡 A 'Rest Audit' app that tracks the seven types of rest and suggests activities based on current deficit.
 
 ## Related Knowledge
 

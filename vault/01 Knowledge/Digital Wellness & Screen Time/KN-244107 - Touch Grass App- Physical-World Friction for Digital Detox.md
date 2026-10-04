@@ -15,7 +15,7 @@ topics:
   - Productivity Apps
   - Doomscrolling
 source_id: SRC-244107
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Touch Grass App: Physical-World Friction for Digital Detox

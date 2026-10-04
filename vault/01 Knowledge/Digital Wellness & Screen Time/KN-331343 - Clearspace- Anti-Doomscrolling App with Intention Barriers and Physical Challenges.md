@@ -15,7 +15,7 @@ topics:
   - Behavioral Design
   - Screen Time
 source_id: SRC-331343
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Clearspace: Anti-Doomscrolling App with Intention Barriers and Physical Challenges

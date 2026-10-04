@@ -118,43 +118,92 @@ export async function fetchOAuthLikedVideos(
   const allVideos: YouTubeVideoItem[] = [];
   let nextPageToken: string | undefined = undefined;
 
-  do {
-    const pageSize = Math.min(50, maxTotal - allVideos.length);
-    let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=LL&maxResults=${pageSize}`;
-    if (nextPageToken) {
-      url += `&pageToken=${encodeURIComponent(nextPageToken)}`;
-    }
-
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      // If LL playlist is empty or restricted, break cleanly
-      console.warn(`YouTube Liked Videos API response ${res.status}:`, errText);
-      break;
-    }
-
-    const data: any = await res.json();
-    const items = data.items || [];
-
-    for (const item of items) {
-      const videoId = item.snippet?.resourceId?.videoId || item.contentDetails?.videoId;
-      if (videoId) {
-        allVideos.push({
-          videoId,
-          title: item.snippet?.title || 'YouTube Liked Video',
-          channel: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle,
-          url: `https://www.youtube.com/watch?v=${videoId}`,
-          publishedAt: item.snippet?.publishedAt,
-          playlistTitle: 'Liked Videos',
-        });
+  // Attempt 1: playlistItems.list with playlistId=LL
+  try {
+    do {
+      const pageSize = Math.min(50, maxTotal - allVideos.length);
+      let url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=LL&maxResults=${pageSize}`;
+      if (nextPageToken) {
+        url += `&pageToken=${encodeURIComponent(nextPageToken)}`;
       }
-    }
 
-    nextPageToken = data.nextPageToken;
-  } while (nextPageToken && allVideos.length < maxTotal);
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.warn(`YouTube Liked Videos (LL) API response ${res.status}:`, errText);
+        break;
+      }
+
+      const data: any = await res.json();
+      const items = data.items || [];
+
+      for (const item of items) {
+        const videoId = item.snippet?.resourceId?.videoId || item.contentDetails?.videoId;
+        if (videoId) {
+          allVideos.push({
+            videoId,
+            title: item.snippet?.title || 'YouTube Liked Video',
+            channel: item.snippet?.videoOwnerChannelTitle || item.snippet?.channelTitle,
+            url: `https://www.youtube.com/watch?v=${videoId}`,
+            publishedAt: item.snippet?.publishedAt,
+            playlistTitle: 'Liked Videos',
+          });
+        }
+      }
+
+      nextPageToken = data.nextPageToken;
+    } while (nextPageToken && allVideos.length < maxTotal);
+  } catch (err) {
+    console.warn('Error fetching LL playlist items:', err);
+  }
+
+  // Attempt 2: If LL returned no items, try videos.list with myRating=like
+  if (allVideos.length === 0) {
+    let videoPageToken: string | undefined = undefined;
+    try {
+      do {
+        const pageSize = Math.min(50, maxTotal - allVideos.length);
+        let url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&myRating=like&maxResults=${pageSize}`;
+        if (videoPageToken) {
+          url += `&pageToken=${encodeURIComponent(videoPageToken)}`;
+        }
+
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.warn(`YouTube videos.list (myRating=like) API response ${res.status}:`, errText);
+          break;
+        }
+
+        const data: any = await res.json();
+        const items = data.items || [];
+
+        for (const item of items) {
+          const videoId = item.id;
+          if (videoId) {
+            allVideos.push({
+              videoId,
+              title: item.snippet?.title || 'YouTube Liked Video',
+              channel: item.snippet?.channelTitle,
+              url: `https://www.youtube.com/watch?v=${videoId}`,
+              publishedAt: item.snippet?.publishedAt,
+              playlistTitle: 'Liked Videos',
+            });
+          }
+        }
+
+        videoPageToken = data.nextPageToken;
+      } while (videoPageToken && allVideos.length < maxTotal);
+    } catch (err) {
+      console.warn('Error fetching videos with myRating=like:', err);
+    }
+  }
 
   return allVideos;
 }
@@ -491,6 +540,39 @@ export async function handleYouTubeRoutes(
       count: playlists.length,
       playlists,
     });
+  }
+
+  // 2b. GET /api/youtube/diagnose - Test YouTube API responses directly
+  if (request.method === 'GET' && action === 'diagnose') {
+    const accessToken = await getOAuthAccessToken(env, db);
+    if (!accessToken) {
+      return jsonResponse({ error: 'No OAuth access token available' }, 400);
+    }
+
+    const testUrls: Record<string, string> = {
+      channel: 'https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails&mine=true',
+      playlists: 'https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails,status&mine=true&maxResults=50',
+      playlist_LL: 'https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=LL&maxResults=10',
+      videos_liked: 'https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&myRating=like&maxResults=10',
+    };
+
+    const results: Record<string, any> = {};
+    for (const [key, testUrl] of Object.entries(testUrls)) {
+      try {
+        const resp = await fetch(testUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const status = resp.status;
+        const text = await resp.text();
+        let json = null;
+        try { json = JSON.parse(text); } catch {}
+        results[key] = { status, ok: resp.ok, data: json || text };
+      } catch (err: any) {
+        results[key] = { error: err.message };
+      }
+    }
+
+    return jsonResponse({ success: true, results });
   }
 
   // 3. GET /api/youtube/auth - Redirect user to Google OAuth Consent Screen

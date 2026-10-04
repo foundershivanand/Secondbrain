@@ -16,7 +16,9 @@
     "sync:cloud": "curl -s -X POST -H 'Authorization: Bearer secondbrain_dev_secret' https://second-brain-api.fitt.workers.dev/api/sync/all",
     "db:sync:remote": "node scripts/push-to-remote-d1.mjs",
     "scan:raw": "node scripts/scan-raw-storage.mjs",
-    "terabox:import": "node scripts/terabox-importer.mjs"
+    "brain:reset": "node scripts/reset-brain-data.mjs",
+    "terabox:import": "node scripts/terabox-importer.mjs",
+    "terabox:extract": "node scripts/terabox-importer.mjs"
   },
   "keywords": [
     "second-brain",

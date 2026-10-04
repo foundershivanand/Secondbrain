@@ -1,65 +1,21 @@
----
-id: DASHBOARD-ROOT
-type: dashboard
-updated_at: 2026-10-03
----
+# 🧠 Second Brain Master Dashboard
 
-# 🧠 Second Brain — Operating Dashboard
+Welcome to your unified Second Brain knowledge repository.
 
-> **Decoupled Storage & Structured Intelligence OS**
-> *Raw Media (100 GB+)* in external archives · *Structured Knowledge (2–10 KB)* in local vault · *Reasoning Engine* powered by Cloudflare Workers & Gemini.
+## 📊 Knowledge Collections
+- [[01 - AI & Autonomous Systems/_Index|01 • AI & Autonomous Systems]]
+- [[02 - Business, Startups & SaaS/_Index|02 • Business, Startups & SaaS]]
+- [[03 - Mobile Apps & UI-UX Design/_Index|03 • Mobile Apps & UI-UX Design]]
+- [[04 - Tech, Engineering & DevOps/_Index|04 • Tech, Engineering & DevOps]]
+- [[05 - Digital Wellness & Habit Systems/_Index|05 • Digital Wellness & Habit Systems]]
+- [[06 - Content, Reels & Creative Media/_Index|06 • Content, Reels & Creative Media]]
+- [[07 - Cinema, Storytelling & Arts/_Index|07 • Cinema, Storytelling & Arts]]
+- [[08 - Psychology, Mindset & Philosophy/_Index|08 • Psychology, Mindset & Philosophy]]
+- [[09 - Academics, Education & Research/_Index|09 • Academics, Education & Research]]
+- [[10 - Governance, History & Legal/_Index|10 • Governance, History & Legal]]
+- [[11 - Finance, Wealth & Operations/_Index|11 • Finance, Wealth & Operations]]
+- [[12 - General Knowledge & Reference/_Index|12 • General Knowledge & Reference]]
 
----
-
-## ⚡ Quick System Status
-- 📑 **Knowledge Notes:** 46 curated notes organized into **9 canonical categories**
-- 🗄️ **External Storage:** 8,241 indexed files on TeraBox (zero local vault bloat)
-- 📲 **Mobile Capture:** Telegram Bot active for instant notes, screenshots, and links
-- 🌐 **Web PWA:** [https://second-brain-web-83u.pages.dev](https://second-brain-web-83u.pages.dev)
-- ⚡ **Worker API:** [https://second-brain-api.fitt.workers.dev](https://second-brain-api.fitt.workers.dev)
-
----
-
-## 📂 Knowledge by Category (Canonical Taxonomy)
-
-| Category | Notes | Focus & Scope | Direct Link |
-| :--- | :---: | :--- | :--- |
-| 🎓 **Academics & Education** | `5 notes` | Official semester marksheets, higher education syllabi, course management, and academic records. | [[01 Knowledge/Academics & Education/_Category Index\|Browse Category ➔]] |
-| 🤖 **Artificial Intelligence & LLMs** | `2 notes` | AI case studies, prompt engineering, agent planning architectures, and LLM applications. | [[01 Knowledge/Artificial Intelligence & LLMs/_Category Index\|Browse Category ➔]] |
-| 🎬 **Cinema, Literature & Arts** | `2 notes` | Classic cinema analysis, literary epics, courtroom drama narratives, and human psychology. | [[01 Knowledge/Cinema, Literature & Arts/_Category Index\|Browse Category ➔]] |
-| 📊 **Data Engineering & Analytics** | `1 notes` | HR analytics dashboard evaluations, mock vs real-world data patterns, and visual metrics. | [[01 Knowledge/Data Engineering & Analytics/_Category Index\|Browse Category ➔]] |
-| 📱 **Digital Wellness & Screen Time** | `12 notes` | Doomscrolling disruption, intentional habit friction, focus tools, and iOS screen minimalism. | [[01 Knowledge/Digital Wellness & Screen Time/_Category Index\|Browse Category ➔]] |
-| 📚 **General Knowledge & Reference** | `1 notes` | Hardware device backup archives, technical reference documents, and general research artifacts. | [[01 Knowledge/General Knowledge & Reference/_Category Index\|Browse Category ➔]] |
-| 🏛️ **History, Governance & Politics** | `3 notes` | Modern Indian history, NCERT curriculum excerpts, political strategies, and governance committees. | [[01 Knowledge/History, Governance & Politics/_Category Index\|Browse Category ➔]] |
-| 📜 **Legal, Career & Administration** | `3 notes` | Employment appointment letters, contractual affidavits, formal templates, and institutional records. | [[01 Knowledge/Legal, Career & Administration/_Category Index\|Browse Category ➔]] |
-| 📲 **Mobile Apps & UI Design** | `17 notes` | App concept screenshots, Play Store tablet assets, fitness & travel planning interfaces. | [[01 Knowledge/Mobile Apps & UI Design/_Category Index\|Browse Category ➔]] |
-
----
-
-## 📱 Recent Captures & Activity (Telegram Bot)
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-712280 - ScreenZen - App for Reducing Compulsive Screen Time via Intentional Friction|ScreenZen: Intentional Friction for Digital Detox]]
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-857908 - Opal App- Anti-Doomscrolling and Focus Tool|Opal: Disappearing Apps & Active Friction]]
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-331343 - Clearspace- Anti-Doomscrolling App with Intention Barriers and Physical Challenges|Clearspace: Physical-World Barriers]]
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-244107 - Touch Grass App- Physical-World Friction for Digital Detox|Touch Grass: Physical Verification Detox]]
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-152129 - Cat On Chair- Gamified Focus and Anti-Doomscrolling App|Cat On Chair: Gamified Focus Companion]]
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-292585 - Focus Flight- Gamified Aviation-Themed Focus App|Focus Flight: Loss Aversion Focus App]]
-- [[01 Knowledge/Digital Wellness & Screen Time/KN-529015 - Brain Rot App - Gamified Screen Time Blocker|Brain Rot: Visual Decay Habit Breaker]]
-
----
-
-## 🧭 Vault Navigation & Systems
-- 🗺️ **Maps of Content (MOCs):** [[02 Topics/MOC - Digital Wellness & Habit Friction|Topics & Concept Hubs]]
-- 💡 **Ideas Factory:**
-  - [[07 Ideas/Product & SaaS Opportunities|🚀 Product & SaaS Opportunities]]
-  - [[07 Ideas/Content & Publishing Ideas|✍️ Content & Publishing Ideas]]
-- 🧠 **Brain State & Memories:**
-  - [[06 Memories/Current Context|⚡ Current Context (Brain State)]]
-  - [[06 Memories/Durable Memories|🧠 Consolidated Durable Memories]]
-  - [[06 Memories/Goals|🎯 Active Goals]]
-  - [[06 Memories/Principles|🧭 Core Principles]]
-  - [[06 Memories/Preferences|⚙️ Permanent Preferences]]
-- 📦 **Provenance & Media:**
-  - [[09 Sources/Sources Catalog|🗃️ Sources Catalog (Telegram & TeraBox Archives)]]
-
----
-*Autonomous Cloud Sync active with GitHub `main` and Cloudflare D1.*
+## 🤖 Multi-AI Memory Architecture
+- [[Shared Memory|Multi-AI Shared Working Memory]]
+- [[Principles|Guiding Principles]]

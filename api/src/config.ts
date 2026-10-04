@@ -22,7 +22,15 @@ export interface Env {
   YOUTUBE_REFRESH_TOKEN?: string;
   YOUTUBE_PLAYLIST_ID?: string;
   YOUTUBE_API_KEY?: string;
+
+  // Multi-AI Collaboration & Quota Failover
+  GROK_API_KEY?: string;
+  ANTHROPIC_API_KEY?: string;
+  COPILOT_API_KEY?: string;
+  OPENAI_API_KEY?: string;
+  GROQ_API_KEY?: string;
+  OPENROUTER_API_KEY?: string;
 }
 
-export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash';
-export const FALLBACK_GEMINI_MODEL = 'gemini-3.1-flash-lite';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
+export const FALLBACK_GEMINI_MODEL = 'gemini-2.5-flash';

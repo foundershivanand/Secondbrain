@@ -15,5 +15,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["api/src/**/*"]
+  "include": ["src/**/*", "api/src/**/*"]
 }

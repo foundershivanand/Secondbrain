@@ -15,7 +15,7 @@ topics:
   - Decluttering
   - UX Design
 source_id: SRC-275478
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Decluttering iOS Home Screen by Hiding Apps

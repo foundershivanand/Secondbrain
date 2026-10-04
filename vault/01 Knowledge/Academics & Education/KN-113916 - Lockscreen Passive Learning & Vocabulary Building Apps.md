@@ -15,7 +15,7 @@ topics:
   - EdTech
   - Passive Learning
 source_id: SRC-113916
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Lockscreen Passive Learning & Vocabulary Building Apps

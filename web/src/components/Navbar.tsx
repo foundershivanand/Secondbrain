@@ -20,6 +20,7 @@ interface NavbarProps {
   setActiveTab: (tab: string) => void;
   onOpenCapture: () => void;
   stats: BrainStats | null;
+  isSyncing?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -27,6 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   setActiveTab,
   onOpenCapture,
   stats,
+  isSyncing,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
@@ -69,7 +71,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <div className="flex items-center space-x-2">
               <span className="font-bold text-sm tracking-tight text-white">Second Brain</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Online & Connected" />
+              {isSyncing ? (
+                <span className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
+                  <span>Syncing...</span>
+                </span>
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Online & Connected" />
+              )}
             </div>
           </div>
 

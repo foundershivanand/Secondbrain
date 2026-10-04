@@ -22,6 +22,59 @@ export function App() {
   const [captureCategory, setCaptureCategory] = useState<string | undefined>(undefined);
   const [knowledgeRefreshKey, setKnowledgeRefreshKey] = useState(0);
   const [newlyCreatedNote, setNewlyCreatedNote] = useState<KnowledgeRecord | null>(null);
+  const [isAutoSyncing, setIsAutoSyncing] = useState(false);
+
+  // Auto-sync YouTube liked videos & playlists whenever opening the app
+  useEffect(() => {
+    let isCancelled = false;
+
+    const autoSyncYouTube = async () => {
+      // Throttle rapid reloads within 60 seconds
+      const lastAutoSyncKey = 'secondbrain_last_yt_autosync';
+      const lastSyncTime = parseInt(sessionStorage.getItem(lastAutoSyncKey) || '0', 10);
+      const now = Date.now();
+      if (now - lastSyncTime < 60 * 1000) {
+        return;
+      }
+
+      try {
+        const status = await api.getYoutubeSyncStatus();
+        if (isCancelled || !status.connected) return;
+
+        setIsAutoSyncing(true);
+        sessionStorage.setItem(lastAutoSyncKey, String(now));
+
+        const res = await api.triggerYoutubeSync({ target: 'all', limit: 25 });
+        if (isCancelled) return;
+
+        if (res.newIngested > 0 || (res.playlistsSynced && res.playlistsSynced > 0)) {
+          refreshStats();
+          setKnowledgeRefreshKey((prev) => prev + 1);
+        }
+      } catch (err) {
+        console.debug('Background YouTube auto-sync skipped:', err);
+      } finally {
+        if (!isCancelled) {
+          setIsAutoSyncing(false);
+        }
+      }
+    };
+
+    autoSyncYouTube();
+
+    // Also auto-sync when switching back into the tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        autoSyncYouTube();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      isCancelled = true;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   // Detect Share Target from mobile OS (Android / iOS share sheet)
   useEffect(() => {
@@ -84,6 +137,7 @@ export function App() {
         setActiveTab={setActiveTab}
         onOpenCapture={() => handleOpenCapture('text')}
         stats={stats}
+        isSyncing={isAutoSyncing}
       />
 
       {/* Main View Area */}

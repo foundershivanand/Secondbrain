@@ -15,7 +15,7 @@ topics:
   - RSS
   - Political Strategy
 source_id: SRC-338304
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Political Strategies of RSS and Muslim League During British Rule

@@ -15,7 +15,7 @@ topics:
   - Synthetic Data
   - Business Intelligence
 source_id: SRC-929935
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # HR Analytics Dashboard UI and Mock Data Analysis

@@ -15,7 +15,7 @@ topics:
   - Context-Aware Computing
   - Product Design
 source_id: SRC-295102
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # AI Workout Planner UI Concept by MiniMax M3

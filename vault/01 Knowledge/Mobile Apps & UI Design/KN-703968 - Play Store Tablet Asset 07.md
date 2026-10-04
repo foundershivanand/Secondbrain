@@ -14,7 +14,7 @@ topics:
   - UI/UX Design
   - Tablet Optimization
 source_id: SRC-692358771703968
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Play Store Tablet Asset 07

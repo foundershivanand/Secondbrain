@@ -15,7 +15,7 @@ topics:
   - Decluttering
   - Mobile Habits
 source_id: SRC-437707
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Minimalist iPhone Decluttering: Limiting Home Screen Widgets

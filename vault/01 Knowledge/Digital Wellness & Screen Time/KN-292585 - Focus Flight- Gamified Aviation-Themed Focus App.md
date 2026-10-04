@@ -15,7 +15,7 @@ topics:
   - Behavioral Design
   - Doomscrolling
 source_id: SRC-292585
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Focus Flight: Gamified Aviation-Themed Focus App

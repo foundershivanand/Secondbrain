@@ -15,7 +15,7 @@ topics:
   - Screen Time
   - Behavioral Design
 source_id: SRC-712280
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # ScreenZen - App for Reducing Compulsive Screen Time via Intentional Friction

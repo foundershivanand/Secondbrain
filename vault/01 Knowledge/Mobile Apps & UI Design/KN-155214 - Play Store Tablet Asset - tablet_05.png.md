@@ -13,7 +13,7 @@ topics:
   - UI Design
   - Play Store Assets
 source_id: SRC-45080803155214
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Play Store Tablet Asset - tablet_05.png

@@ -15,7 +15,7 @@ topics:
   - App Blocking
   - Product Design
 source_id: SRC-529015
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Brain Rot App - Gamified Screen Time Blocker

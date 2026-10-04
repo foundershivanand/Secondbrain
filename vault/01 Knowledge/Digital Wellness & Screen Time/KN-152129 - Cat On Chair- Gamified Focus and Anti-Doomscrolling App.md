@@ -15,7 +15,7 @@ topics:
   - UX Design
   - App Blockers
 source_id: SRC-152129
-created: 2026-10-03
+created: 2026-10-04
 ---
 
 # Cat On Chair: Gamified Focus and Anti-Doomscrolling App

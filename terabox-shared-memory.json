@@ -1,95 +1,6 @@
 {
-  "counter": 11,
-  "recent_concepts": [
-    {
-      "number": 1,
-      "title": "12 Angry Men (1957) - Consensus Dynamics and Critical Deliberation",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "Sidney Lumet's courtroom drama serves as a masterclass in consensus-building, the mitigation of cognitive bias, and systematic critical deliberation. It demonstrates how a single persistent dissenter employing inquiry and reasonable doubt can dismantle groupthink and reverse a rush to judgment.",
-      "model": "gemini-3.8-flash",
-      "time": "2026-10-04T18:20:58.825Z"
-    },
-    {
-      "number": 2,
-      "title": "The Dark Knight Rises (2012) - Mythic Culmination, Systemic Collapse, and the Symbolism of Rebirth",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "The concluding chapter of Christopher Nolan's Dark Knight trilogy examines the fragility of institutional peace built on deceit, pitting an aging vigilante against ideological revolution. It deconstructs the Batman mythos by testing whether an incorruptible symbol can transcend individual mortality and systemic societal despair.",
-      "model": "gemini-3.8-flash",
-      "time": "2026-10-04T18:21:05.526Z"
-    },
-    {
-      "number": 3,
-      "title": "The Godfather (1972) - Dynastic Power, Pragmatic Realpolitik, and Tragic Metamorphosis",
-      "category": "02 - Business, Startups & SaaS",
-      "core_idea": "Francis Ford Coppola's cinematic adaptation of Mario Puzo's novel dissects the intersection of institutional corruption, family loyalty, and realpolitik power dynamics. It tracks the tragic moral devolution of Michael Corleone as he trades personal integrity for dynastic survival, demonstrating how systemic violence and organizational survival cannibalize individual morality.",
-      "model": "gemini-3.8-flash",
-      "time": "2026-10-04T18:21:15.736Z"
-    },
-    {
-      "number": 4,
-      "title": "Instagram Idea Capture - Uncategorized",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "This note represents a screenshot taken from Instagram and saved into an 'Ideas' folder, indicating its perceived value as a conceptual or inspirational piece of content for future processing and categorization.",
-      "model": "gemini-2.5-flash",
-      "time": "2026-10-04T18:22:16.288Z"
-    },
-    {
-      "number": 5,
-      "title": "Instagram Idea Capture - Unprocessed Screenshot",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "This note represents a screenshot taken from Instagram, likely containing an idea, piece of information, or inspiration, and stored in a general 'Ideas' folder for future processing. It highlights a common method of [[Digital Content Capture]] from social media platforms to prevent loss of valuable insights.",
-      "model": "gemini-2.5-flash",
-      "time": "2026-10-04T18:22:33.584Z"
-    },
-    {
-      "number": 6,
-      "title": "Instagram Idea Capture - Raw Input",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "This screenshot represents a raw, uncategorized input captured from Instagram, intended for future processing and knowledge extraction. It serves as a placeholder for an idea or piece of information deemed valuable enough to save for later review.",
-      "model": "gemini-2.5-flash",
-      "time": "2026-10-04T18:22:51.288Z"
-    },
-    {
-      "number": 7,
-      "title": "The Godfather Part II (1974) - Generational Power, Moral Decay, and the Cost of Empire",
-      "category": "02 - Business, Startups & SaaS",
-      "core_idea": "This film masterfully intertwines the origin story of Vito Corleone's rise to power with Michael Corleone's desperate struggle to legitimize the family business, illustrating the profound moral decay and personal sacrifices inherent in maintaining a criminal empire across generations.",
-      "model": "gemini-2.5-flash",
-      "time": "2026-10-04T18:25:03.352Z"
-    },
-    {
-      "number": 8,
-      "title": "The Godfather Part III - Redemption, Legacy, and the Unescapable Past",
-      "category": "02 - Business, Startups & SaaS",
-      "core_idea": "Michael Corleone, now an aging patriarch, attempts to legitimize the Corleone family's business dealings and seek redemption for his past sins, only to find himself entangled in new conspiracies and ultimately pay the highest personal price for his life of power and violence.",
-      "model": "gemini-2.5-flash",
-      "time": "2026-10-04T18:25:15.985Z"
-    },
-    {
-      "number": 9,
-      "title": "The Odyssey - Narrative Archetypes, Strategic Cunning, and the Hero's Return",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "Homer's epic narrative establishes the foundational Western archetype of the hero's journey, emphasizing intellect and strategic deceit over brute force. It explores themes of homecoming (nostos), temptation, hubris, and the restoration of civic and familial order against opportunistic exploiters.",
-      "model": "gemini-3.8-flash",
-      "time": "2026-10-04T18:25:25.055Z"
-    },
-    {
-      "number": 10,
-      "title": "The Shawshank Redemption (1994) - Hope, Perseverance, and Institutional Corruption",
-      "category": "06 - Content, Reels & Creative Media",
-      "core_idea": "This film explores the enduring power of hope and perseverance against systemic oppression, following Andy Dufresne's decades-long quest for freedom from a corrupt prison system. It illustrates how the human spirit can resist institutionalization and find redemption through strategic planning and unwavering belief.",
-      "model": "gemini-2.5-flash",
-      "time": "2026-10-04T18:25:37.393Z"
-    },
-    {
-      "number": 11,
-      "title": "AI Implementation Case Study - Strategic Deployment and Practical Impact",
-      "category": "01 - AI & Autonomous Systems",
-      "core_idea": "A structured examination of enterprise or practical artificial intelligence deployment, highlighting problem framing, system architecture, and operational integration. It demonstrates how AI moves from theoretical models to measurable workflow enhancement while navigating implementation bottlenecks and governance.",
-      "model": "gemini-3.8-flash",
-      "time": "2026-10-04T18:25:43.924Z"
-    }
-  ],
+  "counter": 0,
+  "recent_concepts": [],
   "discovered_topics": [
     "AI Agents",
     "Autonomous Systems",
@@ -97,44 +8,16 @@
     "Digital Wellness",
     "Cinema & Storytelling",
     "Academics & Research",
-    "Business & Startups",
-    "Decision Making",
-    "Cognitive Bias",
-    "Psychology of Persuasion",
-    "Knowledge Management",
-    "Digital Content Capture",
-    "Information Curation",
-    "[[Digital Content Capture]]",
-    "[[Information Curation]]",
-    "[[Knowledge Management]]",
-    "[[Business & Startups]]",
-    "[[Decision Making]]",
-    "Power Dynamics",
-    "Ethics",
-    "Family Dynamics",
-    "American History",
-    "Organized Crime",
-    "[[Power Dynamics]]",
-    "[[Ethics]]",
-    "[[Family Dynamics]]",
-    "Literature & Mythology",
-    "Storytelling & Archetypes",
-    "Justice",
-    "Redemption",
-    "Perseverance",
-    "Artificial Intelligence",
-    "Machine Learning",
-    "Digital Transformation",
-    "System Architecture"
+    "Business & Startups"
   ],
   "model_stats": {
-    "gemini-3.8-flash": 5,
-    "gemini-2.5-flash": 6,
+    "gemini-3.8-flash": 0,
+    "gemini-2.5-flash": 0,
     "gemini-3.5-flash-lite": 0,
     "grok": 0,
     "claude": 0,
     "copilot": 0,
     "semantic_engine": 0
   },
-  "last_updated": "2026-10-04T18:25:43.924Z"
+  "last_updated": "2026-10-09T16:29:53.559Z"
 }

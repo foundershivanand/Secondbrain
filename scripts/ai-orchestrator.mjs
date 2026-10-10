@@ -293,7 +293,7 @@ export class MultiAiOrchestrator {
   }
 
   // 1. Gemini Flash Multimodal Call (Primary & High-Fidelity Vision Extractor)
-  async callGemini(metaText, mediaData = null, model = 'gemini-3.8-flash') {
+  async callGemini(metaText, mediaData = null, model = 'gemini-flash-latest') {
     const apiKey = this.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error('GEMINI_API_KEY not configured');
 
@@ -612,18 +612,18 @@ export class MultiAiOrchestrator {
   // BEST MODEL ROUTER & MULTI-AI COLLABORATION (Multimodal Pipeline)
   // ─────────────────────────────────────────────────────────────────────────
   async extractKnowledge(item, metaText, mediaData = null) {
-    // Priority 1: Gemini 3.8 Flash (Most reliable, hyper-accurate multimodal vision model)
+    // Priority 1: Gemini Flash Latest (Most reliable, hyper-accurate multimodal vision model)
     if (!this.isOnCooldown('gemini') && this.env.GEMINI_API_KEY) {
       try {
-        const extraction = await this.callGemini(metaText, mediaData, 'gemini-3.8-flash');
-        return { extraction, modelUsed: 'gemini-3.8-flash' };
+        const extraction = await this.callGemini(metaText, mediaData, 'gemini-flash-latest');
+        return { extraction, modelUsed: 'gemini-flash-latest' };
       } catch (err) {
-        console.warn(`   ⚠️ Gemini 3.8 Flash error (${err.message}). Trying Gemini 2.0 Flash fallback...`);
+        console.warn(`   ⚠️ Gemini Flash Latest error (${err.message}). Trying Gemini Flash Lite fallback...`);
         try {
-          const extraction = await this.callGemini(metaText, mediaData, 'gemini-2.0-flash');
-          return { extraction, modelUsed: 'gemini-2.0-flash' };
+          const extraction = await this.callGemini(metaText, mediaData, 'gemini-flash-lite-latest');
+          return { extraction, modelUsed: 'gemini-flash-lite-latest' };
         } catch (err2) {
-          console.warn(`   ⚠️ Gemini 2.0 Flash error (${err2.message}). Checking multi-AI fallback chain...`);
+          console.warn(`   ⚠️ Gemini Flash Lite error (${err2.message}). Checking multi-AI fallback chain...`);
         }
       }
     }

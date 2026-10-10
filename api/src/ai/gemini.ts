@@ -72,11 +72,32 @@ export async function callGemini(
   }
 
   try {
-    let response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        signal: controller.signal,
+      });
+    } catch (fetchErr: any) {
+      if (fetchErr.name === 'AbortError') {
+        console.warn(`Primary Gemini model timed out after 25s, trying fallback ${FALLBACK_GEMINI_MODEL}...`);
+      } else {
+        console.warn(`Primary Gemini fetch failed: ${fetchErr.message}`);
+      }
+      const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${FALLBACK_GEMINI_MODEL}:generateContent?key=${apiKey}`;
+      response = await fetch(fallbackEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     // Fallback model if primary model (e.g. gemini-2.0-flash) is overloaded or unavailable
     if (!response.ok && modelName !== FALLBACK_GEMINI_MODEL) {
@@ -90,7 +111,7 @@ export async function callGemini(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.warn(`Gemini API error [${response.status}]: ${errorText}. Checking Multi-AI fallback...`);
+      console.warn(`Gemini API error [${response.status}]: ${errorText.slice(0, 150)}. Checking Multi-AI fallback...`);
 
       // Fallback 1: xAI Grok
       if (env.GROK_API_KEY) {
@@ -283,6 +304,7 @@ export async function extractKnowledgeWithGemini(
     url?: string;
     mimeType?: string;
     base64Data?: string;
+    videoFrames?: string[];
     fileUri?: string;
     sourceType?: string;
     userNote?: string;
@@ -319,6 +341,15 @@ export async function extractKnowledgeWithGemini(
         file_uri: content.fileUri,
       },
     });
+  } else if (content.videoFrames && content.videoFrames.length > 0) {
+    for (const frame of content.videoFrames) {
+      parts.push({
+        inline_data: {
+          mime_type: 'image/jpeg',
+          data: frame,
+        },
+      });
+    }
   } else if (content.base64Data && content.mimeType) {
     parts.push({
       inline_data: {

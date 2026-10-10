@@ -73,7 +73,7 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   return (
     <div
       onClick={() => (onOpenModal ? onOpenModal(knowledge) : setIsExpanded(!isExpanded))}
-      className="glass-panel-interactive rounded-2xl p-4 sm:p-5 border border-white/[0.06] hover:border-white/20 transition-all duration-200 space-y-3 cursor-pointer group"
+      className="glass-panel-interactive rounded-2xl p-4 sm:p-5 border border-zinc-800/80 hover:border-zinc-700 transition-all duration-200 space-y-3 cursor-pointer group"
     >
       {/* Header: Badges & Actions */}
       <div className="flex items-start justify-between gap-3">
@@ -84,15 +84,15 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
           </span>
 
           {isReel && (
-            <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20">
-              <Film className="w-3 h-3" />
-              <span>Instagram Reel</span>
+            <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
+              <Film className="w-3 h-3 text-emerald-400" />
+              <span>Reel</span>
             </span>
           )}
 
           {isYt && (
-            <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20">
-              <Video className="w-3 h-3" />
+            <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
+              <Video className="w-3 h-3 text-emerald-400" />
               <span>YouTube</span>
             </span>
           )}
@@ -106,7 +106,7 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
           <button
             onClick={handleCopyMarkdown}
             title="Copy Markdown"
-            className="p-1.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
@@ -114,14 +114,14 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
             href={api.getMarkdownDownloadUrl(knowledge.id)}
             download
             title="Download .md file"
-            className="p-1.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
           >
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
           <button
             onClick={handleDelete}
             title="Delete note"
-            className="p-1.5 rounded-xl bg-zinc-900/60 hover:bg-rose-950/60 text-zinc-400 hover:text-rose-400 transition"
+            className="p-1.5 rounded-xl bg-zinc-900 hover:bg-rose-950/60 text-zinc-400 hover:text-rose-400 transition"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -129,14 +129,14 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
       </div>
 
       {/* Title */}
-      <h3 className="text-sm sm:text-base font-semibold text-white group-hover:text-amber-200 transition-colors leading-snug">
+      <h3 className="text-sm sm:text-base font-semibold text-white group-hover:text-emerald-300 transition-colors leading-snug">
         {knowledge.title}
       </h3>
 
       {/* Core Idea */}
       {knowledge.core_idea && (
-        <div className="p-3 rounded-xl bg-amber-500/[0.06] border border-amber-500/20 text-xs text-amber-100/90 leading-relaxed font-normal">
-          <span className="font-semibold text-amber-400 mr-1.5">Thesis:</span>
+        <div className="p-3 rounded-xl bg-zinc-900/90 border border-zinc-800 text-xs text-zinc-300 leading-relaxed font-normal">
+          <span className="font-semibold text-emerald-400 mr-1.5">Thesis:</span>
           {knowledge.core_idea}
         </div>
       )}

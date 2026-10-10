@@ -443,6 +443,16 @@ async function processStream(streamType, itemsList) {
     const fp = getFingerprint(item);
     const group = fingerprintGroups[fp] || [];
     const duplicates = group.filter(x => (x.fs_id ? String(x.fs_id) : x.path) !== key);
+    const CONTROL_FILE = path.resolve(ROOT_DIR, '.extraction-control.json');
+    if (fs.existsSync(CONTROL_FILE)) {
+      try {
+        const ctrl = JSON.parse(fs.readFileSync(CONTROL_FILE, 'utf8'));
+        if (ctrl.status === 'paused' || ctrl.status === 'stopped' || ctrl.action === 'stop') {
+          console.log(`\n🛑 Extraction stopped by user command.`);
+          break;
+        }
+      } catch {}
+    }
 
     console.log(`[${i + 1}/${itemsList.length}] ${streamType === 'images' ? '📸' : '🎬'} ${item.filename} (${sizeMB} MB)`);
 
@@ -568,8 +578,20 @@ async function main() {
   // Step 1: Process Images
   await processStream('images', imagesToProcess);
 
-  // Step 2: Process Videos
-  await processStream('videos', videosToProcess);
+  // Step 2: Enforce Priority Rule: Unless ALL images & screenshots are completed, do not start videos
+  const remainingPendingImages = allImages.filter(item => {
+    const key = item.fs_id ? String(item.fs_id) : (item.url || item.path);
+    return !progress.images.processed[key] && !progress.images.skipped_personal[key] && !progress.images.skipped_duplicate[key];
+  });
+
+  if (remainingPendingImages.length > 0) {
+    console.log(`\n⏸️ Video stream held: ${remainingPendingImages.length} images/screenshots still pending.`);
+    console.log(`🔒 Per rule: Unless all images & screenshots are done, do not start with videos.`);
+  } else {
+    // Process Videos only when all images are completed
+    console.log(`\n🎉 All images & screenshots completed! Starting video extraction.`);
+    await processStream('videos', videosToProcess);
+  }
 
   // Step 3: Update Master Dashboard
   updateMasterDashboard();

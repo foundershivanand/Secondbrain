@@ -102,58 +102,44 @@ export const SourcesView: React.FC = () => {
   }, {} as Record<string, number>);
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <div className="flex items-center space-x-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            M0 Pointer Architecture
+    <div className="max-w-5xl mx-auto p-4 sm:px-6 py-5 space-y-4 animate-fade-in">
+      {/* Minimal Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2.5">
+          <Database className="w-5 h-5 text-emerald-400" />
+          <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            Sources
+          </h1>
+          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
+            {sources.length}
           </span>
         </div>
-        <h1 className="text-xl sm:text-2xl font-black text-white mt-1 flex items-center space-x-2">
-          <Database className="w-6 h-6 text-emerald-400" />
-          <span>Raw Storage Pointers & Manifests</span>
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
-          Raw 100 GB+ media lives in TeraBox, Google Drive, Telegram, or Discord. Your Second Brain stores only the compressed knowledge and pointers.
-        </p>
-      </div>
-
-      {/* Architectural Guarantee Box */}
-      <div className="p-4 glass-panel rounded-2xl border border-emerald-500/30 bg-emerald-950/15 space-y-1.5 text-xs text-slate-300">
-        <div className="flex items-center space-x-2 text-emerald-400 font-bold">
-          <CheckCircle className="w-4 h-4" />
-          <span>The Zero-Bloat Principle</span>
-        </div>
-        <p>
-          Your Cloudflare D1 database (limited to 500 MB on free tier) and your Obsidian vault stay ultra-lean (under 100 MB). The manifest tracks file locations across external clouds without moving files or re-uploading gigabytes.
-        </p>
       </div>
 
       {/* Tabs */}
       <div className="flex items-center space-x-2 border-b border-zinc-800 pb-2">
         <button
           onClick={() => setActiveTab('catalog')}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+          className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-medium transition ${
             activeTab === 'catalog'
-              ? 'bg-white/10 text-white border border-white/15'
+              ? 'bg-zinc-800 text-white border border-zinc-700'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <Layers className="w-4 h-4 text-amber-400" />
-          <span>Registered Pointers ({sources.length})</span>
+          <Layers className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Catalog ({sources.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTab('manifest')}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+          className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-medium transition ${
             activeTab === 'manifest'
-              ? 'bg-white/10 text-white border border-white/15'
+              ? 'bg-zinc-800 text-white border border-zinc-700'
               : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <Upload className="w-4 h-4 text-emerald-400" />
-          <span>Progressive 100 GB Manifest Importer</span>
+          <Upload className="w-3.5 h-3.5 text-zinc-400" />
+          <span>Import Manifest</span>
         </button>
       </div>
 

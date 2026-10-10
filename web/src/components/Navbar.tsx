@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { BrainStats } from '../types';
+import { ExtractionControl } from './ExtractionControl';
 
 interface NavbarProps {
   activeTab: string;
@@ -58,33 +59,33 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* Top Header - Minimalist & Aesthetic */}
-      <header className="sticky top-0 z-40 w-full bg-[#08090c]/85 backdrop-blur-xl border-b border-white/[0.06]">
+      <header className="sticky top-0 z-40 w-full bg-[#09090b]/90 backdrop-blur-xl border-b border-zinc-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           {/* Logo & Brand */}
           <div
             className="flex items-center space-x-2.5 cursor-pointer select-none group"
             onClick={() => setActiveTab('brain')}
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 flex items-center justify-center text-zinc-950 shadow-sm shadow-amber-500/20 group-hover:scale-105 transition-transform duration-200">
-              <Brain className="w-4 h-4 text-zinc-950 stroke-[2.2]" />
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm group-hover:scale-105 transition-transform duration-200">
+              <Brain className="w-3.5 h-3.5 stroke-[2.2]" />
             </div>
             <div className="flex items-center space-x-2">
-              <span className="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-amber-200 transition-colors">
+              <span className="font-semibold text-sm tracking-tight text-zinc-100 group-hover:text-emerald-300 transition-colors">
                 Second Brain
               </span>
               {isSyncing ? (
-                <span className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/20 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                <span className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
                   <span>Syncing</span>
                 </span>
               ) : (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,0.6)]" title="Online" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" title="Online" />
               )}
             </div>
           </div>
 
           {/* Desktop Navigation - 4 Core Pills + More */}
-          <nav className="hidden md:flex items-center space-x-1 bg-zinc-900/60 p-1 rounded-xl border border-white/[0.06]">
+          <nav className="hidden md:flex items-center space-x-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800">
             {primaryNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -94,14 +95,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => setActiveTab(item.id)}
                   className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                     isActive
-                      ? 'bg-white/10 text-white border border-white/15 shadow-sm'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]'
+                      ? 'bg-zinc-800 text-white border border-zinc-700 shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{item.label}</span>
                   {typeof item.count === 'number' && item.count > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-300">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-300 font-mono">
                       {item.count}
                     </span>
                   )}
@@ -115,8 +116,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
                 className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                   isSecondaryActive || isMoreMenuOpen
-                    ? 'bg-white/10 text-white border border-white/15'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]'
+                    ? 'bg-zinc-800 text-white border border-zinc-700'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
                 }`}
                 title="More Tools"
               >
@@ -126,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* Desktop Dropdown */}
               {isMoreMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0f1118] border border-white/[0.08] shadow-2xl p-1.5 z-50 animate-fade-in space-y-0.5"
+                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#121215] border border-zinc-800 shadow-2xl p-1.5 z-50 animate-fade-in space-y-0.5"
                   onMouseLeave={() => setIsMoreMenuOpen(false)}
                 >
                   {secondaryNavItems.map((item) => {
@@ -138,16 +139,16 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onClick={() => handleSelectSecondary(item.id)}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition ${
                           isActive
-                            ? 'bg-white/10 text-white border border-white/10'
-                            : 'text-zinc-300 hover:bg-white/[0.04] hover:text-white'
+                            ? 'bg-zinc-800 text-white border border-zinc-700'
+                            : 'text-zinc-300 hover:bg-zinc-800/50 hover:text-white'
                         }`}
                       >
                         <div className="flex items-center space-x-2.5">
-                          <Icon className="w-3.5 h-3.5 text-amber-400" />
+                          <Icon className="w-3.5 h-3.5 text-emerald-400" />
                           <span>{item.label}</span>
                         </div>
                         {typeof item.count === 'number' && item.count > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-400">
+                          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-400 font-mono">
                             {item.count}
                           </span>
                         )}
@@ -159,11 +160,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </nav>
 
-          {/* Desktop Quick Capture Button */}
-          <div className="hidden sm:flex items-center space-x-2">
+          {/* Right Header Actions: Extraction Control + Capture Button */}
+          <div className="hidden sm:flex items-center space-x-2.5">
+            <ExtractionControl />
+
             <button
               onClick={onOpenCapture}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-white/20"
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-emerald-400/30"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Capture</span>
@@ -173,16 +176,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       </header>
 
       {/* Mobile Bottom Navigation Bar (Minimalist & Ergonomic) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#08090c]/95 backdrop-blur-2xl border-t border-white/[0.06] px-3 pb-safe">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#09090b]/95 backdrop-blur-2xl border-t border-zinc-800 px-3 pb-safe">
         <div className="grid grid-cols-5 items-center h-14 max-w-md mx-auto">
           {/* 1. Brain */}
           <button
             onClick={() => setActiveTab('brain')}
             className={`flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium transition ${
-              activeTab === 'brain' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'brain' ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Brain className={`w-4 h-4 mb-0.5 ${activeTab === 'brain' ? 'text-amber-400' : ''}`} />
+            <Brain className={`w-4 h-4 mb-0.5 ${activeTab === 'brain' ? 'text-emerald-400' : ''}`} />
             <span>Brain</span>
           </button>
 
@@ -190,10 +193,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setActiveTab('knowledge')}
             className={`flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium transition ${
-              activeTab === 'knowledge' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'knowledge' ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <BookOpen className={`w-4 h-4 mb-0.5 ${activeTab === 'knowledge' ? 'text-amber-400' : ''}`} />
+            <BookOpen className={`w-4 h-4 mb-0.5 ${activeTab === 'knowledge' ? 'text-emerald-400' : ''}`} />
             <span>Notes</span>
           </button>
 
@@ -201,7 +204,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center justify-center">
             <button
               onClick={onOpenCapture}
-              className="w-10 h-10 rounded-full bg-white text-zinc-950 flex items-center justify-center shadow-lg shadow-white/10 active:scale-90 transition border border-white/20"
+              className="w-10 h-10 rounded-full bg-emerald-500 text-zinc-950 flex items-center justify-center shadow-lg shadow-emerald-500/20 active:scale-90 transition border border-emerald-400/30"
               aria-label="Capture"
             >
               <Plus className="w-5 h-5 stroke-[2.5]" />
@@ -212,10 +215,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setActiveTab('inbox')}
             className={`flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium transition ${
-              activeTab === 'inbox' ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              activeTab === 'inbox' ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Inbox className={`w-4 h-4 mb-0.5 ${activeTab === 'inbox' ? 'text-amber-400' : ''}`} />
+            <Inbox className={`w-4 h-4 mb-0.5 ${activeTab === 'inbox' ? 'text-emerald-400' : ''}`} />
             <span>Inbox</span>
           </button>
 
@@ -223,7 +226,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setIsMoreMenuOpen(true)}
             className={`flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium transition ${
-              isSecondaryActive ? 'text-amber-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
+              isSecondaryActive ? 'text-emerald-400 font-bold' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <MoreHorizontal className="w-4 h-4 mb-0.5" />
@@ -240,10 +243,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             if (e.target === e.currentTarget) setIsMoreMenuOpen(false);
           }}
         >
-          <div className="bg-[#0f1118] border-t border-white/[0.08] rounded-t-3xl p-5 space-y-4 max-h-[75vh] overflow-y-auto pb-safe">
-            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-              <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
-                Second Brain Navigation
+          <div className="bg-[#121215] border-t border-zinc-800 rounded-t-3xl p-5 space-y-4 max-h-[75vh] overflow-y-auto pb-safe">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                Tools &amp; Navigation
               </span>
               <button
                 onClick={() => setIsMoreMenuOpen(false)}
@@ -251,6 +254,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <X className="w-4 h-4" />
               </button>
+            </div>
+
+            <div className="pb-1 flex justify-center">
+              <ExtractionControl />
             </div>
 
             <div className="space-y-1.5">

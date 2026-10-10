@@ -16,6 +16,7 @@ import {
   Image as ImageIcon,
   AlertCircle,
   Video,
+  Lock,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceType } from '../types';
@@ -25,7 +26,9 @@ import {
   captureFrameFromVideo,
   requestMicrophoneStream,
   blobToBase64,
+  extractVideoKeyframes,
   ProcessedImage,
+  VideoKeyframe,
 } from '../utils/media';
 import { CANONICAL_CATEGORIES } from '../utils/categories';
 
@@ -57,6 +60,8 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   // Selected Media / Video / Image
   const [photos, setPhotos] = useState<ProcessedImage[]>([]);
   const [videoFile, setVideoFile] = useState<{ name: string; base64: string; mime: string; sizeMB: string } | null>(null);
+  const [videoKeyframes, setVideoKeyframes] = useState<VideoKeyframe[]>([]);
+  const [allImagesDone, setAllImagesDone] = useState<boolean>(true);
   const [isProcessingMedia, setIsProcessingMedia] = useState(false);
   const [mediaProcessingStatus, setMediaProcessingStatus] = useState('');
 
@@ -121,6 +126,9 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
       setError(null);
       setSuccessToast(null);
       setIsLoading(false);
+      api.getExtractionStatus().then((st) => {
+        setAllImagesDone(st.allImagesDone);
+      }).catch(() => {});
     }
   }, [isOpen, initialType, defaultCategory]);
 
@@ -210,27 +218,29 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     e.target.value = '';
   };
 
-  // 2. Handle Reel Video Selection
+  // 2. Handle Reel Video Selection with lightweight keyframe sampling
   const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsProcessingMedia(true);
-    setMediaProcessingStatus('Reading video clip...');
+    setMediaProcessingStatus('Extracting video keyframes...');
     setError(null);
 
     try {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-      const base64 = await blobToBase64(file);
+      // Sample 4 lightweight keyframes (<100KB each) to prevent Cloudflare Worker memory crashes and fetch failed errors
+      const { frames, durationSec } = await extractVideoKeyframes(file, 4, 1080);
+      setVideoKeyframes(frames);
       setVideoFile({
         name: file.name,
-        base64,
-        mime: file.type || 'video/mp4',
+        base64: frames[0]?.base64 || '',
+        mime: 'image/jpeg',
         sizeMB,
       });
       setActiveType('reel');
     } catch (err: any) {
-      setError('Video read error: ' + err.message);
+      setError('Video read notice: ' + (err.message || 'Could not sample video frames.'));
     } finally {
       setIsProcessingMedia(false);
       setMediaProcessingStatus('');
@@ -375,8 +385,13 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     try {
       let payloadBase64: string | undefined;
       let payloadMime: string | undefined;
+      let payloadVideoFrames: string[] | undefined;
 
-      if (videoFile) {
+      if (videoKeyframes.length > 0) {
+        payloadBase64 = videoKeyframes[0].base64;
+        payloadMime = 'image/jpeg';
+        payloadVideoFrames = videoKeyframes.map((f) => f.base64);
+      } else if (videoFile) {
         payloadBase64 = videoFile.base64;
         payloadMime = videoFile.mime;
       } else if (activeType === 'screenshot' && photos.length > 0) {
@@ -400,6 +415,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
         importance,
         base64_data: payloadBase64,
         mime_type: payloadMime,
+        video_frames: payloadVideoFrames,
       });
 
       setIsLoading(false);
@@ -512,15 +528,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               {/* 1. INSTAGRAM REEL TAB */}
               {activeType === 'reel' && (
                 <div className="space-y-3 animate-fade-in">
-                  <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-200 space-y-1">
-                    <div className="flex items-center space-x-1.5 font-bold text-rose-300">
-                      <Film className="w-4 h-4" />
-                      <span>Instagram Reel &amp; Short Video Protocol</span>
+                  {!allImagesDone && (
+                    <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 flex items-center space-x-2.5">
+                      <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <div className="text-[11px] leading-tight">
+                        <span className="font-semibold text-zinc-100">Images prioritized first.</span> Video extractions will unlock once all screenshots and images are completed.
+                      </div>
                     </div>
-                    <p className="text-[11px] text-zinc-300 leading-relaxed">
-                      Extracts 100% full verbatim transcript if spoken, or extracts chronological on-screen text overlays if sound/music only, and synthesizes the core breakthrough idea.
-                    </p>
-                  </div>
+                  )}
 
                   <div>
                     <label className="block text-[11px] font-medium text-zinc-400 mb-1">
@@ -530,31 +545,49 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                       type="url"
                       value={url}
                       onChange={(e) => handleUrlChange(e.target.value)}
-                      placeholder="https://www.instagram.com/reel/C7.../ or post URL"
+                      placeholder="https://www.instagram.com/reel/..."
                       className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none"
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2 text-[11px] text-zinc-500">
-                    <span className="flex-1 border-t border-white/[0.06]" />
-                    <span>OR UPLOAD REEL CLIP</span>
-                    <span className="flex-1 border-t border-white/[0.06]" />
+                  <div className="flex items-center space-x-2 text-[11px] text-zinc-600">
+                    <span className="flex-1 border-t border-zinc-800" />
+                    <span>OR UPLOAD VIDEO</span>
+                    <span className="flex-1 border-t border-zinc-800" />
                   </div>
 
-                  <label className="flex items-center justify-center space-x-2 p-3.5 rounded-2xl border border-dashed border-white/[0.12] hover:border-white/30 bg-zinc-900/40 text-zinc-300 hover:text-white transition cursor-pointer text-xs">
-                    <Video className="w-4 h-4 text-rose-300" />
+                  <label className="flex items-center justify-center space-x-2 p-3.5 rounded-2xl border border-dashed border-zinc-800 hover:border-zinc-700 bg-zinc-900/40 text-zinc-300 hover:text-white transition cursor-pointer text-xs">
+                    <Video className="w-4 h-4 text-emerald-400" />
                     <span>
-                      {videoFile ? `${videoFile.name} (${videoFile.sizeMB} MB)` : 'Upload Reel video file (.mp4, .mov)'}
+                      {videoFile ? `${videoFile.name} (${videoFile.sizeMB} MB)` : 'Choose reel or video file (.mp4, .mov)'}
                     </span>
                     <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" />
                   </label>
+
+                  {videoKeyframes.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
+                        Sampled Keyframes ({videoKeyframes.length})
+                      </span>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {videoKeyframes.map((kf, idx) => (
+                          <div key={idx} className="relative rounded-lg overflow-hidden border border-zinc-800 aspect-video bg-black">
+                            <img src={kf.previewUrl} alt={`Frame ${idx + 1}`} className="w-full h-full object-cover" />
+                            <span className="absolute bottom-0.5 right-1 text-[9px] font-mono text-white/90 bg-black/70 px-1 rounded">
+                              {kf.timestampSec}s
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <textarea
                     rows={2}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Optional: Paste caption, transcript, or on-screen notes if available..."
-                    className="w-full glass-input rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none resize-none"
+                    placeholder="Optional notes or caption..."
+                    className="w-full glass-input rounded-xl p-3 text-xs text-white placeholder-zinc-500 focus:outline-none resize-none"
                   />
                 </div>
               )}
@@ -830,17 +863,22 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               <button
                 type="submit"
                 onClick={(e) => handleCapture(e)}
-                disabled={isLoading || isProcessingMedia}
-                className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 disabled:opacity-40 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-white/20"
+                disabled={isLoading || isProcessingMedia || (activeType === 'reel' && !allImagesDone)}
+                className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:opacity-50 text-zinc-950 font-semibold text-xs shadow-sm transition-all duration-150 active:scale-95 border border-emerald-400/20"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
                     <span>{loadingStep || 'Extracting...'}</span>
                   </>
+                ) : activeType === 'reel' && !allImagesDone ? (
+                  <>
+                    <Lock className="w-3.5 h-3.5 text-zinc-500" />
+                    <span>Images Pending</span>
+                  </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500 stroke-[2.2]" />
+                    <Sparkles className="w-3.5 h-3.5 text-zinc-950 stroke-[2.2]" />
                     <span>Extract Knowledge</span>
                   </>
                 )}

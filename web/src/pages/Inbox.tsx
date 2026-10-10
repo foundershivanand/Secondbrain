@@ -105,21 +105,16 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
       {/* Page Header */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center space-x-2.5">
-          <div className="p-1.5 rounded-lg bg-amber-500/15 text-amber-400">
-            <InboxIcon className="w-5 h-5" />
+          <div className="p-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+            <InboxIcon className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                Ingestion Inbox
-              </h1>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">
-                {sources.length}
-              </span>
-            </div>
-            <p className="text-[11px] text-zinc-400 hidden sm:block">
-              Incoming captures, Telegram webhooks & raw stream
-            </p>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              Inbox
+            </h1>
+            <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
+              {sources.length}
+            </span>
           </div>
         </div>
 
@@ -133,7 +128,7 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
           </button>
           <button
             onClick={onOpenCapture}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm transition active:scale-95 shrink-0 border border-white/20"
+            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm transition active:scale-95 shrink-0 border border-emerald-400/30"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>Capture</span>
@@ -145,17 +140,17 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
       <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
         {[
           { id: 'ALL', label: 'All' },
-          { id: 'PROCESSING', label: 'In Pipeline' },
+          { id: 'PROCESSING', label: 'Processing' },
           { id: 'DONE', label: 'Completed' },
           { id: 'FAILED', label: 'Failed' },
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setFilter(tab.id)}
-            className={`px-3 py-1 rounded-lg font-medium transition whitespace-nowrap ${
+            className={`px-3 py-1.5 rounded-xl font-medium transition whitespace-nowrap ${
               filter === tab.id
-                ? 'bg-white text-zinc-950 font-semibold shadow-sm'
-                : 'bg-zinc-900 border border-zinc-800/80 text-zinc-400 hover:text-white'
+                ? 'bg-emerald-500 text-zinc-950 font-semibold shadow-sm'
+                : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
             {tab.label}

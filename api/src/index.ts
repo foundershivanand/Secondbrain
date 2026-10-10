@@ -15,6 +15,7 @@ import { handleManifestImport } from './routes/manifest';
 import { handleDailyBrief } from './routes/daily-brief';
 import { handleSync } from './routes/sync';
 import { handleYouTubeRoutes, syncYouTubeVideos } from './routes/youtube-sync';
+import { handleExtraction } from './routes/extraction';
 import { runMemoryConsolidationAgent } from './ai/memory-agent';
 import { runEvolutionAgent } from './ai/evolution-agent';
 import { verifyAuth } from './utils/security';
@@ -125,6 +126,11 @@ export default {
           return await handleYouTubeRoutes(request, env, db, ['sync']);
         }
         return await handleSync(request, env, db, pathParts);
+      }
+
+      if (pathname.startsWith('/api/extraction')) {
+        const pathParts = pathname.replace(/^\/api\/extraction\/?/, '').split('/').filter(Boolean);
+        return await handleExtraction(request, db, pathParts);
       }
 
       if (pathname.startsWith('/api/youtube')) {

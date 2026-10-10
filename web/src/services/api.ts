@@ -69,6 +69,41 @@ export const api = {
     return res.json();
   },
 
+  async getExtractionStatus(): Promise<{
+    status: 'idle' | 'running' | 'paused';
+    currentStream: string;
+    imagesExtracted: number;
+    totalKnownImages: number;
+    videosExtracted: number;
+    allImagesDone: boolean;
+    canStartVideos: boolean;
+    message: string;
+  }> {
+    const res = await fetch(`${getApiBaseUrl()}/api/extraction`, {
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to fetch extraction status');
+    return res.json();
+  },
+
+  async startExtraction(): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/api/extraction/start`, {
+      method: 'POST',
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to start extraction');
+    return res.json();
+  },
+
+  async stopExtraction(): Promise<any> {
+    const res = await fetch(`${getApiBaseUrl()}/api/extraction/stop`, {
+      method: 'POST',
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to stop extraction');
+    return res.json();
+  },
+
   async updateBrainState(state: BrainState): Promise<{ success: boolean }> {
     const res = await fetch(`${getApiBaseUrl()}/api/brain-state`, {
       method: 'POST',
@@ -98,6 +133,7 @@ export const api = {
     priority?: string;
     base64_data?: string;
     mime_type?: string;
+    video_frames?: string[];
   }) {
     const res = await fetch(`${getApiBaseUrl()}/api/capture`, {
       method: 'POST',

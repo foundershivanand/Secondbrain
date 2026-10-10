@@ -31,8 +31,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content:
-        '👋 Welcome to your Personal Intelligence OS. I have loaded your current Brain State, atomic ideas, and long-term memory.\n\nAsk me anything you have learned, or trace how your beliefs have evolved over time.',
+      content: 'Ask anything across your captured knowledge, ideas, and notes.',
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);

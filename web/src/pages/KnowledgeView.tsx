@@ -143,31 +143,26 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-7 space-y-5 animate-fade-in">
-      {/* 1. Header & Controls */}
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-6 space-y-4 animate-fade-in">
+      {/* 1. Minimal Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-              Knowledge Notes
-            </h1>
-            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-900 border border-white/[0.08] text-slate-300">
-              {filteredNotes.length}
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Durable atomic insights, Instagram reel transcripts &amp; conceptual breakdowns
-          </p>
+        <div className="flex items-center space-x-2.5">
+          <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+            Notes
+          </h1>
+          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
+            {filteredNotes.length}
+          </span>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center space-x-2">
           {/* View Mode Toggle */}
-          <div className="flex items-center bg-zinc-900/60 p-1 rounded-xl border border-white/[0.06]">
+          <div className="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg text-xs transition ${
-                viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'
+                viewMode === 'grid' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'
               }`}
               title="Grid View"
             >
@@ -176,7 +171,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
             <button
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-lg text-xs transition ${
-                viewMode === 'list' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'
+                viewMode === 'list' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:text-white'
               }`}
               title="List View"
             >
@@ -186,15 +181,15 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
           <button
             onClick={() => onOpenCapture('reel')}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/20 transition active:scale-95"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-medium border border-zinc-800 transition active:scale-95"
           >
-            <Film className="w-3.5 h-3.5" />
+            <Film className="w-3.5 h-3.5 text-emerald-400" />
             <span>Reel</span>
           </button>
 
           <button
             onClick={() => onOpenCapture('text')}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm transition active:scale-95 border border-white/20"
+            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm transition active:scale-95 border border-emerald-400/30"
           >
             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>New Note</span>
@@ -204,13 +199,13 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
       {/* 2. Minimal Search Bar */}
       <div className="relative">
-        <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search by keyword, thesis, title, or #topic..."
-          className="w-full glass-input rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none"
+          placeholder="Search notes..."
+          className="w-full glass-input rounded-xl pl-9 pr-9 py-2 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none"
         />
         {searchQuery && (
           <button
@@ -228,11 +223,11 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
           onClick={() => setActiveCategory(null)}
           className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-150 ${
             activeCategory === null
-              ? 'bg-white text-zinc-950 font-semibold shadow-sm'
-              : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/40 hover:bg-zinc-900 border border-white/[0.04]'
+              ? 'bg-emerald-500 text-zinc-950 font-semibold shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900 border border-zinc-800'
           }`}
         >
-          All Notes ({knowledgeList.length})
+          All ({knowledgeList.length})
         </button>
 
         {categoryStats.map((cat) => (
@@ -241,8 +236,8 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
             onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
             className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-150 ${
               activeCategory === cat.id
-                ? 'bg-white text-zinc-950 font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/40 hover:bg-zinc-900 border border-white/[0.04]'
+                ? 'bg-emerald-500 text-zinc-950 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900 border border-zinc-800'
             }`}
           >
             <span>{cat.icon}</span>

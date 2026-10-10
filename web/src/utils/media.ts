@@ -215,3 +215,100 @@ export function blobToBase64(blob: Blob): Promise<string> {
     reader.readAsDataURL(blob);
   });
 }
+
+export interface VideoKeyframe {
+  base64: string;
+  previewUrl: string;
+  timestampSec: number;
+}
+
+/**
+ * Client-side video keyframe extractor.
+ * Samples evenly spaced frames across the video duration using an HTML5 video + canvas.
+ * Produces ultra-lightweight JPEG frames (<100KB each) to avoid Cloudflare 128MB worker crashes
+ * and eliminate "fetch failed" errors on video uploads.
+ */
+export async function extractVideoKeyframes(
+  file: File,
+  frameCount: number = 4,
+  maxDimension: number = 1080
+): Promise<{ frames: VideoKeyframe[]; durationSec: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+    (video as any).playsInline = true;
+    video.src = url;
+
+    const timeout = setTimeout(() => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Video frame extraction timed out (file may be unsupported or damaged)'));
+    }, 15000);
+
+    video.onloadedmetadata = async () => {
+      try {
+        const duration = video.duration || 10;
+        const validFrames: VideoKeyframe[] = [];
+
+        // Sample timestamps (e.g. 15%, 40%, 65%, 85% of duration)
+        const timestamps: number[] = [];
+        for (let i = 1; i <= frameCount; i++) {
+          timestamps.push((duration / (frameCount + 1)) * i);
+        }
+
+        const canvas = document.createElement('canvas');
+        let targetWidth = video.videoWidth || 960;
+        let targetHeight = video.videoHeight || 540;
+
+        if (targetWidth > maxDimension || targetHeight > maxDimension) {
+          if (targetWidth > targetHeight) {
+            targetHeight = Math.round((targetHeight * maxDimension) / targetWidth);
+            targetWidth = maxDimension;
+          } else {
+            targetWidth = Math.round((targetWidth * maxDimension) / targetHeight);
+            targetHeight = maxDimension;
+          }
+        }
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+
+        for (const t of timestamps) {
+          await new Promise<void>((res) => {
+            const onSeek = () => {
+              video.removeEventListener('seeked', onSeek);
+              if (ctx) {
+                ctx.drawImage(video, 0, 0, targetWidth, targetHeight);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+                validFrames.push({
+                  base64: dataUrl.split(',')[1],
+                  previewUrl: dataUrl,
+                  timestampSec: Math.round(t),
+                });
+              }
+              res();
+            };
+            video.addEventListener('seeked', onSeek);
+            video.currentTime = t;
+          });
+        }
+
+        clearTimeout(timeout);
+        URL.revokeObjectURL(url);
+        resolve({ frames: validFrames, durationSec: Math.round(duration) });
+      } catch (err) {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(url);
+        reject(err);
+      }
+    };
+
+    video.onerror = () => {
+      clearTimeout(timeout);
+      URL.revokeObjectURL(url);
+      reject(new Error(`Could not load video file: ${file.name}`));
+    };
+  });
+}
+

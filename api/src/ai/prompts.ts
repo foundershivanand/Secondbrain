@@ -72,12 +72,25 @@ Assign exactly ONE primary "category" from this strictly bounded canonical taxon
 Always place this exact category as the FIRST item in the "topics" array.
 Only create a new category if it strictly cannot fit into any of the above. Total categories across the vault must never exceed 30.
 
+INSTAGRAM REELS, TIKTOK, SHORTS & SHORT-FORM VIDEO RULES (1-3 MINUTE CLIPS):
+When the source is a video, reel, short, or audio clip:
+1. FULL TRANSCRIPT: If spoken speech or voiceover exists, extract 100% of the verbatim spoken words into "full_transcript" word-for-word.
+2. SOUND WITH ON-SCREEN TEXT (NO SPEECH): If the reel has NO speech (e.g. trending music, ambient sound, beat) and conveys ideas through visual text overlays, title cards, captions, quotes, bullet points, or code snippets:
+   - Extract EVERY on-screen text overlay in sequential order into "visual_text_content".
+   - Describe the audio atmosphere in "audio_sound_profile" (e.g. "Trending upbeat music / no speech; content delivered via on-screen text cards").
+   - Synthesize the chronological on-screen text into "full_transcript" so the note retains a complete textual readout.
+3. CORE IDEA: Distill the definitive breakthrough, thesis, or value into "core_idea".
+4. KEY INFORMATION: Break down all actionable steps, frameworks, or takeaways into "key_information".
+
 Return strictly valid JSON matching this schema:
 {
   "title": "Concise title representing the knowledge",
   "category": "One of the canonical categories above",
-  "source_type": "text | screenshot | image | video | pdf | url | youtube | voice | chat_export",
+  "source_type": "text | screenshot | image | video | reel | pdf | url | youtube | voice | chat_export",
   "core_idea": "Dense, clear summary of the core breakthrough",
+  "full_transcript": "100% complete verbatim spoken transcript or chronological readout of on-screen text",
+  "visual_text_content": ["Array of all on-screen text cards, overlays, and captions in order"],
+  "audio_sound_profile": "Description of audio/sound (e.g. 'Spoken voiceover', 'Trending instrumental sound with text overlays')",
   "key_information": ["Point 1", "Point 2"],
   "atomic_knowledge": [
     {

@@ -54,24 +54,40 @@ export async function processIngestion(
   const knowledgeId = `KN-${rawIdNum}`;
   const rawId = input.rawId || `RAW-${rawIdNum}`;
 
-  // 1. YouTube detection & oEmbed metadata enrichment
+  // 1. YouTube & Instagram Reel detection & enrichment
   const isYouTube =
     input.sourceType === 'youtube' ||
     Boolean(input.url && (input.url.includes('youtube.com') || input.url.includes('youtu.be'))) ||
     Boolean(input.userNote && /\[Category:\s*youtube\]/i.test(input.userNote)) ||
     Boolean(input.userNote && /\byoutube\b/i.test(input.userNote) && input.rawStorage !== 'terabox');
 
-  const effectiveSourceType: SourceType = isYouTube ? 'youtube' : input.sourceType;
+  const isInstagramReel =
+    input.sourceType === 'reel' ||
+    Boolean(input.url && (input.url.includes('instagram.com/reel') || input.url.includes('instagram.com/p/') || input.url.includes('instagram.com/share/') || input.url.includes('instagr.am'))) ||
+    Boolean(input.userNote && /\[Category:\s*(reel|instagram)\]/i.test(input.userNote)) ||
+    Boolean(input.mimeType && input.mimeType.startsWith('video/'));
+
+  const effectiveSourceType: SourceType = isYouTube ? 'youtube' : (isInstagramReel ? 'reel' : input.sourceType);
 
   let enrichedTitle = input.title;
   let videoChannel: string | undefined;
-  if ((isYouTube || input.url?.includes('youtube.com') || input.url?.includes('youtu.be')) && input.url) {
+
+  if (isYouTube && input.url) {
     try {
       const oembedRes = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(input.url)}&format=json`);
       if (oembedRes.ok) {
         const oembedData: any = await oembedRes.json();
         if (oembedData.title) enrichedTitle = oembedData.title;
         if (oembedData.author_name) videoChannel = oembedData.author_name;
+      }
+    } catch {}
+  } else if (isInstagramReel && input.url) {
+    try {
+      const oembedRes = await fetch(`https://api.instagram.com/oembed?url=${encodeURIComponent(input.url)}&omitscript=true`);
+      if (oembedRes.ok) {
+        const oembedData: any = await oembedRes.json();
+        if (oembedData.title && !enrichedTitle) enrichedTitle = oembedData.title;
+        if (oembedData.author_name) videoChannel = `@${oembedData.author_name}`;
       }
     } catch {}
   }
@@ -235,8 +251,13 @@ export async function processIngestion(
       id: knowledgeId,
       source_id: sourceId,
       title: extraction.title || 'Untitled Knowledge',
-      knowledge_type: isYouTube ? 'youtube' : (extraction.source_type || effectiveSourceType),
+      knowledge_type: isYouTube ? 'youtube' : (isInstagramReel ? 'reel' : (extraction.source_type || effectiveSourceType)),
       core_idea: extraction.core_idea || '',
+      full_transcript: extraction.full_transcript || null,
+      visual_text_content: extraction.visual_text_content && extraction.visual_text_content.length > 0
+        ? JSON.stringify(extraction.visual_text_content)
+        : null,
+      audio_sound_profile: extraction.audio_sound_profile || null,
       key_information: JSON.stringify(extraction.key_information || []),
       insights: JSON.stringify(extraction.insights || []),
       my_thought: extraction.my_thought || input.userNote || null,

@@ -32,88 +32,138 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
 
-  const desktopNavItems = [
+  // 4 Primary core navigation tabs (minimal, clear focus)
+  const primaryNavItems = [
     { id: 'brain', label: 'Brain', icon: Brain },
     { id: 'knowledge', label: 'Notes', icon: BookOpen, count: stats?.knowledgeCount },
     { id: 'inbox', label: 'Inbox', icon: Inbox, count: stats?.sourcesCount },
-    { id: 'topics', label: 'Topics', icon: Network },
-    { id: 'ideas', label: 'Ideas', icon: Lightbulb },
-    { id: 'memories', label: 'Memories', icon: Sparkles, count: stats?.durableMemoriesCount },
-    { id: 'sources', label: 'Sources', icon: Database },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'topics', label: 'Graph', icon: Network },
   ];
 
-  const moreMenuItems = [
-    { id: 'topics', label: 'Topics & Knowledge Graph', icon: Network, desc: 'Visual MOC network and concept clusters' },
-    { id: 'ideas', label: 'Ideas & Product Factory', icon: Lightbulb, desc: 'Extracted SaaS, product & content ideas' },
-    { id: 'memories', label: 'Durable Memories', icon: Sparkles, desc: 'Permanent principles, goals & mental models' },
-    { id: 'sources', label: 'Raw Sources & Archives', icon: Database, desc: 'TeraBox, YouTube, and media pointers' },
-    { id: 'settings', label: 'Settings & Cloud Sync', icon: Settings, desc: 'API endpoints, token, and GitHub sync' },
+  // Secondary tools in refined dropdown/more sheet
+  const secondaryNavItems = [
+    { id: 'ideas', label: 'Ideas & Product Factory', icon: Lightbulb, desc: 'SaaS & content opportunities' },
+    { id: 'memories', label: 'Durable Memories', icon: Sparkles, count: stats?.durableMemoriesCount, desc: 'Permanent principles & mental models' },
+    { id: 'sources', label: 'Raw Sources', icon: Database, desc: 'External files & cloud pointers' },
+    { id: 'settings', label: 'Settings', icon: Settings, desc: 'API endpoints, token & GitHub sync' },
   ];
 
-  const handleSelectMoreItem = (id: string) => {
+  const handleSelectSecondary = (id: string) => {
     setActiveTab(id);
     setIsMoreMenuOpen(false);
   };
 
+  const isSecondaryActive = secondaryNavItems.some((item) => item.id === activeTab);
+
   return (
     <>
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80">
+      {/* Top Header - Minimalist & Aesthetic */}
+      <header className="sticky top-0 z-40 w-full bg-[#090d16]/80 backdrop-blur-xl border-b border-white/[0.06]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           {/* Logo & Brand */}
           <div
-            className="flex items-center space-x-2.5 cursor-pointer select-none"
+            className="flex items-center space-x-2.5 cursor-pointer select-none group"
             onClick={() => setActiveTab('brain')}
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-purple-500/20">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-sm shadow-purple-500/25 group-hover:scale-105 transition-transform duration-200">
               <Brain className="w-4 h-4 text-white" />
             </div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-sm tracking-tight text-white">Second Brain</span>
+              <span className="font-semibold text-sm tracking-tight text-white group-hover:text-purple-300 transition-colors">
+                Second Brain
+              </span>
               {isSyncing ? (
-                <span className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30 animate-pulse">
+                <span className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] bg-purple-500/15 text-purple-300 border border-purple-500/20 animate-pulse">
                   <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-ping" />
-                  <span>Syncing...</span>
+                  <span>Syncing</span>
                 </span>
               ) : (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" title="Online & Connected" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/80 shadow-[0_0_8px_rgba(52,211,153,0.6)]" title="Online" />
               )}
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-1">
-            {desktopNavItems.map((item) => {
+          {/* Desktop Navigation - 4 Core Pills + More */}
+          <nav className="hidden md:flex items-center space-x-1 bg-slate-900/40 p-1 rounded-xl border border-white/[0.05]">
+            {primaryNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
                     isActive
-                      ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                      ? 'bg-purple-600/20 text-purple-200 border border-purple-500/30 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{item.label}</span>
                   {typeof item.count === 'number' && item.count > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 ml-0.5">
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300">
                       {item.count}
                     </span>
                   )}
                 </button>
               );
             })}
+
+            {/* More Menu Dropdown Toggle */}
+            <div className="relative">
+              <button
+                onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
+                className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+                  isSecondaryActive || isMoreMenuOpen
+                    ? 'bg-purple-600/20 text-purple-200 border border-purple-500/30'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                }`}
+                title="More Tools"
+              >
+                <MoreHorizontal className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Desktop Dropdown */}
+              {isMoreMenuOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#0d1322] border border-white/[0.08] shadow-2xl p-1.5 z-50 animate-fade-in space-y-0.5"
+                  onMouseLeave={() => setIsMoreMenuOpen(false)}
+                >
+                  {secondaryNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => handleSelectSecondary(item.id)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition ${
+                          isActive
+                            ? 'bg-purple-600/20 text-purple-300'
+                            : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2.5">
+                          <Icon className="w-3.5 h-3.5 text-purple-400" />
+                          <span>{item.label}</span>
+                        </div>
+                        {typeof item.count === 'number' && item.count > 0 && (
+                          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-400">
+                            {item.count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </nav>
 
-          {/* Desktop Capture Action */}
+          {/* Desktop Quick Capture Button */}
           <div className="hidden sm:flex items-center space-x-2">
             <button
               onClick={onOpenCapture}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-sm shadow-purple-600/25 transition active:scale-95"
+              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-sm shadow-purple-600/20 transition-all duration-150 active:scale-95 border border-purple-400/20"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Capture</span>
@@ -122,8 +172,8 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Bar (5 clean, accessible touch targets) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800/80 px-2 pb-safe">
+      {/* Mobile Bottom Navigation Bar (Minimalist & Ergonomic) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#090d16]/95 backdrop-blur-2xl border-t border-white/[0.06] px-3 pb-safe">
         <div className="grid grid-cols-5 items-center h-14 max-w-md mx-auto">
           {/* 1. Brain */}
           <button
@@ -132,7 +182,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'brain' ? 'text-purple-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Brain className={`w-5 h-5 mb-0.5 ${activeTab === 'brain' ? 'text-purple-400 scale-105' : ''}`} />
+            <Brain className={`w-4 h-4 mb-0.5 ${activeTab === 'brain' ? 'text-purple-400' : ''}`} />
             <span>Brain</span>
           </button>
 
@@ -143,17 +193,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'knowledge' ? 'text-purple-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <BookOpen className={`w-5 h-5 mb-0.5 ${activeTab === 'knowledge' ? 'text-purple-400 scale-105' : ''}`} />
+            <BookOpen className={`w-4 h-4 mb-0.5 ${activeTab === 'knowledge' ? 'text-purple-400' : ''}`} />
             <span>Notes</span>
           </button>
 
-          {/* 3. Center Capture Button - Guaranteed Tap Target */}
+          {/* 3. Center Capture Button */}
           <div className="flex items-center justify-center">
             <button
               onClick={onOpenCapture}
-              className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-600/30 active:scale-90 transition border border-purple-400/30"
-              aria-label="Quick Capture"
-              title="Quick Capture"
+              className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-purple-600/30 active:scale-90 transition border border-purple-400/30"
+              aria-label="Capture"
             >
               <Plus className="w-5 h-5" />
             </button>
@@ -166,37 +215,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'inbox' ? 'text-purple-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Inbox className={`w-5 h-5 mb-0.5 ${activeTab === 'inbox' ? 'text-purple-400 scale-105' : ''}`} />
+            <Inbox className={`w-4 h-4 mb-0.5 ${activeTab === 'inbox' ? 'text-purple-400' : ''}`} />
             <span>Inbox</span>
           </button>
 
-          {/* 5. More Menu */}
+          {/* 5. More */}
           <button
             onClick={() => setIsMoreMenuOpen(true)}
             className={`flex flex-col items-center justify-center h-full py-1 text-[10px] font-medium transition ${
-              ['topics', 'ideas', 'memories', 'sources', 'settings'].includes(activeTab)
-                ? 'text-purple-400 font-bold'
-                : 'text-slate-400 hover:text-slate-200'
+              isSecondaryActive ? 'text-purple-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <MoreHorizontal className="w-5 h-5 mb-0.5" />
+            <MoreHorizontal className="w-4 h-4 mb-0.5" />
             <span>More</span>
           </button>
         </div>
       </div>
 
-      {/* Mobile "More" Slide-up Sheet */}
+      {/* Mobile Slide-up Sheet */}
       {isMoreMenuOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex flex-col justify-end md:hidden animate-fade-in"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col justify-end md:hidden animate-fade-in"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsMoreMenuOpen(false);
           }}
         >
-          <div className="bg-slate-900 border-t border-slate-800 rounded-t-2xl p-4 space-y-3 max-h-[75vh] overflow-y-auto pb-safe">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Explore Second Brain
+          <div className="bg-[#0d1322] border-t border-white/[0.08] rounded-t-3xl p-5 space-y-4 max-h-[75vh] overflow-y-auto pb-safe">
+            <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                Second Brain Navigation
               </span>
               <button
                 onClick={() => setIsMoreMenuOpen(false)}
@@ -206,27 +253,29 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            <div className="space-y-1">
-              {moreMenuItems.map((item) => {
+            <div className="space-y-1.5">
+              {[...primaryNavItems, ...secondaryNavItems].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 return (
                   <button
                     key={item.id}
-                    onClick={() => handleSelectMoreItem(item.id)}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl transition text-left ${
+                    onClick={() => handleSelectSecondary(item.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl transition text-left ${
                       isActive
                         ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
                         : 'text-slate-300 hover:bg-slate-800/60'
                     }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-purple-400">
+                      <div className="p-2 rounded-xl bg-slate-950 border border-white/[0.06] text-purple-400">
                         <Icon className="w-4 h-4" />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-white">{item.label}</div>
-                        <div className="text-[11px] text-slate-400">{item.desc}</div>
+                        {'desc' in item && typeof (item as any).desc === 'string' && (
+                          <div className="text-[11px] text-slate-400">{(item as any).desc}</div>
+                        )}
                       </div>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-500" />

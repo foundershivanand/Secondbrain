@@ -5,6 +5,7 @@ export type SourceType =
   | 'pdf'
   | 'url'
   | 'youtube'
+  | 'reel'
   | 'video'
   | 'voice'
   | 'chat_export'
@@ -60,6 +61,9 @@ export interface KnowledgeRecord {
   title: string;
   knowledge_type: string;
   core_idea: string;
+  full_transcript?: string | null;
+  visual_text_content?: string | null; // JSON string array
+  audio_sound_profile?: string | null;
   key_information: string; // JSON string
   insights: string;        // JSON string (AI suggestions)
   my_thought: string | null;// Explicit user thoughts

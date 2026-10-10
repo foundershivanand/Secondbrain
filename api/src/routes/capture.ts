@@ -19,6 +19,10 @@ export async function handleCapture(request: Request, env: Env, db: Database): P
       let inferredType: SourceType = body.source_type || 'text';
       if (body.url && (body.url.includes('youtube.com') || body.url.includes('youtu.be'))) {
         inferredType = 'youtube';
+      } else if (body.url && (body.url.includes('instagram.com/reel') || body.url.includes('instagram.com/p/') || body.url.includes('instagram.com/share/') || body.url.includes('instagr.am/'))) {
+        inferredType = 'reel';
+      } else if (body.url && (body.url.includes('tiktok.com/') || body.url.includes('shorts'))) {
+        inferredType = 'reel';
       } else if (body.url && inferredType === 'text') {
         inferredType = 'url';
       }
@@ -64,8 +68,20 @@ export async function handleCapture(request: Request, env: Env, db: Database): P
         base64Data = btoa(binary);
       }
 
+      let detectedType = sourceType;
+      if (file) {
+        if (mimeType?.startsWith('image/')) detectedType = 'screenshot';
+        else if (mimeType?.includes('pdf')) detectedType = 'pdf';
+        else if (mimeType?.startsWith('video/')) detectedType = 'reel';
+        else if (mimeType?.startsWith('audio/')) detectedType = 'voice';
+      } else if (url) {
+        if (url.includes('youtube.com') || url.includes('youtu.be')) detectedType = 'youtube';
+        else if (url.includes('instagram.com/reel') || url.includes('instagram.com/p/') || url.includes('instagram.com/share/') || url.includes('instagr.am')) detectedType = 'reel';
+        else if (url.includes('tiktok.com')) detectedType = 'reel';
+      }
+
       input = {
-        sourceType: file ? (mimeType?.startsWith('image/') ? 'screenshot' : mimeType?.includes('pdf') ? 'pdf' : sourceType) : sourceType,
+        sourceType: detectedType,
         text: text || undefined,
         url: url || undefined,
         rawStorage: rawStorage || undefined,

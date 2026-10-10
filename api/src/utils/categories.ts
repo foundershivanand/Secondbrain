@@ -21,6 +21,16 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     ],
   },
   {
+    id: 'content-reels',
+    name: 'Content, Reels & Creative Media',
+    icon: '🎬',
+    keywords: [
+      'reel', 'reels', 'instagram', 'tiktok', 'short', 'shorts', 'content creator', 'video editing',
+      'capcut', 'premiere', 'audio sound', 'transcript', 'on-screen text', 'visual text',
+      'hook', 'viral', 'storytelling', 'social media', 'creator'
+    ],
+  },
+  {
     id: 'ai-llms',
     name: 'Artificial Intelligence & LLMs',
     icon: '🤖',

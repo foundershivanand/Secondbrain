@@ -30,7 +30,8 @@ export interface Env {
   OPENAI_API_KEY?: string;
   GROQ_API_KEY?: string;
   OPENROUTER_API_KEY?: string;
+  INCEPTION_API_KEY?: string;
 }
 
 export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
-export const FALLBACK_GEMINI_MODEL = 'gemini-2.5-flash';
+export const FALLBACK_GEMINI_MODEL = 'gemini-2.0-flash';

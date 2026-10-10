@@ -151,7 +151,65 @@ export async function callGemini(
         }
       }
 
-      // Fallback 3: Copilot / OpenAI / Groq
+      // Fallback 3: Inception Labs (Ultra-Fast Mercury Diffusion LLM)
+      if (env.INCEPTION_API_KEY) {
+        try {
+          const userText = parts.map(p => p.text || '').join('\n');
+          const incRes = await fetch('https://api.inceptionlabs.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${env.INCEPTION_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'mercury-2.5',
+              messages: [
+                { role: 'system', content: (systemInstruction || '') + '\nOutput valid JSON.' },
+                { role: 'user', content: userText }
+              ],
+              temperature: 0.2
+            })
+          });
+          if (incRes.ok) {
+            const data: any = await incRes.json();
+            const text = data.choices?.[0]?.message?.content;
+            if (text) return text;
+          }
+        } catch (incErr) {
+          console.warn('Inception Labs fallback error:', incErr);
+        }
+      }
+
+      // Fallback 4: OpenRouter
+      if (env.OPENROUTER_API_KEY) {
+        try {
+          const userText = parts.map(p => p.text || '').join('\n');
+          const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${env.OPENROUTER_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'openrouter/auto',
+              messages: [
+                { role: 'system', content: (systemInstruction || '') + '\nOutput valid JSON.' },
+                { role: 'user', content: userText }
+              ],
+              temperature: 0.2
+            })
+          });
+          if (orRes.ok) {
+            const data: any = await orRes.json();
+            const text = data.choices?.[0]?.message?.content;
+            if (text) return text;
+          }
+        } catch (orErr) {
+          console.warn('OpenRouter fallback error:', orErr);
+        }
+      }
+
+      // Fallback 5: Copilot / OpenAI / Groq
       const openaiKey = env.COPILOT_API_KEY || env.OPENAI_API_KEY || env.GROQ_API_KEY;
       if (openaiKey) {
         try {
@@ -235,6 +293,23 @@ export async function extractKnowledgeWithGemini(
   let promptInstruction = `Source Type: ${content.sourceType || 'text'}\n`;
   if (content.url) promptInstruction += `Source URL: ${content.url}\n`;
   if (content.userNote) promptInstruction += `User Note / Context: ${content.userNote}\n`;
+
+  if (
+    content.sourceType === 'reel' ||
+    content.sourceType === 'video' ||
+    content.mimeType?.startsWith('video/') ||
+    (content.url && (content.url.includes('instagram.com') || content.url.includes('tiktok.com')))
+  ) {
+    promptInstruction += `\nSPECIAL 1-3 MINUTE INSTAGRAM REEL & VIDEO EXTRACTION DIRECTIVE:
+1. WHOLE TRANSCRIPT: If spoken words or voiceover exists, transcribe 100% of the verbatim spoken words into "full_transcript" word-for-word.
+2. SOUND WITH ON-SCREEN TEXT CONTENT (NO SPEECH): If the reel has NO speech (e.g. music only, trending audio beat) and conveys ideas through visual text overlays, title cards, captions, quote cards, bullet points, or code snippets:
+   - Extract 100% of the on-screen text overlays in sequential order into "visual_text_content".
+   - Describe the audio atmosphere in "audio_sound_profile" (e.g. "Trending music with beat; no speech. Delivered via visual text overlays.").
+   - Synthesize the chronological on-screen text into "full_transcript" so the note retains a complete textual readout.
+3. THE IDEA / BREAKTHROUGH: Distill the fundamental thesis or value proposition into "core_idea".
+4. COMPREHENSIVE NOTE CREATION: Break down all actionable steps, frameworks, or takeaways into "key_information" and "atomic_knowledge".\n`;
+  }
+
   promptInstruction += `\nAnalyze the following source material:\n`;
 
   if (content.fileUri && content.mimeType) {

@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS knowledge (
     title TEXT NOT NULL,
     knowledge_type TEXT NOT NULL,
     core_idea TEXT,
+    full_transcript TEXT,     -- Complete verbatim spoken transcript or chronological on-screen text readout
+    visual_text_content TEXT, -- JSON array of strings: on-screen text cards, captions, quote overlays
+    audio_sound_profile TEXT, -- Audio atmosphere description (speech, trending music, beat)
     key_information TEXT,     -- JSON array of strings
     insights TEXT,            -- JSON array of strings (AI insights)
     my_thought TEXT,          -- Explicit User Thoughts (Distinguished from AI)

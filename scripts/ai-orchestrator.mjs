@@ -39,11 +39,12 @@ export class SharedMemoryManager {
       ],
       model_stats: {
         'gemini-3.8-flash': 0,
-        'gemini-2.5-flash': 0,
-        'gemini-3.5-flash-lite': 0,
-        'grok': 0,
-        'claude': 0,
-        'copilot': 0,
+        'gemini-2.0-flash': 0,
+        'inception-mercury': 0,
+        'openrouter': 0,
+        'claude-3-5-haiku': 0,
+        'grok-beta': 0,
+        'copilot-openai': 0,
         'semantic_engine': 0
       },
       last_updated: new Date().toISOString()
@@ -221,10 +222,27 @@ export function classifyCategory(item, extraction = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// PROMPTS & EXTRACTION SCHEMA
+// PROMPTS & EXTRACTION SCHEMA (Multimodal Vision & Audio Enhanced)
 // ─────────────────────────────────────────────────────────────────────────────
 export const EXTRACTION_SCHEMA_PROMPT = `You are the Lead Knowledge Architect for a personal Second Brain.
-Your role: Transform raw file metadata, OCR hints, and path context into an elegant, high-density structured knowledge note.
+Your role: Transform raw media (screenshots, videos, audio, documents) and contextual metadata into an elegant, high-density structured knowledge note.
+
+MULTIMODAL EXTRACTION PROTOCOL:
+- When an image/screenshot is provided:
+  * Exhaustive OCR reading: Transcribe and interpret all visible text, headers, statistics, formulas, and labels.
+  * Visual & architectural decomposition: Analyze UI wireframes, design systems, diagrams, charts, infographics, code snippets, or tweet threads.
+  * Extract the FUNDAMENTAL THESIS/CORE IDEA: Why did the human save this screenshot? What is the non-obvious insight, principle, or mechanism?
+  * Do NOT give generic descriptions like "This is a screenshot of an app". Give the EXACT subject, mechanism, or strategy shown.
+
+INSTAGRAM REELS, TIKTOK, SHORTS & SHORT-FORM VIDEO RULES (1-3 MINUTE CLIPS):
+- When the source is a video, reel, short, or clip:
+  * 100% WHOLE TRANSCRIPT: If spoken speech or voiceover exists, extract 100% of the verbatim spoken words into "full_transcript" word-for-word.
+  * SOUND WITH ON-SCREEN TEXT (NO SPEECH): If the reel has NO speech (e.g. trending music, ambient sound, beat) and conveys ideas through visual text overlays, title cards, captions, quotes, bullet points, or code snippets:
+    - Extract EVERY on-screen text overlay in sequential order into "visual_text_content".
+    - Describe the audio atmosphere in "audio_sound_profile" (e.g. "Trending upbeat music / no speech; content delivered via on-screen text cards").
+    - Synthesize the chronological on-screen text into "full_transcript" so the note retains a complete textual readout.
+  * THE IDEA: Distill the definitive breakthrough, thesis, or value into "core_idea".
+  * KEY INFORMATION: Break down all actionable steps, frameworks, or takeaways into "key_information".
 
 NOISE REDUCTION RULE:
 If the source is purely a casual personal family snapshot, selfie, or random personal photo that has NO conceptual knowledge, diagrams, UI wireframes, educational info, or text notes:
@@ -233,8 +251,11 @@ Set "is_personal_media": true, "should_skip_note": true, "title": "Personal Medi
 Otherwise, produce strictly valid JSON matching this schema:
 {
   "title": "Clean, memorable conceptual title (no file extensions)",
-  "source_type": "video | screenshot | pdf | voice | text",
+  "source_type": "video | reel | screenshot | pdf | voice | text",
   "core_idea": "2-3 sentence fundamental essence of what this media/note teaches or represents",
+  "full_transcript": "100% complete verbatim spoken transcript or chronological readout of on-screen text",
+  "visual_text_content": ["Array of all on-screen text cards, overlays, and captions in order"],
+  "audio_sound_profile": "Description of audio/sound (e.g. 'Spoken voiceover', 'Trending music with on-screen text cards')",
   "key_information": ["Concrete takeaway 1", "Concrete takeaway 2", "Concrete takeaway 3"],
   "atomic_knowledge": [
     {
@@ -271,20 +292,31 @@ export class MultiAiOrchestrator {
     console.warn(`⏳ [${provider}] set on cooldown for ${Math.round(durationMs / 1000)}s.`);
   }
 
-  // 1. Gemini Flash Call (Primary & Best Extractor)
-  async callGemini(metaText, model = 'gemini-3.8-flash') {
+  // 1. Gemini Flash Multimodal Call (Primary & High-Fidelity Vision Extractor)
+  async callGemini(metaText, mediaData = null, model = 'gemini-3.8-flash') {
     const apiKey = this.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error('GEMINI_API_KEY not configured');
 
     const sharedContext = this.sharedMemory.getSharedContext();
     const fullSystemInstruction = `${EXTRACTION_SCHEMA_PROMPT}\n\n${sharedContext}`;
 
+    const parts = [];
+    if (mediaData && mediaData.base64 && mediaData.mimeType) {
+      parts.push({
+        inlineData: {
+          mimeType: mediaData.mimeType,
+          data: mediaData.base64
+        }
+      });
+    }
+    parts.push({ text: metaText });
+
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: metaText }] }],
+        contents: [{ parts }],
         systemInstruction: { parts: [{ text: fullSystemInstruction }] },
         generationConfig: {
           temperature: 0.2,
@@ -344,12 +376,25 @@ export class MultiAiOrchestrator {
     return JSON.parse(content);
   }
 
-  // 3. Anthropic Claude Call
-  async callClaude(metaText) {
+  // 3. Anthropic Claude Call (Multimodal Vision Supported)
+  async callClaude(metaText, mediaData = null) {
     const apiKey = this.env.ANTHROPIC_API_KEY || this.env.CLAUDE_API_KEY;
     if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured');
 
     const sharedContext = this.sharedMemory.getSharedContext();
+    const userContent = [];
+    if (mediaData && mediaData.base64 && mediaData.mimeType) {
+      userContent.push({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: mediaData.mimeType,
+          data: mediaData.base64
+        }
+      });
+    }
+    userContent.push({ type: 'text', text: metaText });
+
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -360,7 +405,7 @@ export class MultiAiOrchestrator {
       body: JSON.stringify({
         model: 'claude-3-5-haiku-20241022',
         system: `${EXTRACTION_SCHEMA_PROMPT}\n\n${sharedContext}\nOutput valid JSON only.`,
-        messages: [{ role: 'user', content: metaText }],
+        messages: [{ role: 'user', content: userContent }],
         max_tokens: 1024,
         temperature: 0.2
       })
@@ -378,9 +423,9 @@ export class MultiAiOrchestrator {
     return JSON.parse(jsonMatch ? jsonMatch[0] : content);
   }
 
-  // 4. Copilot / OpenAI / Groq Call
-  async callCopilotOrOpenAi(metaText) {
-    const apiKey = this.env.COPILOT_API_KEY || this.env.OPENAI_API_KEY || this.env.GROQ_API_KEY || this.env.OPENROUTER_API_KEY;
+  // 4. Copilot / OpenAI / Groq Call (Multimodal Vision Supported)
+  async callCopilotOrOpenAi(metaText, mediaData = null) {
+    const apiKey = this.env.COPILOT_API_KEY || this.env.OPENAI_API_KEY || this.env.GROQ_API_KEY;
     if (!apiKey) throw new Error('No Copilot/OpenAI/Groq API key configured');
 
     let endpoint = 'https://api.openai.com/v1/chat/completions';
@@ -388,13 +433,21 @@ export class MultiAiOrchestrator {
 
     if (this.env.GROQ_API_KEY) {
       endpoint = 'https://api.groq.com/openai/v1/chat/completions';
-      model = 'llama-3.3-70b-versatile';
-    } else if (this.env.OPENROUTER_API_KEY) {
-      endpoint = 'https://openrouter.ai/api/v1/chat/completions';
-      model = 'meta-llama/llama-3.3-70b-instruct:free';
+      model = mediaData ? 'llama-3.2-11b-vision-preview' : 'llama-3.3-70b-versatile';
     }
 
     const sharedContext = this.sharedMemory.getSharedContext();
+    const userContent = [];
+    if (mediaData && mediaData.base64 && mediaData.mimeType) {
+      userContent.push({
+        type: 'image_url',
+        image_url: {
+          url: `data:${mediaData.mimeType};base64,${mediaData.base64}`
+        }
+      });
+    }
+    userContent.push({ type: 'text', text: metaText });
+
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
@@ -405,7 +458,7 @@ export class MultiAiOrchestrator {
         model,
         messages: [
           { role: 'system', content: `${EXTRACTION_SCHEMA_PROMPT}\n\n${sharedContext}\nRespond with JSON.` },
-          { role: 'user', content: metaText }
+          { role: 'user', content: userContent }
         ],
         temperature: 0.2
       })
@@ -423,7 +476,94 @@ export class MultiAiOrchestrator {
     return JSON.parse(jsonMatch ? jsonMatch[0] : content);
   }
 
-  // 5. Intelligent Semantic Fallback Engine (Offline resilient parser)
+  // 5. Inception Labs Mercury 2.5 (Diffusion LLM, ultra-fast generation)
+  async callInception(metaText) {
+    const apiKey = this.env.INCEPTION_API_KEY || this.env.INCEPTION_LABS_API_KEY;
+    if (!apiKey) throw new Error('INCEPTION_API_KEY not configured');
+
+    const sharedContext = this.sharedMemory.getSharedContext();
+    const res = await fetch('https://api.inceptionlabs.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'mercury-2.5',
+        messages: [
+          { role: 'system', content: `${EXTRACTION_SCHEMA_PROMPT}\n\n${sharedContext}\nRespond strictly with valid JSON only.` },
+          { role: 'user', content: metaText }
+        ],
+        temperature: 0.2
+      })
+    });
+
+    if (res.status === 429) {
+      this.setCooldown('inception', 60000);
+      throw new Error('Inception Labs 429 Rate Limit');
+    }
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Inception Labs error [${res.status}]: ${err.slice(0, 150)}`);
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content;
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : content);
+  }
+
+  // 6. OpenRouter Multi-Model Call
+  async callOpenRouter(metaText, mediaData = null) {
+    const apiKey = this.env.OPENROUTER_API_KEY;
+    if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured');
+
+    const sharedContext = this.sharedMemory.getSharedContext();
+    const userContent = [];
+    if (mediaData && mediaData.base64 && mediaData.mimeType) {
+      userContent.push({
+        type: 'image_url',
+        image_url: {
+          url: `data:${mediaData.mimeType};base64,${mediaData.base64}`
+        }
+      });
+    }
+    userContent.push({ type: 'text', text: metaText });
+
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'openrouter/auto',
+        messages: [
+          { role: 'system', content: `${EXTRACTION_SCHEMA_PROMPT}\n\n${sharedContext}\nRespond strictly with valid JSON only.` },
+          { role: 'user', content: userContent }
+        ],
+        temperature: 0.2
+      })
+    });
+
+    if (res.status === 429) {
+      this.setCooldown('openrouter', 60000);
+      throw new Error('OpenRouter 429 Rate Limit');
+    }
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`OpenRouter error [${res.status}]: ${err.slice(0, 150)}`);
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content;
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : content);
+  }
+
+  // 7. Intelligent Semantic Fallback Engine (Offline resilient parser)
   generateSemanticKnowledge(item) {
     const filename = (item.filename || item.name || 'Untitled')
       .replace(/\.[^/.]+$/, '')
@@ -469,26 +609,70 @@ export class MultiAiOrchestrator {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // BEST MODEL ROUTER & MULTI-AI COLLABORATION
+  // BEST MODEL ROUTER & MULTI-AI COLLABORATION (Multimodal Pipeline)
   // ─────────────────────────────────────────────────────────────────────────
-  async extractKnowledge(item, metaText) {
-    // Priority 1: Gemini 3.8 Flash (Best model for structured information extraction)
+  async extractKnowledge(item, metaText, mediaData = null) {
+    // Priority 1: Gemini 3.8 Flash (Most reliable, hyper-accurate multimodal vision model)
     if (!this.isOnCooldown('gemini') && this.env.GEMINI_API_KEY) {
       try {
-        const extraction = await this.callGemini(metaText, 'gemini-3.8-flash');
+        const extraction = await this.callGemini(metaText, mediaData, 'gemini-3.8-flash');
         return { extraction, modelUsed: 'gemini-3.8-flash' };
       } catch (err) {
-        console.warn(`   ⚠️ Gemini 3.8 Flash error (${err.message}). Trying Gemini 2.5 Flash fallback...`);
+        console.warn(`   ⚠️ Gemini 3.8 Flash error (${err.message}). Trying Gemini 2.0 Flash fallback...`);
         try {
-          const extraction = await this.callGemini(metaText, 'gemini-2.5-flash');
-          return { extraction, modelUsed: 'gemini-2.5-flash' };
+          const extraction = await this.callGemini(metaText, mediaData, 'gemini-2.0-flash');
+          return { extraction, modelUsed: 'gemini-2.0-flash' };
         } catch (err2) {
-          console.warn(`   ⚠️ Gemini 2.5 Flash error (${err2.message}). Checking multi-AI fallback chain...`);
+          console.warn(`   ⚠️ Gemini 2.0 Flash error (${err2.message}). Checking multi-AI fallback chain...`);
         }
       }
     }
 
-    // Priority 2: Grok API
+    // Priority 2: Inception Labs Mercury 2.5 (Diffusion LLM, ultra-fast generation for metadata & context)
+    if (!this.isOnCooldown('inception') && (this.env.INCEPTION_API_KEY || this.env.INCEPTION_LABS_API_KEY)) {
+      try {
+        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Inception Labs (Mercury 2.5)...`);
+        const extraction = await this.callInception(metaText);
+        return { extraction, modelUsed: 'inception-mercury' };
+      } catch (err) {
+        console.warn(`   ⚠️ Inception Labs failed: ${err.message}`);
+      }
+    }
+
+    // Priority 3: OpenRouter Multi-Model Call
+    if (!this.isOnCooldown('openrouter') && this.env.OPENROUTER_API_KEY) {
+      try {
+        console.log(`   🔀 Multi-AI Routing: Handing off extraction to OpenRouter...`);
+        const extraction = await this.callOpenRouter(metaText, mediaData);
+        return { extraction, modelUsed: 'openrouter' };
+      } catch (err) {
+        console.warn(`   ⚠️ OpenRouter failed: ${err.message}`);
+      }
+    }
+
+    // Priority 4: Claude API (Multimodal Vision supported)
+    if (!this.isOnCooldown('claude') && (this.env.ANTHROPIC_API_KEY || this.env.CLAUDE_API_KEY)) {
+      try {
+        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Claude Haiku...`);
+        const extraction = await this.callClaude(metaText, mediaData);
+        return { extraction, modelUsed: 'claude-3-5-haiku' };
+      } catch (err) {
+        console.warn(`   ⚠️ Claude failed: ${err.message}`);
+      }
+    }
+
+    // Priority 5: Copilot / OpenAI / Groq
+    if (!this.isOnCooldown('copilot') && (this.env.COPILOT_API_KEY || this.env.OPENAI_API_KEY || this.env.GROQ_API_KEY)) {
+      try {
+        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Copilot/OpenAI/Groq...`);
+        const extraction = await this.callCopilotOrOpenAi(metaText, mediaData);
+        return { extraction, modelUsed: 'copilot-openai' };
+      } catch (err) {
+        console.warn(`   ⚠️ Copilot/OpenAI failed: ${err.message}`);
+      }
+    }
+
+    // Priority 6: Grok API (Text/meta reasoning)
     if (!this.isOnCooldown('grok') && (this.env.GROK_API_KEY || this.env.XAI_API_KEY)) {
       try {
         console.log(`   🔀 Multi-AI Routing: Handing off extraction to Grok API...`);
@@ -499,37 +683,7 @@ export class MultiAiOrchestrator {
       }
     }
 
-    // Priority 3: Claude API
-    if (!this.isOnCooldown('claude') && (this.env.ANTHROPIC_API_KEY || this.env.CLAUDE_API_KEY)) {
-      try {
-        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Claude Haiku...`);
-        const extraction = await this.callClaude(metaText);
-        return { extraction, modelUsed: 'claude-3-5-haiku' };
-      } catch (err) {
-        console.warn(`   ⚠️ Claude failed: ${err.message}`);
-      }
-    }
-
-    // Priority 4: Copilot / OpenAI / Free Provider
-    if (!this.isOnCooldown('copilot') && (this.env.COPILOT_API_KEY || this.env.OPENAI_API_KEY || this.env.GROQ_API_KEY || this.env.OPENROUTER_API_KEY)) {
-      try {
-        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Copilot/OpenAI/Groq...`);
-        const extraction = await this.callCopilotOrOpenAi(metaText);
-        return { extraction, modelUsed: 'copilot-openai' };
-      } catch (err) {
-        console.warn(`   ⚠️ Copilot/OpenAI failed: ${err.message}`);
-      }
-    }
-
-    // Priority 5: Gemini Flash Lite fallback
-    if (!this.isOnCooldown('gemini') && this.env.GEMINI_API_KEY) {
-      try {
-        const extraction = await this.callGemini(metaText, 'gemini-3.5-flash-lite');
-        return { extraction, modelUsed: 'gemini-3.5-flash-lite' };
-      } catch (err) {}
-    }
-
-    // Priority 6: Semantic Rule Engine (Guarantees workflow never crashes)
+    // Priority 7: Semantic Rule Engine (Guarantees workflow never crashes)
     console.log(`   ⚙️ Using Semantic Engine fallback for deterministic knowledge note...`);
     const extraction = this.generateSemanticKnowledge(item);
     return { extraction, modelUsed: 'semantic_engine' };
@@ -567,6 +721,17 @@ export function formatKnowledgeMarkdown(noteNumber, extraction, item, categoryFo
     duplicatesSection = `\n- **Duplicate / Alternate Pointers:**\n${dupeLines}`;
   }
 
+  let transcriptCallout = '';
+  if (extraction.full_transcript || extraction.audio_sound_profile) {
+    transcriptCallout = `\n> [!quote] 🎙️ Reel Transcript & Audio Profile\n> ${extraction.audio_sound_profile ? `**Audio Profile:** ${extraction.audio_sound_profile}\n> \n> ` : ''}${extraction.full_transcript || 'No spoken audio transcript.'}\n`;
+  }
+
+  let visualTextCallout = '';
+  if (extraction.visual_text_content && extraction.visual_text_content.length > 0) {
+    const visualBullets = extraction.visual_text_content.map((v) => `> - ${v}`).join('\n');
+    visualTextCallout = `\n> [!example] 📱 On-Screen Text & Visual Overlays\n${visualBullets}\n`;
+  }
+
   const content = `---
 id: KN-${numStr}
 number: ${noteNumber}
@@ -589,7 +754,7 @@ created: ${now}
 
 > [!abstract] Core Idea
 > ${extraction.core_idea || 'Knowledge capture pointer from external media storage.'}
-
+${transcriptCallout}${visualTextCallout}
 > [!quote] Atomic Knowledge & Fundamental Principles
 > ${atomicBlocks || '- Atomic conceptual takeaway recorded.'}
 

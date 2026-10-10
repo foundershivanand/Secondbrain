@@ -3,11 +3,10 @@ import {
   X,
   FileText,
   Camera,
-  Video,
+  Film,
   FileCode,
   Link2,
   Mic,
-  HardDrive,
   Sparkles,
   CheckCircle2,
   Loader2,
@@ -16,7 +15,7 @@ import {
   Square,
   Image as ImageIcon,
   AlertCircle,
-  FolderOpen,
+  Video,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceType } from '../types';
@@ -54,57 +53,10 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const [userNote, setUserNote] = useState('');
   const [category, setCategory] = useState<string>(defaultCategory || '');
   const [importance, setImportance] = useState<number>(7);
-  const [rawStorage, setRawStorage] = useState('web');
-  const [rawUrl, setRawUrl] = useState('');
 
-  // Sync state whenever modal is opened
-  useEffect(() => {
-    if (isOpen) {
-      if (initialType) setActiveType(initialType);
-      if (defaultCategory !== undefined) setCategory(defaultCategory);
-      setError(null);
-      setSuccessToast(null);
-      setIsLoading(false);
-    }
-  }, [isOpen, initialType, defaultCategory]);
-
-  // Prefill when opened via Share Target or URL params
-  useEffect(() => {
-    if (initialData) {
-      if (initialData.title) {
-        setTitle(initialData.title);
-      }
-      if (initialData.url) {
-        setUrl(initialData.url);
-        if (initialData.url.includes('youtube.com') || initialData.url.includes('youtu.be')) {
-          setActiveType('youtube');
-        } else {
-          setActiveType('url');
-        }
-      }
-      if (initialData.text && !initialData.url) {
-        const match = initialData.text.match(/https?:\/\/[^\s]+/);
-        if (match) {
-          setUrl(match[0]);
-          const remainingText = initialData.text.replace(match[0], '').trim();
-          if (remainingText) setUserNote(remainingText);
-          if (match[0].includes('youtube.com') || match[0].includes('youtu.be')) {
-            setActiveType('youtube');
-          } else {
-            setActiveType('url');
-          }
-        } else {
-          setText(initialData.text);
-          setActiveType('text');
-        }
-      } else if (initialData.text && initialData.url) {
-        setUserNote(initialData.text);
-      }
-    }
-  }, [initialData]);
-
-  // Selected & Compressed Photos
+  // Selected Media / Video / Image
   const [photos, setPhotos] = useState<ProcessedImage[]>([]);
+  const [videoFile, setVideoFile] = useState<{ name: string; base64: string; mime: string; sizeMB: string } | null>(null);
   const [isProcessingMedia, setIsProcessingMedia] = useState(false);
   const [mediaProcessingStatus, setMediaProcessingStatus] = useState('');
 
@@ -131,7 +83,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState('');
   const [successToast, setSuccessToast] = useState<string | null>(null);
-  const [batchResults, setBatchResults] = useState<{ title: string; filename?: string; isPersonal?: boolean; isDuplicate?: boolean }[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Stop active camera and microphone streams
@@ -154,9 +105,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       try {
         mediaRecorderRef.current.stop();
-      } catch {
-        // ignore
-      }
+      } catch {}
     }
     if (audioStreamRef.current) {
       audioStreamRef.current.getTracks().forEach((track) => track.stop());
@@ -168,11 +117,51 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (initialType) setActiveType(initialType);
-      if (defaultCategory) setCategory(defaultCategory);
+      if (defaultCategory !== undefined) setCategory(defaultCategory);
       setError(null);
       setSuccessToast(null);
+      setIsLoading(false);
     }
   }, [isOpen, initialType, defaultCategory]);
+
+  // Auto-detect Instagram Reel or YouTube URL on input
+  const handleUrlChange = (newUrl: string) => {
+    setUrl(newUrl);
+    const trimmed = newUrl.trim().toLowerCase();
+    if (trimmed.includes('instagram.com/reel') || trimmed.includes('instagram.com/p/') || trimmed.includes('instagram.com/share') || trimmed.includes('instagr.am')) {
+      setActiveType('reel');
+      if (!category) setCategory('Content, Reels & Creative Media');
+    } else if (trimmed.includes('tiktok.com')) {
+      setActiveType('reel');
+      if (!category) setCategory('Content, Reels & Creative Media');
+    } else if (trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
+      setActiveType('youtube');
+      if (!category) setCategory('YouTube');
+    }
+  };
+
+  // Prefill when opened via Share Target or URL params
+  useEffect(() => {
+    if (initialData) {
+      if (initialData.title) setTitle(initialData.title);
+      if (initialData.url) {
+        handleUrlChange(initialData.url);
+      }
+      if (initialData.text && !initialData.url) {
+        const match = initialData.text.match(/https?:\/\/[^\s]+/);
+        if (match) {
+          handleUrlChange(match[0]);
+          const remainingText = initialData.text.replace(match[0], '').trim();
+          if (remainingText) setUserNote(remainingText);
+        } else {
+          setText(initialData.text);
+          setActiveType('text');
+        }
+      } else if (initialData.text && initialData.url) {
+        setUserNote(initialData.text);
+      }
+    }
+  }, [initialData]);
 
   useEffect(() => {
     return () => {
@@ -183,18 +172,18 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
 
   if (!isOpen) return null;
 
+  // Streamlined 6 Core Tabs
   const captureTabs: { type: SourceType; label: string; icon: any }[] = [
-    { type: 'text', label: 'Note / Idea', icon: FileText },
-    { type: 'url', label: 'Web Link', icon: Link2 },
-    { type: 'screenshot', label: 'Camera / Photos', icon: Camera },
-    { type: 'voice', label: 'Voice Memo', icon: Mic },
-    { type: 'youtube', label: 'YouTube Video', icon: Video },
-    { type: 'pdf', label: 'PDF Document', icon: FileCode },
-    { type: 'raw_pointer', label: 'Cloud Pointer', icon: HardDrive },
+    { type: 'text', label: 'Thought', icon: FileText },
+    { type: 'reel', label: 'Instagram Reel', icon: Film },
+    { type: 'url', label: 'Link', icon: Link2 },
+    { type: 'screenshot', label: 'Photo / Scan', icon: Camera },
+    { type: 'voice', label: 'Voice', icon: Mic },
+    { type: 'pdf', label: 'PDF', icon: FileCode },
   ];
 
-  // 1. Handle File Selection
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 1. Handle Image Selection
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -221,7 +210,34 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     e.target.value = '';
   };
 
-  // 2. Handle Live Camera Activation
+  // 2. Handle Reel Video Selection
+  const handleVideoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingMedia(true);
+    setMediaProcessingStatus('Reading video clip...');
+    setError(null);
+
+    try {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const base64 = await blobToBase64(file);
+      setVideoFile({
+        name: file.name,
+        base64,
+        mime: file.type || 'video/mp4',
+        sizeMB,
+      });
+      setActiveType('reel');
+    } catch (err: any) {
+      setError('Video read error: ' + err.message);
+    } finally {
+      setIsProcessingMedia(false);
+      setMediaProcessingStatus('');
+    }
+  };
+
+  // 3. Live Camera
   const handleStartCamera = async (mode: 'environment' | 'user' = cameraFacingMode) => {
     stopCameraStream();
     setCameraError(null);
@@ -238,12 +254,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
       setCameraError(err.message || 'Could not start camera.');
       setIsCameraActive(false);
     }
-  };
-
-  const handleToggleCameraFacing = () => {
-    const nextMode = cameraFacingMode === 'environment' ? 'user' : 'environment';
-    setCameraFacingMode(nextMode);
-    handleStartCamera(nextMode);
   };
 
   const handleSnapPhoto = () => {
@@ -267,11 +277,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     }
   };
 
-  const handleRemovePhoto = (index: number) => {
-    setPhotos((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // 3. Handle Voice Memo
+  // 4. Voice Recording
   const handleStartRecording = async () => {
     setAudioError(null);
     setRecordedAudioBase64(null);
@@ -290,7 +296,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
       }
 
       setRecordedAudioMime(mimeType);
-
       const recorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = recorder;
 
@@ -342,14 +347,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setIsRecordingAudio(false);
   };
 
-  const handleDiscardAudio = () => {
-    stopAudioRecordingStream();
-    setRecordedAudioBase64(null);
-    setAudioPreviewUrl(null);
-    setAudioRecordingTime(0);
-  };
-
-  // 4. Submission
+  // 5. Submit Capture to Second Brain
   const handleCapture = async (e?: React.FormEvent | React.MouseEvent) => {
     if (e && e.preventDefault) e.preventDefault();
     if (isLoading) return;
@@ -361,109 +359,64 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     }
 
     if (activeType === 'text' && !contentText) {
-      setError('Please enter a note or title.');
+      setError('Please write a thought or enter a title.');
       return;
     }
 
-    if ((activeType === 'url' || activeType === 'youtube') && !url.trim()) {
-      setError('Please enter a valid URL.');
+    if ((activeType === 'url' || activeType === 'reel') && !url.trim() && !contentText && !videoFile && photos.length === 0) {
+      setError('Please enter an Instagram Reel link or upload the video clip.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
-    setBatchResults([]);
+    setLoadingStep('Extracting knowledge with Gemini...');
 
     try {
-      if (activeType === 'screenshot' && photos.length > 1) {
-        const results = [];
-        for (let i = 0; i < photos.length; i++) {
-          const item = photos[i];
-          setLoadingStep(`Analyzing photo ${i + 1}/${photos.length}...`);
+      let payloadBase64: string | undefined;
+      let payloadMime: string | undefined;
 
-          const isYt = category?.toLowerCase() === 'youtube' || (userNote && userNote.toLowerCase().includes('youtube'));
-          const noteCtx = category ? `[Category: ${category}] ${userNote || contentText || ''}`.trim() : (userNote || contentText || undefined);
-
-          try {
-            const res = await api.capture({
-              source_type: isYt ? 'youtube' : 'screenshot',
-              title: contentTitle || undefined,
-              user_note: noteCtx,
-              importance,
-              base64_data: item.base64,
-              mime_type: item.mime,
-            });
-
-            results.push({
-              title: res.knowledge?.title || item.name,
-              filename: res.markdown?.filename,
-              isPersonal: res.source?.status === 'IGNORED_PERSONAL_MEDIA',
-              isDuplicate: res.isDuplicate,
-            });
-          } catch (itemErr: any) {
-            results.push({
-              title: item.name,
-              filename: itemErr.message,
-              isPersonal: false,
-            });
-          }
-        }
-
-        setBatchResults(results);
-        setIsLoading(false);
-        onSuccess(results);
-      } else {
-        setLoadingStep('Ingesting into Second Brain...');
-
-        let payloadBase64: string | undefined;
-        let payloadMime: string | undefined;
-
-        if (activeType === 'screenshot' && photos.length > 0) {
-          payloadBase64 = photos[0].base64;
-          payloadMime = photos[0].mime;
-        } else if (activeType === 'voice' && recordedAudioBase64) {
-          payloadBase64 = recordedAudioBase64;
-          payloadMime = recordedAudioMime;
-        }
-
-        const isYoutubeItem =
-          activeType === 'youtube' ||
-          category?.toLowerCase() === 'youtube' ||
-          (url && (url.includes('youtube.com') || url.includes('youtu.be')));
-
-        const effectiveCategory = isYoutubeItem ? 'YouTube' : category;
-
-        const noteContext = effectiveCategory
-          ? `[Category: ${effectiveCategory}] ${userNote || ''}`.trim()
-          : userNote || undefined;
-
-        const result = await api.capture({
-          source_type: isYoutubeItem ? 'youtube' : activeType,
-          title: contentTitle || undefined,
-          text: contentText || undefined,
-          url: url.trim() || undefined,
-          user_note: noteContext,
-          importance,
-          raw_storage: activeType === 'raw_pointer' ? rawStorage : undefined,
-          raw_url: rawUrl.trim() || undefined,
-          base64_data: payloadBase64,
-          mime_type: payloadMime,
-        });
-
-        setIsLoading(false);
-        setSuccessToast(result.isDuplicate ? 'Note already in Second Brain' : 'Captured & Indexed successfully!');
-
-        // Call parent onSuccess immediately to update UI
-        onSuccess(result.knowledge || result);
-
-        // Auto-close after brief confirmation
-        setTimeout(() => {
-          resetForm();
-        }, 1100);
+      if (videoFile) {
+        payloadBase64 = videoFile.base64;
+        payloadMime = videoFile.mime;
+      } else if (activeType === 'screenshot' && photos.length > 0) {
+        payloadBase64 = photos[0].base64;
+        payloadMime = photos[0].mime;
+      } else if (activeType === 'voice' && recordedAudioBase64) {
+        payloadBase64 = recordedAudioBase64;
+        payloadMime = recordedAudioMime;
       }
+
+      const noteContext = category
+        ? `[Category: ${category}] ${userNote || ''}`.trim()
+        : userNote || undefined;
+
+      const result = await api.capture({
+        source_type: activeType,
+        title: contentTitle || undefined,
+        text: contentText || undefined,
+        url: url.trim() || undefined,
+        user_note: noteContext,
+        importance,
+        base64_data: payloadBase64,
+        mime_type: payloadMime,
+      });
+
+      setIsLoading(false);
+      setSuccessToast(
+        result.isDuplicate
+          ? 'Note already indexed in Second Brain'
+          : `Extracted: "${result.knowledge?.title || 'Knowledge Note'}"`
+      );
+
+      onSuccess(result.knowledge || result);
+
+      setTimeout(() => {
+        resetForm();
+      }, 1000);
     } catch (err: any) {
       console.error('Capture error:', err);
-      setError(err.message || 'Capture failed. Check network or settings.');
+      setError(err.message || 'Capture failed. Check connection.');
       setIsLoading(false);
     }
   };
@@ -476,52 +429,45 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
     setUrl('');
     setUserNote('');
     setPhotos([]);
-    setRawUrl('');
+    setVideoFile(null);
     setRecordedAudioBase64(null);
     setAudioPreviewUrl(null);
-    setBatchResults([]);
     setSuccessToast(null);
     setError(null);
     onClose();
   };
 
-  const formatTimer = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center bg-black/75 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center items-center bg-black/80 backdrop-blur-md sm:p-4 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget && !isLoading) resetForm();
       }}
     >
-      <div className="relative w-full sm:max-w-xl bg-slate-900 border-t sm:border border-slate-800 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden">
+      <div className="relative w-full sm:max-w-xl bg-[#0d1322] border-t sm:border border-white/[0.08] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-slate-800 bg-slate-950/80 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-[#090d16]/70 shrink-0">
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 rounded-lg bg-purple-600/20 text-purple-400">
+            <span className="p-1.5 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/20">
               <Sparkles className="w-4 h-4" />
             </span>
-            <h2 className="text-sm font-bold text-white tracking-tight">
-              {activeType === 'text' ? 'New Note & Idea' : 'Quick Capture'}
+            <h2 className="text-sm font-semibold text-white tracking-tight">
+              Capture &amp; Extract
             </h2>
           </div>
           <button
             onClick={resetForm}
             disabled={isLoading}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Capture Type Selector - Minimal Pill Tabs */}
-        <div className="px-4 py-2 border-b border-slate-800/60 bg-slate-950/40 shrink-0 overflow-x-auto scrollbar-none">
-          <div className="flex items-center space-x-1 whitespace-nowrap">
+        {/* Minimal Pill Tabs */}
+        <div className="px-5 py-2.5 border-b border-white/[0.06] bg-[#090d16]/40 shrink-0 overflow-x-auto scrollbar-none">
+          <div className="flex items-center space-x-1.5 whitespace-nowrap">
             {captureTabs.map((tab) => {
               const Icon = tab.icon;
               const isSelected = activeType === tab.type;
@@ -533,11 +479,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                     stopCameraStream();
                     stopAudioRecordingStream();
                     setActiveType(tab.type);
+                    if (tab.type === 'reel' && !category) {
+                      setCategory('Content, Reels & Creative Media');
+                    }
                   }}
-                  className={`flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 ${
                     isSelected
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                      ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -548,51 +497,77 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           </div>
         </div>
 
-        {/* Form Body - Scrollable */}
+        {/* Form Body */}
         {successToast ? (
-          <div className="p-8 text-center space-y-3 flex-1 flex flex-col justify-center items-center">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+          <div className="p-8 text-center space-y-3 flex-1 flex flex-col justify-center items-center animate-fade-in">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-lg shadow-emerald-500/10">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-white">{successToast}</h3>
-            <p className="text-xs text-slate-400">Vault synced and linked in your Second Brain.</p>
-          </div>
-        ) : batchResults.length > 0 ? (
-          <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain space-y-3">
-            <div className="flex items-center space-x-2 text-emerald-400 font-bold text-sm">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Processed {batchResults.length} photos</span>
-            </div>
-            <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-xs space-y-1.5 max-h-48 overflow-y-auto">
-              {batchResults.map((res, i) => (
-                <div key={i} className="flex justify-between items-center py-1 border-b border-slate-800/60 last:border-0">
-                  <span className="text-slate-300 truncate max-w-xs">{res.title}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
-                    Indexed
-                  </span>
-                </div>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={resetForm}
-              className="w-full py-2 rounded-xl bg-purple-600 text-white text-xs font-bold"
-            >
-              Done
-            </button>
+            <h3 className="text-sm font-semibold text-white">{successToast}</h3>
+            <p className="text-xs text-slate-400">Structured note &amp; provenance pointer saved in Obsidian.</p>
           </div>
         ) : (
           <form id="capture-form" onSubmit={handleCapture} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div className="p-4 sm:p-5 overflow-y-auto flex-1 overscroll-contain space-y-3.5">
-              {/* NOTE / TEXT TAB */}
+            <div className="p-5 overflow-y-auto flex-1 overscroll-contain space-y-3.5">
+              {/* 1. INSTAGRAM REEL TAB */}
+              {activeType === 'reel' && (
+                <div className="space-y-3 animate-fade-in">
+                  <div className="p-3 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 text-xs text-pink-200 space-y-1">
+                    <div className="flex items-center space-x-1.5 font-bold text-pink-300">
+                      <Film className="w-4 h-4" />
+                      <span>Instagram Reel &amp; Short Video Protocol</span>
+                    </div>
+                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                      Extracts 100% full verbatim transcript if spoken, or extracts chronological on-screen text overlays if sound/music only, and synthesizes the core breakthrough idea.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                      Instagram Reel URL
+                    </label>
+                    <input
+                      type="url"
+                      value={url}
+                      onChange={(e) => handleUrlChange(e.target.value)}
+                      placeholder="https://www.instagram.com/reel/C7.../ or post URL"
+                      className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2 text-[11px] text-slate-500">
+                    <span className="flex-1 border-t border-white/[0.06]" />
+                    <span>OR UPLOAD REEL CLIP</span>
+                    <span className="flex-1 border-t border-white/[0.06]" />
+                  </div>
+
+                  <label className="flex items-center justify-center space-x-2 p-3.5 rounded-2xl border border-dashed border-white/[0.12] hover:border-purple-500/40 bg-slate-900/40 text-slate-300 hover:text-white transition cursor-pointer text-xs">
+                    <Video className="w-4 h-4 text-purple-400" />
+                    <span>
+                      {videoFile ? `${videoFile.name} (${videoFile.sizeMB} MB)` : 'Upload Reel video file (.mp4, .mov)'}
+                    </span>
+                    <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" />
+                  </label>
+
+                  <textarea
+                    rows={2}
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Optional: Paste caption, transcript, or on-screen notes if available..."
+                    className="w-full glass-input rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none resize-none"
+                  />
+                </div>
+              )}
+
+              {/* 2. NOTE / THOUGHT TAB */}
               {activeType === 'text' && (
-                <div className="space-y-2.5">
+                <div className="space-y-3 animate-fade-in">
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Note title (optional, AI generates if blank)..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-semibold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    placeholder="Title (optional, auto-generated by AI if blank)..."
+                    className="w-full glass-input rounded-xl px-3.5 py-2 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none"
                   />
 
                   <textarea
@@ -600,118 +575,62 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                     rows={4}
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Write your note, idea, or paste content here..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition resize-none leading-relaxed"
+                    placeholder="What is on your mind? Write your note, paste quotes, or draft ideas..."
+                    className="w-full glass-input rounded-2xl p-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none resize-none leading-relaxed"
                   />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                        Category (Optional)
-                      </label>
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
-                      >
-                        <option value="">Auto-classify with Gemini</option>
-                        {CANONICAL_CATEGORIES.map((cat) => (
-                          <option key={cat.id} value={cat.name}>
-                            {cat.icon} {cat.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                        Context / Why Save?
-                      </label>
-                      <input
-                        type="text"
-                        value={userNote}
-                        onChange={(e) => setUserNote(e.target.value)}
-                        placeholder="Context or reasoning..."
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                      />
-                    </div>
-                  </div>
                 </div>
               )}
 
-              {/* WEB LINK TAB */}
+              {/* 3. WEB / ARTICLE LINK */}
               {activeType === 'url' && (
-                <div className="space-y-2.5">
+                <div className="space-y-3 animate-fade-in">
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1">Web URL</label>
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1">Web Link</label>
                     <input
                       type="url"
                       required
                       value={url}
-                      onChange={(e) => setUrl(e.target.value)}
+                      onChange={(e) => handleUrlChange(e.target.value)}
                       placeholder="https://example.com/article"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                      className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1">Context Note</label>
-                    <input
-                      type="text"
-                      value={userNote}
-                      onChange={(e) => setUserNote(e.target.value)}
-                      placeholder="Why is this link relevant?"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                    placeholder="Why are you saving this link? (Context)"
+                    className="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
+                  />
                 </div>
               )}
 
-              {/* YOUTUBE TAB */}
-              {activeType === 'youtube' && (
-                <div className="space-y-2.5">
-                  <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1">YouTube Video Link</label>
-                    <input
-                      type="url"
-                      required
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
-                    />
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Gemini extracts spoken concepts and timestamps without downloading heavy video files.
-                  </p>
-                </div>
-              )}
-
-              {/* CAMERA / PHOTOS TAB */}
+              {/* 4. PHOTO / CAMERA TAB */}
               {activeType === 'screenshot' && (
-                <div className="space-y-3">
+                <div className="space-y-3 animate-fade-in">
                   {cameraError && (
-                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center space-x-2">
+                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-xs flex items-center space-x-2">
                       <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
                       <span>{cameraError}</span>
                     </div>
                   )}
 
                   {isCameraActive ? (
-                    <div className="relative rounded-xl overflow-hidden bg-black border border-purple-500/40">
-                      <video ref={videoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
+                    <div className="relative rounded-2xl overflow-hidden bg-black border border-purple-500/30">
+                      <video ref={videoRef} autoPlay playsInline muted className="w-full h-52 object-cover bg-black" />
                       <div className="absolute top-2 right-2 flex space-x-1.5">
                         <button
                           type="button"
-                          onClick={handleToggleCameraFacing}
+                          onClick={() => {
+                            const next = cameraFacingMode === 'environment' ? 'user' : 'environment';
+                            setCameraFacingMode(next);
+                            handleStartCamera(next);
+                          }}
                           className="p-1.5 rounded-full bg-black/60 text-white"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                         </button>
-                        <button
-                          type="button"
-                          onClick={stopCameraStream}
-                          className="p-1.5 rounded-full bg-black/60 text-white"
-                        >
+                        <button type="button" onClick={stopCameraStream} className="p-1.5 rounded-full bg-black/60 text-white">
                           <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -730,35 +649,28 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleStartCamera('environment')}
-                        className="flex flex-col items-center justify-center p-3 rounded-xl border border-purple-500/30 bg-purple-600/10 hover:bg-purple-600/20 text-purple-200 transition"
+                        className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-purple-500/20 bg-purple-600/10 hover:bg-purple-600/20 text-purple-200 transition"
                       >
                         <Camera className="w-5 h-5 text-purple-400 mb-1" />
                         <span className="text-xs font-semibold">Live Camera</span>
                       </button>
 
-                      <label className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-900 text-slate-300 transition cursor-pointer">
+                      <label className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-white/[0.08] bg-slate-900/40 hover:bg-slate-900 text-slate-300 transition cursor-pointer">
                         <ImageIcon className="w-5 h-5 text-indigo-400 mb-1" />
-                        <span className="text-xs font-semibold">Photo Gallery</span>
-                        <input type="file" accept="image/*" multiple onChange={handleFileSelect} className="hidden" />
+                        <span className="text-xs font-semibold">Gallery</span>
+                        <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
                       </label>
-                    </div>
-                  )}
-
-                  {isProcessingMedia && (
-                    <div className="flex items-center space-x-2 text-xs text-purple-300">
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>{mediaProcessingStatus}</span>
                     </div>
                   )}
 
                   {photos.length > 0 && (
                     <div className="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto">
                       {photos.map((photo, idx) => (
-                        <div key={idx} className="relative rounded-lg overflow-hidden border border-slate-800 aspect-video">
+                        <div key={idx} className="relative rounded-xl overflow-hidden border border-white/[0.08] aspect-video">
                           <img src={photo.previewUrl} alt={photo.name} className="w-full h-full object-cover" />
                           <button
                             type="button"
-                            onClick={() => handleRemovePhoto(idx)}
+                            onClick={() => setPhotos((prev) => prev.filter((_, i) => i !== idx))}
                             className="absolute top-1 right-1 p-1 rounded-full bg-rose-600/80 text-white"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -772,65 +684,60 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                     type="text"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Optional notes or context about photo..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+                    placeholder="Optional: Context or note about photo..."
+                    className="w-full glass-input rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
               )}
 
-              {/* VOICE MEMO TAB */}
+              {/* 5. VOICE MEMO TAB */}
               {activeType === 'voice' && (
-                <div className="space-y-3">
-                  {audioError && (
-                    <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs">
-                      {audioError}
-                    </div>
-                  )}
-
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-center space-y-3">
-                    {isRecordingAudio ? (
-                      <div className="space-y-2">
-                        <div className="text-rose-400 text-xs font-mono font-bold animate-pulse">
-                          RECORDING {formatTimer(audioRecordingTime)}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleStopRecording}
-                          className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold inline-flex items-center space-x-1.5"
-                        >
-                          <Square className="w-3.5 h-3.5" />
-                          <span>Stop Recording</span>
-                        </button>
+                <div className="space-y-3 text-center p-4 rounded-2xl bg-slate-900/40 border border-white/[0.06] animate-fade-in">
+                  {isRecordingAudio ? (
+                    <div className="space-y-3">
+                      <div className="text-rose-400 text-xs font-mono font-bold animate-pulse">
+                        RECORDING {Math.floor(audioRecordingTime / 60)}:{(audioRecordingTime % 60).toString().padStart(2, '0')}
                       </div>
-                    ) : recordedAudioBase64 && audioPreviewUrl ? (
-                      <div className="space-y-2">
-                        <audio controls src={audioPreviewUrl} className="w-full h-9" />
-                        <button
-                          type="button"
-                          onClick={handleDiscardAudio}
-                          className="text-xs text-rose-400 hover:underline"
-                        >
-                          Re-record
-                        </button>
-                      </div>
-                    ) : (
                       <button
                         type="button"
-                        onClick={handleStartRecording}
-                        className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold inline-flex items-center space-x-2"
+                        onClick={handleStopRecording}
+                        className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold inline-flex items-center space-x-1.5 shadow-lg active:scale-95"
                       >
-                        <Mic className="w-4 h-4" />
-                        <span>Start Microphone Recording</span>
+                        <Square className="w-3.5 h-3.5" />
+                        <span>Stop Recording</span>
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  ) : recordedAudioBase64 && audioPreviewUrl ? (
+                    <div className="space-y-2">
+                      <audio controls src={audioPreviewUrl} className="w-full h-9" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecordedAudioBase64(null);
+                          setAudioPreviewUrl(null);
+                        }}
+                        className="text-xs text-rose-400 hover:underline"
+                      >
+                        Re-record
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleStartRecording}
+                      className="px-5 py-3 rounded-2xl bg-gradient-to-tr from-rose-600 to-pink-600 text-white text-xs font-bold inline-flex items-center space-x-2 shadow-lg shadow-rose-600/20 active:scale-95 transition"
+                    >
+                      <Mic className="w-4 h-4" />
+                      <span>Start Voice Recording</span>
+                    </button>
+                  )}
                 </div>
               )}
 
-              {/* PDF TAB */}
+              {/* 6. PDF DOCUMENT TAB */}
               {activeType === 'pdf' && (
-                <div className="space-y-2.5">
-                  <div className="border border-dashed border-slate-800 hover:border-purple-500/60 rounded-xl p-5 text-center relative cursor-pointer bg-slate-950/60">
+                <div className="space-y-3 animate-fade-in">
+                  <label className="border border-dashed border-white/[0.12] hover:border-purple-500/40 rounded-2xl p-6 text-center block cursor-pointer bg-slate-900/40 transition">
                     <input
                       type="file"
                       accept=".pdf,application/pdf"
@@ -855,72 +762,67 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                           setIsProcessingMedia(false);
                         }
                       }}
-                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      className="hidden"
                     />
-                    <FileCode className="w-6 h-6 mx-auto text-indigo-400 mb-1" />
-                    <span className="text-xs text-slate-300">
+                    <FileCode className="w-6 h-6 mx-auto text-indigo-400 mb-1.5" />
+                    <span className="text-xs text-slate-300 font-medium">
                       {photos.length > 0 && photos[0].mime === 'application/pdf'
                         ? photos[0].name
                         : 'Choose PDF document'}
                     </span>
-                  </div>
+                  </label>
                 </div>
               )}
 
-              {/* CLOUD POINTER TAB */}
-              {activeType === 'raw_pointer' && (
-                <div className="space-y-2.5">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-400 mb-1">Storage</label>
-                      <select
-                        value={rawStorage}
-                        onChange={(e) => setRawStorage(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
-                      >
-                        <option value="terabox">TeraBox</option>
-                        <option value="gdrive">Google Drive</option>
-                        <option value="telegram">Telegram</option>
-                        <option value="discord">Discord</option>
-                        <option value="s3">AWS S3</option>
-                        <option value="local">Local Hard Drive</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-medium text-slate-400 mb-1">Direct Link</label>
-                      <input
-                        type="text"
-                        value={rawUrl}
-                        onChange={(e) => setRawUrl(e.target.value)}
-                        placeholder="https://..."
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500"
-                      />
-                    </div>
-                  </div>
-                  <textarea
-                    rows={2}
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Key takeaway of this pointer..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 resize-none"
+              {/* Category & Context Section */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-white/[0.06]">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full glass-input rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none"
+                  >
+                    <option value="">Auto-classify (AI)</option>
+                    {CANONICAL_CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.name}>
+                        {cat.icon} {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                    User Thought / Why Saved
+                  </label>
+                  <input
+                    type="text"
+                    value={userNote}
+                    onChange={(e) => setUserNote(e.target.value)}
+                    placeholder="Your thought on this..."
+                    className="w-full glass-input rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
-              )}
+              </div>
 
               {error && (
-                <div className="p-2.5 rounded-xl bg-red-900/30 border border-red-800/50 text-red-200 text-xs">
-                  {error}
+                <div className="p-3 rounded-2xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                  <span>{error}</span>
                 </div>
               )}
             </div>
 
-            {/* Modal Sticky Footer - Always Visible Inside Form */}
-            <div className="p-3 sm:px-5 sm:py-3 border-t border-slate-800 bg-slate-950/90 flex items-center justify-between shrink-0 pb-safe">
+            {/* Modal Sticky Footer */}
+            <div className="p-4 border-t border-white/[0.06] bg-[#090d16]/80 flex items-center justify-between shrink-0 pb-safe">
               <button
                 type="button"
                 onClick={resetForm}
                 disabled={isLoading}
-                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
               >
                 Cancel
               </button>
@@ -928,24 +830,18 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               <button
                 type="submit"
                 onClick={(e) => handleCapture(e)}
-                disabled={
-                  isLoading ||
-                  isProcessingMedia ||
-                  (activeType === 'screenshot' && photos.length === 0 && !text) ||
-                  (activeType === 'text' && !text.trim() && !title.trim()) ||
-                  ((activeType === 'url' || activeType === 'youtube') && !url.trim())
-                }
-                className="flex items-center space-x-1.5 px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold shadow-md shadow-purple-600/30 transition active:scale-95"
+                disabled={isLoading || isProcessingMedia}
+                className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-semibold shadow-md shadow-purple-600/30 transition-all duration-150 active:scale-95"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>{loadingStep || 'Saving...'}</span>
+                    <span>{loadingStep || 'Extracting...'}</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>{activeType === 'text' ? 'Save Note' : 'Capture'}</span>
+                    <span>Extract Knowledge</span>
                   </>
                 )}
               </button>

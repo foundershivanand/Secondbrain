@@ -73,6 +73,17 @@ export function generateObsidianMarkdown(
     productIdeasSection = `\n## Product & SaaS Opportunities\n\n${ideas}\n`;
   }
 
+  let transcriptSection = '';
+  if (extraction.full_transcript || extraction.audio_sound_profile) {
+    transcriptSection = `\n> [!quote] 🎙️ Reel Transcript & Audio Profile\n> ${extraction.audio_sound_profile ? `**Audio Profile:** ${extraction.audio_sound_profile}\n> \n> ` : ''}${extraction.full_transcript || 'No spoken audio transcript.'}\n`;
+  }
+
+  let visualTextSection = '';
+  if (extraction.visual_text_content && extraction.visual_text_content.length > 0) {
+    const visualBullets = extraction.visual_text_content.map((v) => `> - ${v}`).join('\n');
+    visualTextSection = `\n> [!example] 📱 On-Screen Text & Visual Overlays\n${visualBullets}\n`;
+  }
+
   const markdown = `---
 id: ${knowledgeId}
 type: knowledge
@@ -94,7 +105,7 @@ created: ${new Date().toISOString().slice(0, 10)}
 ## Core Idea
 
 ${extraction.core_idea}
-
+${transcriptSection}${visualTextSection}
 ## Key Information
 
 ${keyInfoBullets || '- No specific bullet points recorded.'}

@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
 import {
-  FileText,
   Copy,
   Check,
   ChevronDown,
   ChevronUp,
-  Tag,
   ExternalLink,
   Trash2,
+  Film,
+  Video,
+  Mic,
+  Sparkles,
 } from 'lucide-react';
 import { KnowledgeRecord } from '../types';
 import { api } from '../services/api';
+import { resolveNoteCategory } from '../utils/categories';
 
 interface KnowledgeCardProps {
   knowledge: KnowledgeRecord;
   onDeleted?: () => void;
+  onOpenModal?: (note: KnowledgeRecord) => void;
 }
 
 function safeJsonArray(val: string | null | undefined): string[] {
@@ -30,6 +34,7 @@ function safeJsonArray(val: string | null | undefined): string[] {
 export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   knowledge,
   onDeleted,
+  onOpenModal,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -38,8 +43,14 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   const keyInfo: string[] = safeJsonArray(knowledge.key_information);
   const insights: string[] = safeJsonArray(knowledge.insights);
   const actions: string[] = safeJsonArray(knowledge.actionable_items);
+  const visualText: string[] = safeJsonArray(knowledge.visual_text_content);
 
-  const handleCopyMarkdown = async () => {
+  const categoryDef = resolveNoteCategory(knowledge);
+  const isReel = knowledge.knowledge_type === 'reel' || knowledge.knowledge_type === 'video' || categoryDef.id === 'content-reels';
+  const isYt = knowledge.knowledge_type === 'youtube' || categoryDef.id === 'youtube';
+
+  const handleCopyMarkdown = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       const res = await fetch(api.getMarkdownDownloadUrl(knowledge.id));
       const text = await res.text();
@@ -51,7 +62,8 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (confirm(`Delete note "${knowledge.title}"?`)) {
       await api.deleteKnowledge(knowledge.id);
       if (onDeleted) onDeleted();
@@ -59,112 +71,141 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
   };
 
   return (
-    <div className="glass-panel-interactive rounded-2xl p-5 border border-slate-800/80 hover:border-purple-500/40 transition-all space-y-4">
-      {/* Top Header */}
+    <div
+      onClick={() => (onOpenModal ? onOpenModal(knowledge) : setIsExpanded(!isExpanded))}
+      className="glass-panel-interactive rounded-2xl p-4 sm:p-5 border border-white/[0.06] hover:border-purple-500/30 transition-all duration-200 space-y-3 cursor-pointer group"
+    >
+      {/* Header: Badges & Actions */}
       <div className="flex items-start justify-between gap-3">
-        <div className="space-y-1 flex-1">
-          <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-            <span className="text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              {knowledge.id}
+        <div className="flex items-center space-x-2 flex-wrap gap-y-1">
+          <span className="text-sm shrink-0">{categoryDef.icon}</span>
+          <span className="text-[11px] font-semibold text-slate-300">
+            {categoryDef.name}
+          </span>
+
+          {isReel && (
+            <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-500/15 text-pink-300 border border-pink-500/20">
+              <Film className="w-3 h-3" />
+              <span>Instagram Reel</span>
             </span>
-            <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">
-              {knowledge.knowledge_type}
+          )}
+
+          {isYt && (
+            <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/20">
+              <Video className="w-3 h-3" />
+              <span>YouTube</span>
             </span>
-            <span className="text-[10px] font-semibold text-slate-400">
-              {new Date(knowledge.created_at).toLocaleDateString()}
-            </span>
-          </div>
-          <h3 className="text-base font-bold text-white hover:text-purple-300 transition cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-            {knowledge.title}
-          </h3>
+          )}
+
+          <span className="text-[10px] text-slate-500 font-mono">
+            • {new Date(knowledge.created_at).toLocaleDateString()}
+          </span>
         </div>
 
-        <div className="flex items-center space-x-1.5">
+        <div className="flex items-center space-x-1 shrink-0" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={handleCopyMarkdown}
-            title="Copy Obsidian Markdown"
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition"
+            title="Copy Markdown"
+            className="p-1.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white transition"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
           <a
             href={api.getMarkdownDownloadUrl(knowledge.id)}
             download
             title="Download .md file"
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition"
+            className="p-1.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white transition"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-3.5 h-3.5" />
           </a>
           <button
             onClick={handleDelete}
             title="Delete note"
-            className="p-1.5 rounded-lg bg-slate-800/80 hover:bg-red-950 text-slate-400 hover:text-red-400 text-xs transition"
+            className="p-1.5 rounded-xl bg-slate-900/60 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 transition"
           >
-            <Trash2 className="w-4 h-4" />
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Core Idea */}
-      <div className="p-3.5 rounded-xl bg-purple-950/20 border border-purple-900/30 text-xs text-slate-200 leading-relaxed font-medium">
-        <span className="text-purple-400 font-bold mr-1.5">💡 Core Idea:</span>
-        {knowledge.core_idea}
-      </div>
+      {/* Title */}
+      <h3 className="text-sm sm:text-base font-semibold text-white group-hover:text-purple-300 transition-colors leading-snug">
+        {knowledge.title}
+      </h3>
 
-      {/* Topics & Tags */}
-      {topics.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 items-center">
-          <Tag className="w-3 h-3 text-slate-500 mr-0.5" />
-          {topics.map((topic, i) => (
-            <span
-              key={i}
-              className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800/80 text-purple-300 border border-purple-500/10 hover:border-purple-500/30 transition cursor-pointer"
-            >
-              [[{topic}]]
-            </span>
-          ))}
+      {/* Core Idea */}
+      {knowledge.core_idea && (
+        <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-900/20 text-xs text-purple-200/90 leading-relaxed font-normal">
+          <span className="font-semibold text-purple-400 mr-1.5">Thesis:</span>
+          {knowledge.core_idea}
         </div>
       )}
 
-      {/* "Why saved" & "What changed" indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] pt-1">
-        {knowledge.why_saved && (
-          <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
-            <span className="text-slate-400 font-semibold block mb-0.5">🎯 Why I Saved This:</span>
-            {knowledge.why_saved}
-          </div>
-        )}
-        {knowledge.what_changed && (
-          <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
-            <span className="text-indigo-400 font-semibold block mb-0.5">🔄 What Changed:</span>
-            {knowledge.what_changed}
-          </div>
-        )}
-      </div>
-
-      {/* Expandable Details */}
-      {isExpanded && (
-        <div className="pt-3 border-t border-slate-800/80 space-y-4 text-xs animate-fade-in">
-          {keyInfo.length > 0 && (
-            <div>
-              <h4 className="font-bold text-slate-300 mb-1">Key Information</h4>
-              <ul className="list-disc list-inside space-y-1 text-slate-400">
-                {keyInfo.map((info, idx) => (
-                  <li key={idx}>{info}</li>
-                ))}
-              </ul>
+      {/* Reel Transcript Preview / Sound Overlay Badge */}
+      {(knowledge.full_transcript || visualText.length > 0 || knowledge.audio_sound_profile) && (
+        <div className="p-2.5 rounded-xl bg-slate-900/40 border border-white/[0.05] space-y-1.5 text-xs">
+          {knowledge.audio_sound_profile && (
+            <div className="flex items-center space-x-1.5 text-[11px] text-pink-300 font-medium">
+              <Mic className="w-3 h-3 shrink-0" />
+              <span>Audio: {knowledge.audio_sound_profile}</span>
             </div>
           )}
 
-          {insights.length > 0 && (
+          {knowledge.full_transcript && (
+            <div className="text-[11px] text-slate-400 line-clamp-2 italic">
+              &ldquo;{knowledge.full_transcript}&rdquo;
+            </div>
+          )}
+
+          {visualText.length > 0 && (
+            <div className="flex items-center space-x-1.5 flex-wrap gap-y-1 pt-1">
+              <span className="text-[10px] text-slate-500 font-medium">On-Screen Text:</span>
+              {visualText.slice(0, 3).map((item, idx) => (
+                <span
+                  key={idx}
+                  className="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/60 text-slate-300 font-mono border border-white/[0.04] truncate max-w-xs"
+                >
+                  {item}
+                </span>
+              ))}
+              {visualText.length > 3 && (
+                <span className="text-[10px] text-slate-500 font-mono">
+                  +{visualText.length - 3} more
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Topics */}
+      {topics.length > 0 && (
+        <div className="flex flex-wrap gap-1 items-center pt-0.5">
+          {topics.slice(0, 4).map((t, i) => (
+            <span
+              key={i}
+              className="text-[10px] px-2 py-0.5 rounded-lg bg-slate-900/70 text-slate-400 font-mono border border-white/[0.05]"
+            >
+              #{t}
+            </span>
+          ))}
+          {topics.length > 4 && (
+            <span className="text-[10px] text-slate-500 font-mono">
+              +{topics.length - 4}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Expanded Quick Details */}
+      {isExpanded && (
+        <div className="pt-3 border-t border-white/[0.06] space-y-3 text-xs animate-fade-in" onClick={(e) => e.stopPropagation()}>
+          {keyInfo.length > 0 && (
             <div>
-              <h4 className="font-bold text-purple-300 mb-1">Insights</h4>
-              <ul className="space-y-1 text-slate-300">
-                {insights.map((insight, idx) => (
-                  <li key={idx} className="flex items-start space-x-1.5">
-                    <span className="text-purple-400">⚡</span>
-                    <span>{insight}</span>
-                  </li>
+              <h4 className="font-semibold text-slate-300 mb-1">Key Takeaways</h4>
+              <ul className="list-disc list-inside space-y-1 text-slate-400 pl-1">
+                {keyInfo.map((info, idx) => (
+                  <li key={idx} className="leading-relaxed">{info}</li>
                 ))}
               </ul>
             </div>
@@ -172,11 +213,11 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
 
           {actions.length > 0 && (
             <div>
-              <h4 className="font-bold text-emerald-300 mb-1">Action Items</h4>
+              <h4 className="font-semibold text-emerald-400 mb-1">Action Items</h4>
               <ul className="space-y-1 text-slate-300">
                 {actions.map((act, idx) => (
                   <li key={idx} className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded accent-purple-500" readOnly />
+                    <span className="text-emerald-400 text-xs">&#10003;</span>
                     <span>{act}</span>
                   </li>
                 ))}
@@ -184,42 +225,18 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
             </div>
           )}
 
-          {knowledge.atomic_items && knowledge.atomic_items.length > 0 && (
+          {insights.length > 0 && (
             <div>
-              <h4 className="font-bold text-indigo-300 mb-1.5">Atomic Knowledge (M2 Layer)</h4>
-              <div className="space-y-2">
-                {knowledge.atomic_items.map((ak, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800 text-slate-300 flex items-start justify-between">
-                    <div>
-                      <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase mr-1.5">
-                        [{ak.concept_type}]
-                      </span>
-                      <span>{ak.statement}</span>
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-mono ml-2">
-                      {Math.round(ak.confidence * 100)}%
-                    </span>
-                  </div>
+              <h4 className="font-semibold text-purple-400 mb-1">AI Deductions</h4>
+              <ul className="space-y-1 text-slate-300">
+                {insights.map((ins, idx) => (
+                  <li key={idx} className="leading-relaxed">&bull; {ins}</li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
-
-          <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800">
-            <span>Obsidian Path: <code className="text-slate-400">{knowledge.markdown_path}</code></span>
-            <span>Source: <code className="text-purple-400">{knowledge.source_id}</code></span>
-          </div>
         </div>
       )}
-
-      {/* Expand Toggle Button */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full py-1 text-center text-[11px] font-semibold text-slate-400 hover:text-purple-300 flex items-center justify-center space-x-1 transition"
-      >
-        <span>{isExpanded ? 'Collapse' : 'Show Full Knowledge Details'}</span>
-        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-      </button>
     </div>
   );
 };

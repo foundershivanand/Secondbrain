@@ -15,6 +15,7 @@ import {
   Link2,
   Mic,
   HardDrive,
+  Film,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceRecord, SourceStatus } from '../types';
@@ -56,8 +57,10 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
       case 'image':
         return <Camera className="w-4 h-4 text-purple-400" />;
       case 'youtube':
-      case 'video':
         return <Video className="w-4 h-4 text-rose-400" />;
+      case 'reel':
+      case 'video':
+        return <Film className="w-4 h-4 text-pink-400" />;
       case 'pdf':
         return <FileCode className="w-4 h-4 text-indigo-400" />;
       case 'url':

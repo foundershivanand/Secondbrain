@@ -7,6 +7,7 @@ export type SourceType =
   | 'pdf'
   | 'url'
   | 'youtube'
+  | 'reel'
   | 'video'
   | 'voice'
   | 'chat_export'
@@ -88,8 +89,12 @@ export interface VideoTimestamp {
 
 export interface ExtractionResult {
   title: string;
+  category?: string;
   source_type: string;
   core_idea: string;
+  full_transcript?: string;            // 100% full transcript if spoken speech exists, or synthesized on-screen text transcript
+  visual_text_content?: string[];       // Sequential on-screen text overlays, slides, bullet points, subtitles
+  audio_sound_profile?: string;         // Audio track description (e.g. speech, trending sound, background music)
   key_information: string[];
   atomic_knowledge: {
     statement: string;
@@ -124,6 +129,9 @@ export interface KnowledgeRecord {
   title: string;
   knowledge_type: string;
   core_idea: string;
+  full_transcript?: string | null;
+  visual_text_content?: string | null; // JSON string array
+  audio_sound_profile?: string | null;
   key_information: string; // JSON string
   insights: string;        // JSON string (AI suggestions & deductions)
   my_thought: string | null;// Explicit user thoughts (distinct from AI)

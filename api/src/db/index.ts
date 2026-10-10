@@ -172,10 +172,10 @@ export class Database {
     await this.db
       .prepare(
         `INSERT INTO knowledge (
-          id, source_id, title, knowledge_type, core_idea, key_information,
-          insights, my_thought, actionable_items, topics, entities, tags, confidence,
+          id, source_id, title, knowledge_type, core_idea, full_transcript, visual_text_content, audio_sound_profile,
+          key_information, insights, my_thought, actionable_items, topics, entities, tags, confidence,
           importance, why_saved, what_changed, markdown_path, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         k.id,
@@ -183,6 +183,9 @@ export class Database {
         k.title,
         k.knowledge_type,
         k.core_idea,
+        k.full_transcript || null,
+        k.visual_text_content || null,
+        k.audio_sound_profile || null,
         k.key_information,
         k.insights,
         k.my_thought || null,

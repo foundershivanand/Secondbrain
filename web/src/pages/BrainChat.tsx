@@ -58,8 +58,8 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
   };
 
   const samplePrompts = [
-    'What playlists do I have on my YouTube profile?',
-    'What videos did I watch recently?',
+    'What ideas were extracted from recent Instagram reels?',
+    'What are my active goals & durable principles?',
     'What have I learned about AI agent memory?',
     'What SaaS and product opportunities were identified?',
   ];

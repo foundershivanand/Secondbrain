@@ -37,7 +37,7 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     id: 'ai-llms',
     name: 'Artificial Intelligence & LLMs',
     icon: '🤖',
-    color: 'text-purple-400 border-purple-500/30 bg-purple-500/10',
+    color: 'text-sky-400 border-sky-500/30 bg-sky-500/10',
     keywords: [
       'ai study case', 'ai', 'llm', 'llms', 'gemini api', 'gpt', 'claude', 'openai', 'prompt', 'prompting',
       'rag', 'embedding', 'embeddings', 'transformer', 'fine-tuning', 'tokens',
@@ -48,7 +48,7 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     id: 'ai-agents',
     name: 'AI Agents & Autonomous Systems',
     icon: '🧠',
-    color: 'text-fuchsia-400 border-fuchsia-500/30 bg-fuchsia-500/10',
+    color: 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10',
     keywords: [
       'agent', 'agents', 'agentic', 'autonomous', 'crewai', 'autogpt', 'langchain',
       'langgraph', 'subagent', 'multi-agent', 'tool use', 'function calling',
@@ -124,7 +124,7 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     id: 'media-arts',
     name: 'Cinema, Literature & Arts',
     icon: '🎬',
-    color: 'text-purple-300 border-purple-400/30 bg-purple-400/10',
+    color: 'text-teal-300 border-teal-400/30 bg-teal-400/10',
     keywords: [
       '12 angry men', 'the odyssey', 'cinema', 'film', 'movie', 'literature', 'homer',
       'epic', 'play', 'storytelling', 'script', 'arts', 'classic'
@@ -212,7 +212,7 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     id: 'mental-models-philosophy',
     name: 'Mental Models & Philosophy',
     icon: '🧭',
-    color: 'text-violet-400 border-violet-500/30 bg-violet-500/10',
+    color: 'text-amber-300 border-amber-400/30 bg-amber-400/10',
     keywords: [
       'mental model', 'first principles', 'systems thinking', 'philosophy', 'cognitive bias',
       'decision making', 'rationality', 'psychology', 'stoicism'

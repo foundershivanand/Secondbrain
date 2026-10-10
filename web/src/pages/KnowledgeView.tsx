@@ -163,11 +163,11 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
         {/* Action Controls */}
         <div className="flex items-center space-x-2">
           {/* View Mode Toggle */}
-          <div className="flex items-center bg-slate-900/60 p-1 rounded-xl border border-white/[0.06]">
+          <div className="flex items-center bg-zinc-900/60 p-1 rounded-xl border border-white/[0.06]">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-lg text-xs transition ${
-                viewMode === 'grid' ? 'bg-purple-600/30 text-purple-200' : 'text-slate-400 hover:text-white'
+                viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'
               }`}
               title="Grid View"
             >
@@ -176,7 +176,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
             <button
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-lg text-xs transition ${
-                viewMode === 'list' ? 'bg-purple-600/30 text-purple-200' : 'text-slate-400 hover:text-white'
+                viewMode === 'list' ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white'
               }`}
               title="List View"
             >
@@ -186,7 +186,7 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
           <button
             onClick={() => onOpenCapture('reel')}
-            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 text-xs font-semibold border border-pink-500/25 transition active:scale-95"
+            className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/20 transition active:scale-95"
           >
             <Film className="w-3.5 h-3.5" />
             <span>Reel</span>
@@ -194,9 +194,9 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
           <button
             onClick={() => onOpenCapture('text')}
-            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-sm shadow-purple-600/20 transition active:scale-95"
+            className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm transition active:scale-95 border border-white/20"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             <span>New Note</span>
           </button>
         </div>
@@ -204,18 +204,18 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
       {/* 2. Minimal Search Bar */}
       <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search by keyword, thesis, title, or #topic..."
-          className="w-full glass-input rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none"
+          className="w-full glass-input rounded-2xl pl-10 pr-9 py-2.5 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -228,8 +228,8 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
           onClick={() => setActiveCategory(null)}
           className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-150 ${
             activeCategory === null
-              ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/20'
-              : 'text-slate-400 hover:text-slate-200 bg-slate-900/40 hover:bg-slate-900 border border-white/[0.04]'
+              ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+              : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/40 hover:bg-zinc-900 border border-white/[0.04]'
           }`}
         >
           All Notes ({knowledgeList.length})
@@ -241,8 +241,8 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
             onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
             className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-150 ${
               activeCategory === cat.id
-                ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/20'
-                : 'text-slate-400 hover:text-slate-200 bg-slate-900/40 hover:bg-slate-900 border border-white/[0.04]'
+                ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/40 hover:bg-zinc-900 border border-white/[0.04]'
             }`}
           >
             <span>{cat.icon}</span>
@@ -254,35 +254,35 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
       {/* 4. Notes Feed */}
       {loading ? (
-        <div className="p-16 text-center text-xs text-purple-300 space-y-2">
-          <Sparkles className="w-5 h-5 animate-spin mx-auto text-purple-400" />
+        <div className="p-16 text-center text-xs text-amber-300 space-y-2">
+          <Sparkles className="w-5 h-5 animate-spin mx-auto text-amber-400" />
           <p>Loading knowledge notes...</p>
         </div>
       ) : filteredNotes.length === 0 ? (
         /* Minimal Empty State */
-        <div className="p-12 sm:p-16 rounded-3xl border border-white/[0.06] bg-slate-900/20 text-center space-y-4 max-w-lg mx-auto">
-          <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mx-auto border border-purple-500/20">
+        <div className="p-12 sm:p-16 rounded-3xl border border-white/[0.06] bg-zinc-900/20 text-center space-y-4 max-w-lg mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/20">
             <Sparkles className="w-6 h-6" />
           </div>
           <div className="space-y-1">
             <h3 className="text-sm font-semibold text-white">Your Second Brain is ready</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
+            <p className="text-xs text-zinc-400 leading-relaxed">
               No notes yet. Capture a 1-3 minute Instagram reel, link, screenshot, or write your first insight.
             </p>
           </div>
           <div className="flex items-center justify-center space-x-2 pt-2">
             <button
               onClick={() => onOpenCapture('reel')}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-pink-500/15 hover:bg-pink-500/25 text-pink-300 text-xs font-semibold border border-pink-500/30 transition active:scale-95"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs font-semibold border border-rose-500/20 transition active:scale-95"
             >
               <Film className="w-3.5 h-3.5" />
               <span>Capture Reel</span>
             </button>
             <button
               onClick={() => onOpenCapture('text')}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold shadow-sm transition active:scale-95"
+              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold shadow-sm transition active:scale-95 border border-white/20"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>New Note</span>
             </button>
           </div>
@@ -316,11 +316,11 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
                   <span className="text-base shrink-0">{cat.icon}</span>
                   <div className="min-w-0 flex-1 space-y-0.5">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs font-semibold text-white group-hover:text-purple-300 transition truncate">
+                      <span className="text-xs font-semibold text-white group-hover:text-amber-200 transition truncate">
                         {note.title}
                       </span>
                       {isReel && (
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-pink-500/15 text-pink-300 font-bold border border-pink-500/20 shrink-0">
+                        <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-rose-500/10 text-rose-300 font-bold border border-rose-500/20 shrink-0">
                           Reel
                         </span>
                       )}
@@ -400,11 +400,11 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
                   {activeNoteModal.title}
                 </h2>
                 <div className="flex items-center space-x-2 mt-1.5">
-                  <span className="text-[10px] font-mono text-purple-400 font-semibold">
+                  <span className="text-[10px] font-mono text-amber-400 font-semibold">
                     {activeNoteModal.id}
                   </span>
                   {(activeNoteModal.knowledge_type === 'reel' || activeNoteModal.knowledge_type === 'video') && (
-                    <span className="text-[10px] font-bold text-pink-400 flex items-center space-x-1 px-2 py-0.5 rounded-full bg-pink-500/10 border border-pink-500/20">
+                    <span className="text-[10px] font-bold text-rose-300 flex items-center space-x-1 px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20">
                       <Film className="w-3 h-3" />
                       <span>Instagram Reel</span>
                     </span>
@@ -414,8 +414,8 @@ export const KnowledgeView: React.FC<KnowledgeViewProps> = ({
 
               {/* Core Idea */}
               {activeNoteModal.core_idea && (
-                <div className="p-4 rounded-2xl bg-purple-950/25 border border-purple-900/30 text-purple-200 space-y-1">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400">
+                <div className="p-4 rounded-2xl bg-amber-500/[0.08] border border-amber-500/20 text-amber-100 space-y-1">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
                     Core Breakthrough Thesis
                   </div>
                   <p className="text-xs sm:text-sm font-medium leading-relaxed">

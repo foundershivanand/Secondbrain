@@ -281,13 +281,13 @@ export const IdeasFactory: React.FC = () => {
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
                 isSelected
-                  ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30 shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                  ? 'bg-white/10 text-white border border-white/15 shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
               }`}
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-slate-800 text-slate-300 font-mono">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-zinc-800 text-zinc-300 font-mono">
                 {tab.count}
               </span>
             </button>
@@ -299,8 +299,8 @@ export const IdeasFactory: React.FC = () => {
       {activeTab === 'product' && (
         <div className="space-y-4">
           {/* Top Banner */}
-          <div className="p-4 bg-gradient-to-r from-purple-950/30 to-indigo-950/20 border border-purple-900/40 rounded-2xl flex items-start space-x-3 text-xs text-purple-200">
-            <TrendingUp className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
+          <div className="p-4 bg-amber-950/20 border border-amber-500/25 rounded-2xl flex items-start space-x-3 text-xs text-amber-200">
+            <TrendingUp className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <strong className="text-white block font-bold">
                 Automated Product &amp; SaaS Opportunity Engine
@@ -314,13 +314,13 @@ export const IdeasFactory: React.FC = () => {
           {/* Controls: Search + Filter Pills */}
           <div className="space-y-2.5">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" />
+              <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-2.5" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search ideas by keyword, app name, problem, or feature..."
-                className="w-full bg-slate-900/90 border border-slate-800/80 rounded-xl pl-8 pr-3.5 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 transition"
+                className="w-full bg-zinc-900/90 border border-zinc-800/80 rounded-xl pl-8 pr-3.5 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/30 transition"
               />
             </div>
 
@@ -333,8 +333,8 @@ export const IdeasFactory: React.FC = () => {
                     onClick={() => setSelectedType(isSelected ? null : pill.value)}
                     className={`flex items-center space-x-1.5 px-3 py-1 rounded-lg font-medium transition whitespace-nowrap text-xs ${
                       isSelected
-                        ? 'bg-purple-600 text-white shadow-sm font-bold'
-                        : 'bg-slate-900 border border-slate-800/80 text-slate-400 hover:text-white'
+                        ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                        : 'bg-zinc-900 border border-zinc-800/80 text-zinc-400 hover:text-white'
                     }`}
                   >
                     <span>{pill.label}</span>
@@ -347,8 +347,8 @@ export const IdeasFactory: React.FC = () => {
 
           {/* Opportunities Grid */}
           {loading ? (
-            <div className="py-12 text-center text-xs text-slate-500 space-y-2">
-              <Sparkles className="w-6 h-6 text-purple-400 mx-auto animate-spin" />
+            <div className="py-12 text-center text-xs text-zinc-500 space-y-2">
+              <Sparkles className="w-6 h-6 text-amber-400 mx-auto animate-spin" />
               <p>Analyzing Second Brain notes and synthesizing product opportunities...</p>
             </div>
           ) : filteredProducts.length === 0 ? (
@@ -364,53 +364,53 @@ export const IdeasFactory: React.FC = () => {
                     : prod.type === 'Digital Wellness'
                     ? 'text-rose-400 bg-rose-500/10 border-rose-500/20'
                     : prod.type === 'AI & Autonomous'
-                    ? 'text-purple-400 bg-purple-500/10 border-purple-500/20'
-                    : prod.type === 'SaaS Opportunity'
                     ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                    : prod.type === 'SaaS Opportunity'
+                    ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
                     : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20';
 
                 return (
                   <div
                     key={`${prod.id}-${idx}`}
-                    className="p-5 rounded-2xl border border-slate-800/90 bg-slate-900/60 hover:border-purple-500/40 transition space-y-3 flex flex-col justify-between shadow-sm group"
+                    className="p-5 rounded-2xl border border-zinc-800/90 bg-zinc-900/60 hover:border-white/20 transition space-y-3 flex flex-col justify-between shadow-sm group"
                   >
                     <div className="space-y-2">
                       <div className="flex items-start justify-between gap-2">
                         <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${badgeColor}`}>
                           {prod.type}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-500">
+                        <span className="text-[10px] font-mono text-zinc-500">
                           {prod.sourceId}
                         </span>
                       </div>
 
-                      <h3 className="text-sm font-bold text-slate-100 group-hover:text-purple-300 transition leading-snug">
+                      <h3 className="text-sm font-bold text-zinc-100 group-hover:text-amber-200 transition leading-snug">
                         {prod.title}
                       </h3>
 
-                      <p className="text-xs text-slate-400 leading-relaxed italic">
+                      <p className="text-xs text-zinc-400 leading-relaxed italic">
                         "{prod.idea}"
                       </p>
                     </div>
 
-                    <div className="space-y-2 pt-2 border-t border-slate-800/80 text-xs">
+                    <div className="space-y-2 pt-2 border-t border-zinc-800/80 text-xs">
                       {prod.actions && prod.actions.length > 0 && (
                         <div className="space-y-1">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">
                             Key Next Step:
                           </span>
-                          <div className="text-[11px] text-slate-300 flex items-start space-x-1.5">
+                          <div className="text-[11px] text-zinc-300 flex items-start space-x-1.5">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
                             <span>{prod.actions[0]}</span>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                      <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-1">
                         <span className="truncate max-w-[200px]" title={prod.source}>
-                          Evidence: <strong className="text-purple-400">{prod.source}</strong>
+                          Evidence: <strong className="text-amber-400">{prod.source}</strong>
                         </span>
-                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400">
                           {prod.why ? 'Validated' : 'Concept'}
                         </span>
                       </div>
@@ -426,8 +426,8 @@ export const IdeasFactory: React.FC = () => {
       {/* Tab 2: Content Factory */}
       {activeTab === 'content' && (
         <div className="space-y-4">
-          <div className="p-4 bg-indigo-950/20 border border-indigo-900/30 rounded-2xl flex items-start space-x-3 text-xs text-indigo-200">
-            <Video className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+          <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded-2xl flex items-start space-x-3 text-xs text-zinc-200">
+            <Video className="w-5 h-5 text-sky-400 shrink-0 mt-0.5" />
             <div>
               <strong className="text-white block font-bold">Content &amp; Publishing Pipeline</strong>
               High-leverage insights, counterintuitive patterns, and framework explanations ready for social posts or technical threads.
@@ -438,16 +438,16 @@ export const IdeasFactory: React.FC = () => {
             {contentIdeas.slice(0, 30).map((ci, idx) => (
               <div
                 key={idx}
-                className="p-5 rounded-2xl border border-slate-800/90 bg-slate-900/60 hover:border-indigo-500/40 transition space-y-2.5 shadow-sm"
+                className="p-5 rounded-2xl border border-zinc-800/90 bg-zinc-900/60 hover:border-white/20 transition space-y-2.5 shadow-sm"
               >
-                <div className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
+                <div className="text-[10px] uppercase font-bold text-sky-400 tracking-wider">
                   High-Value Insight / Post Angle
                 </div>
-                <h3 className="text-sm font-bold text-slate-100 leading-snug">{ci.title}</h3>
-                <p className="text-xs text-slate-400 line-clamp-2">{ci.idea}</p>
-                <div className="text-[11px] text-slate-500 pt-2 border-t border-slate-800/80 flex items-center justify-between">
-                  <span className="truncate max-w-[220px]">Source: <strong className="text-indigo-300">{ci.source}</strong></span>
-                  <span className="font-mono text-[10px] text-slate-600">{ci.sourceId}</span>
+                <h3 className="text-sm font-bold text-zinc-100 leading-snug">{ci.title}</h3>
+                <p className="text-xs text-zinc-400 line-clamp-2">{ci.idea}</p>
+                <div className="text-[11px] text-zinc-500 pt-2 border-t border-zinc-800/80 flex items-center justify-between">
+                  <span className="truncate max-w-[220px]">Source: <strong className="text-sky-300">{ci.source}</strong></span>
+                  <span className="font-mono text-[10px] text-zinc-600">{ci.sourceId}</span>
                 </div>
               </div>
             ))}
@@ -457,12 +457,12 @@ export const IdeasFactory: React.FC = () => {
 
       {/* Tab 3: Ebook Blueprint */}
       {activeTab === 'ebook' && (
-        <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/50 space-y-4 shadow-sm">
+        <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 space-y-4 shadow-sm">
           <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-            <BookOpen className="w-4 h-4 text-purple-400" />
+            <BookOpen className="w-4 h-4 text-amber-400" />
             <span>Structured Knowledge Blueprint &amp; Chapters</span>
           </h3>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-400">
             Concept clusters mapped into cohesive chapters and documentation modules.
           </p>
 
@@ -470,9 +470,9 @@ export const IdeasFactory: React.FC = () => {
             {ebookChapters.slice(0, 16).map((ch, idx) => (
               <div
                 key={idx}
-                className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 flex items-start space-x-3 text-xs"
+                className="p-3.5 rounded-xl bg-zinc-950/70 border border-zinc-800 flex items-start space-x-3 text-xs"
               >
-                <span className="w-6 h-6 rounded-lg bg-purple-600/20 text-purple-400 font-mono font-bold flex items-center justify-center shrink-0">
+                <span className="w-6 h-6 rounded-lg bg-amber-500/15 text-amber-400 font-mono font-bold flex items-center justify-center shrink-0">
                   {idx + 1}
                 </span>
                 <div className="space-y-0.5 flex-1 min-w-0">

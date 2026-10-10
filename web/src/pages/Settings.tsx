@@ -243,24 +243,24 @@ export const Settings: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-xl sm:text-2xl font-black text-white flex items-center space-x-2">
-          <SettingsIcon className="w-6 h-6 text-purple-400" />
+          <SettingsIcon className="w-6 h-6 text-amber-400" />
           <span>Second Brain System Settings</span>
         </h1>
-        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
           Configure backend API endpoints, Telegram bot webhooks, data export, and historical chat importers.
         </p>
       </div>
 
       {/* Cloudflare Worker Connection */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+      <div className="glass-panel p-6 rounded-2xl border border-zinc-800 space-y-4">
         <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-          <Key className="w-4 h-4 text-purple-400" />
+          <Key className="w-4 h-4 text-amber-400" />
           <span>API Connection & Cloudflare Worker</span>
         </h3>
 
         <form onSubmit={handleSaveConnection} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               Cloudflare Worker URL
             </label>
             <input
@@ -268,15 +268,15 @@ export const Settings: React.FC = () => {
               value={apiEndpoint}
               onChange={(e) => setApiEndpoint(e.target.value)}
               placeholder="https://second-brain-api.your-subdomain.workers.dev (leave blank for local dev proxy)"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/30"
             />
-            <span className="text-[11px] text-slate-500 block mt-1">
+            <span className="text-[11px] text-zinc-500 block mt-1">
               Default uses relative <code>/api</code> proxied to local Worker.
             </span>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">
+            <label className="block text-xs font-semibold text-zinc-300 mb-1">
               API Bearer Token (Optional)
             </label>
             <input
@@ -284,7 +284,7 @@ export const Settings: React.FC = () => {
               value={authToken}
               onChange={(e) => setAuthToken(e.target.value)}
               placeholder="AUTH_TOKEN if configured in Cloudflare Secrets"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/30"
             />
           </div>
 
@@ -297,7 +297,7 @@ export const Settings: React.FC = () => {
             )}
             <button
               type="submit"
-              className="ml-auto px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition shadow"
+              className="ml-auto px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold transition shadow-sm border border-white/20 active:scale-95"
             >
               Save Configuration
             </button>
@@ -337,48 +337,48 @@ export const Settings: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
             <span className="text-xs font-bold text-slate-200 block">AI Chat Export (conversations.json)</span>
-            <p className="text-[11px] text-slate-500">Supports ChatGPT, Claude, or Gemini exports</p>
+            <p className="text-[11px] text-zinc-500">Supports ChatGPT, Claude, or Gemini exports</p>
             <input
               type="file"
               accept=".json"
               onChange={handleChatExportUpload}
-              className="text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:bg-purple-600 file:text-white hover:file:bg-purple-500 cursor-pointer"
+              className="text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:bg-white file:text-zinc-950 hover:file:bg-zinc-200 cursor-pointer font-medium"
             />
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
-            <span className="text-xs font-bold text-slate-200 block">YouTube Watch History (watch-history.json)</span>
-            <p className="text-[11px] text-slate-500">Filters learning videos from Google Takeout</p>
+          <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2">
+            <span className="text-xs font-bold text-zinc-200 block">YouTube Watch History (watch-history.json)</span>
+            <p className="text-[11px] text-zinc-500">Filters learning videos from Google Takeout</p>
             <input
               type="file"
               accept=".json"
               onChange={handleYoutubeHistoryUpload}
-              className="text-xs text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:bg-rose-600 file:text-white hover:file:bg-rose-500 cursor-pointer"
+              className="text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:bg-rose-600 file:text-white hover:file:bg-rose-500 cursor-pointer font-medium"
             />
           </div>
         </div>
 
         {importStatus && (
-          <div className="p-3 rounded-xl bg-slate-900 border border-purple-500/30 text-xs text-purple-300 font-medium animate-fade-in">
+          <div className="p-3 rounded-xl bg-zinc-900 border border-amber-500/25 text-xs text-amber-300 font-medium animate-fade-in">
             {importStatus}
           </div>
         )}
       </div>
 
       {/* YouTube Profile, Liked Videos & Playlists */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+      <div className="glass-panel p-6 rounded-2xl border border-zinc-800 space-y-6">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center space-x-2">
             <Video className="w-4 h-4 text-rose-400" />
             <span>YouTube Profile, Liked Videos &amp; Playlists</span>
           </h3>
-          <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+          <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
             Access and query all your liked videos and profile playlists with AI-extracted core ideas, atomic notes, and architectural takeaways.
           </p>
         </div>
 
         {/* Status & Quick Sync Actions */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
+        <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-2.5">
               <span
@@ -386,7 +386,7 @@ export const Settings: React.FC = () => {
                   ytStatus?.connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
                 }`}
               />
-              <span className="text-xs font-semibold text-slate-200">
+              <span className="text-xs font-semibold text-zinc-200">
                 {ytStatus?.connected
                   ? (ytStatus.mode === 'oauth' || ytStatus.mode === 'oauth_liked'
                       ? 'Connected to YouTube Profile (Liked Videos & Playlists)'
@@ -395,10 +395,10 @@ export const Settings: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex items-center space-x-2 text-[11px] font-mono text-slate-400 bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
+            <div className="flex items-center space-x-2 text-[11px] font-mono text-zinc-400 bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-800">
               <span>{ytStatus?.totalSyncedCount ?? 0} Videos</span>
               <span>•</span>
-              <span className="text-purple-300">{playlists.length || ytStatus?.playlistsCount || 0} Playlists</span>
+              <span className="text-amber-300">{playlists.length || ytStatus?.playlistsCount || 0} Playlists</span>
             </div>
           </div>
 
@@ -407,7 +407,7 @@ export const Settings: React.FC = () => {
             <button
               onClick={handleSyncLiked}
               disabled={isYtSyncing}
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold transition shadow-sm active:scale-95"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isYtSyncing ? 'animate-spin' : ''}`} />
               <span>{isYtSyncing ? 'Syncing...' : 'Sync Liked Videos'}</span>
@@ -416,7 +416,7 @@ export const Settings: React.FC = () => {
             <button
               onClick={handleSyncPlaylists}
               disabled={isYtSyncing}
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-200 disabled:opacity-50 text-zinc-950 text-xs font-semibold transition shadow-sm border border-white/20 active:scale-95"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isYtSyncing ? 'animate-spin' : ''}`} />
               <span>{isYtSyncing ? 'Syncing...' : 'Sync Playlists'}</span>
@@ -426,7 +426,7 @@ export const Settings: React.FC = () => {
               href={`${apiEndpoint || 'https://second-brain-api.fitt.workers.dev'}/api/youtube/auth`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold transition border border-zinc-700 active:scale-95"
             >
               <ExternalLink className="w-3.5 h-3.5 text-rose-400" />
               <span>Connect Google Account</span>
@@ -434,10 +434,10 @@ export const Settings: React.FC = () => {
           </div>
 
           {/* Direct Playlist ID Syncer (Zero OAuth Required) */}
-          <div className="pt-2 border-t border-slate-800/80 space-y-2">
+          <div className="pt-2 border-t border-zinc-800/80 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-slate-300">Custom YouTube Playlist ID (Zero-OAuth Alternative)</span>
-              <span className="text-[11px] text-slate-500">Public or unlisted playlists (starts with PL...)</span>
+              <span className="font-semibold text-zinc-300">Custom YouTube Playlist ID (Zero-OAuth Alternative)</span>
+              <span className="text-[11px] text-zinc-500">Public or unlisted playlists (starts with PL...)</span>
             </div>
             <form onSubmit={handleSavePlaylist} className="flex gap-2">
               <input
@@ -445,12 +445,12 @@ export const Settings: React.FC = () => {
                 value={playlistInput}
                 onChange={(e) => setPlaylistInput(e.target.value)}
                 placeholder="e.g. PLrAXtmErZgOdP_8GzqsJ4VSL822rW8n"
-                className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-rose-500"
+                className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5 text-xs text-zinc-200 font-mono placeholder-zinc-600 focus:outline-none focus:border-rose-500"
               />
               <button
                 type="submit"
                 disabled={isSavingPlaylist || !playlistInput.trim()}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-bold text-white transition border border-slate-700 shrink-0"
+                className="px-3.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-xs font-bold text-white transition border border-zinc-700 shrink-0"
               >
                 {isSavingPlaylist ? 'Saving...' : 'Save'}
               </button>
@@ -466,7 +466,7 @@ export const Settings: React.FC = () => {
           </div>
 
           {ytSyncMessage && (
-            <div className="p-3 rounded-xl bg-slate-900 border border-purple-500/30 text-xs text-purple-300 font-medium">
+            <div className="p-3 rounded-xl bg-zinc-900 border border-amber-500/25 text-xs text-amber-300 font-medium">
               {ytSyncMessage}
             </div>
           )}
@@ -519,7 +519,7 @@ export const Settings: React.FC = () => {
                         href={pl.playlist_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10px] text-purple-400 hover:text-purple-300 flex items-center space-x-0.5"
+                        className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center space-x-0.5"
                       >
                         <span>Open</span>
                         <ExternalLink className="w-2.5 h-2.5" />
@@ -568,14 +568,14 @@ export const Settings: React.FC = () => {
                     value={clientIdInput}
                     onChange={(e) => setClientIdInput(e.target.value)}
                     placeholder="Google Client ID (e.g. 1234...apps.googleusercontent.com)"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-purple-500"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-white/30"
                   />
                   <input
                     type="password"
                     value={clientSecretInput}
                     onChange={(e) => setClientSecretInput(e.target.value)}
                     placeholder="Google Client Secret"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-purple-500"
+                    className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono placeholder-slate-600 focus:outline-none focus:border-white/30"
                   />
                 </div>
                 <div className="flex items-center justify-between pt-1">
@@ -585,7 +585,7 @@ export const Settings: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSavingOAuth}
-                    className="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-xs font-bold text-white transition shadow"
+                    className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-zinc-200 disabled:opacity-50 text-xs font-bold text-zinc-950 transition shadow"
                   >
                     {isSavingOAuth ? 'Saving...' : 'Save Credentials'}
                   </button>
@@ -625,7 +625,7 @@ export const Settings: React.FC = () => {
                 <p className="text-[11px] text-slate-400 leading-relaxed">
                   Install the Second Brain Userscript into <strong>Tampermonkey</strong> in Chrome/Brave. Clicking the YouTube <strong>Like</strong> button automatically extracts ideas and saves them to your vault!
                 </p>
-                <div className="text-[11px] font-mono text-purple-400 pt-0.5">
+                <div className="text-[11px] font-mono text-amber-400 pt-0.5">
                   Script file: <code>scripts/youtube-watcher-userscript.js</code>
                 </div>
               </div>
@@ -638,7 +638,7 @@ export const Settings: React.FC = () => {
       <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
         <div>
           <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-            <Cloud className="w-4 h-4 text-purple-400" />
+            <Cloud className="w-4 h-4 text-amber-400" />
             <span>Autonomous Cloud Vault Sync (Zero-Laptop Dependency)</span>
           </h3>
           <p className="text-xs text-slate-400 mt-1 leading-relaxed">
@@ -664,7 +664,7 @@ export const Settings: React.FC = () => {
 
             {syncStatus?.configured && syncStatus?.owner && (
               <div className="flex items-center space-x-2 text-[11px] text-slate-400 font-mono bg-slate-900 px-3 py-1 rounded-lg border border-slate-800">
-                <GitBranch className="w-3 h-3 text-purple-400" />
+                <GitBranch className="w-3 h-3 text-amber-400" />
                 <span>
                   {syncStatus.owner}/{syncStatus.repo || 'second-brain-vault'} : {syncStatus.branch || 'main'}
                 </span>
@@ -676,7 +676,7 @@ export const Settings: React.FC = () => {
             <button
               onClick={handleTriggerSync}
               disabled={isSyncing}
-              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-bold transition shadow"
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 disabled:opacity-50 text-zinc-950 text-xs font-bold transition shadow"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
               <span>{isSyncing ? 'Syncing to GitHub...' : 'Sync All Knowledge to GitHub Now'}</span>
@@ -693,7 +693,7 @@ export const Settings: React.FC = () => {
           </div>
 
           {syncMessage && (
-            <div className="p-3 rounded-xl bg-slate-900 border border-purple-500/30 text-xs text-purple-300 font-medium">
+            <div className="p-3 rounded-xl bg-slate-900 border border-amber-500/30 text-xs text-amber-300 font-medium">
               {syncMessage}
             </div>
           )}
@@ -707,7 +707,7 @@ export const Settings: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
             <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1.5">
-              <span className="font-semibold text-purple-300 block">1. Cloudflare Worker Secrets</span>
+              <span className="font-semibold text-amber-300 block">1. Cloudflare Worker Secrets</span>
               <p className="text-slate-400 text-[11px] leading-relaxed">
                 Add your GitHub Personal Access Token (classic or fine-grained with <code>repo</code> scope) to Cloudflare:
               </p>

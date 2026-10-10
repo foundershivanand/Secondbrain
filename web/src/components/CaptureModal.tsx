@@ -444,11 +444,11 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
         if (e.target === e.currentTarget && !isLoading) resetForm();
       }}
     >
-      <div className="relative w-full sm:max-w-xl bg-[#0d1322] border-t sm:border border-white/[0.08] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden">
+      <div className="relative w-full sm:max-w-xl bg-[#0f1118] border-t sm:border border-white/[0.08] rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[92dvh] sm:max-h-[85vh] overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-[#090d16]/70 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] bg-[#090a0e]/70 shrink-0">
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 rounded-xl bg-purple-500/15 text-purple-400 border border-purple-500/20">
+            <span className="p-1.5 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/20">
               <Sparkles className="w-4 h-4" />
             </span>
             <h2 className="text-sm font-semibold text-white tracking-tight">
@@ -458,7 +458,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
           <button
             onClick={resetForm}
             disabled={isLoading}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition"
+            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition"
             aria-label="Close"
           >
             <X className="w-4 h-4" />
@@ -466,7 +466,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
         </div>
 
         {/* Minimal Pill Tabs */}
-        <div className="px-5 py-2.5 border-b border-white/[0.06] bg-[#090d16]/40 shrink-0 overflow-x-auto scrollbar-none">
+        <div className="px-5 py-2.5 border-b border-white/[0.06] bg-[#090a0e]/40 shrink-0 overflow-x-auto scrollbar-none">
           <div className="flex items-center space-x-1.5 whitespace-nowrap">
             {captureTabs.map((tab) => {
               const Icon = tab.icon;
@@ -485,8 +485,8 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                   }}
                   className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-150 ${
                     isSelected
-                      ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/30'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      ? 'bg-white text-zinc-950 font-semibold shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -504,7 +504,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <h3 className="text-sm font-semibold text-white">{successToast}</h3>
-            <p className="text-xs text-slate-400">Structured note &amp; provenance pointer saved in Obsidian.</p>
+            <p className="text-xs text-zinc-400">Structured note &amp; provenance pointer saved in Obsidian.</p>
           </div>
         ) : (
           <form id="capture-form" onSubmit={handleCapture} className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -512,18 +512,18 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               {/* 1. INSTAGRAM REEL TAB */}
               {activeType === 'reel' && (
                 <div className="space-y-3 animate-fade-in">
-                  <div className="p-3 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/20 text-xs text-pink-200 space-y-1">
-                    <div className="flex items-center space-x-1.5 font-bold text-pink-300">
+                  <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-200 space-y-1">
+                    <div className="flex items-center space-x-1.5 font-bold text-rose-300">
                       <Film className="w-4 h-4" />
                       <span>Instagram Reel &amp; Short Video Protocol</span>
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-relaxed">
+                    <p className="text-[11px] text-zinc-300 leading-relaxed">
                       Extracts 100% full verbatim transcript if spoken, or extracts chronological on-screen text overlays if sound/music only, and synthesizes the core breakthrough idea.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                    <label className="block text-[11px] font-medium text-zinc-400 mb-1">
                       Instagram Reel URL
                     </label>
                     <input
@@ -531,18 +531,18 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                       value={url}
                       onChange={(e) => handleUrlChange(e.target.value)}
                       placeholder="https://www.instagram.com/reel/C7.../ or post URL"
-                      className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
+                      className="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none"
                     />
                   </div>
 
-                  <div className="flex items-center space-x-2 text-[11px] text-slate-500">
+                  <div className="flex items-center space-x-2 text-[11px] text-zinc-500">
                     <span className="flex-1 border-t border-white/[0.06]" />
                     <span>OR UPLOAD REEL CLIP</span>
                     <span className="flex-1 border-t border-white/[0.06]" />
                   </div>
 
-                  <label className="flex items-center justify-center space-x-2 p-3.5 rounded-2xl border border-dashed border-white/[0.12] hover:border-purple-500/40 bg-slate-900/40 text-slate-300 hover:text-white transition cursor-pointer text-xs">
-                    <Video className="w-4 h-4 text-purple-400" />
+                  <label className="flex items-center justify-center space-x-2 p-3.5 rounded-2xl border border-dashed border-white/[0.12] hover:border-white/30 bg-zinc-900/40 text-zinc-300 hover:text-white transition cursor-pointer text-xs">
+                    <Video className="w-4 h-4 text-rose-300" />
                     <span>
                       {videoFile ? `${videoFile.name} (${videoFile.sizeMB} MB)` : 'Upload Reel video file (.mp4, .mov)'}
                     </span>
@@ -616,7 +616,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                   )}
 
                   {isCameraActive ? (
-                    <div className="relative rounded-2xl overflow-hidden bg-black border border-purple-500/30">
+                    <div className="relative rounded-2xl overflow-hidden bg-black border border-white/20">
                       <video ref={videoRef} autoPlay playsInline muted className="w-full h-52 object-cover bg-black" />
                       <div className="absolute top-2 right-2 flex space-x-1.5">
                         <button
@@ -638,7 +638,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                         <button
                           type="button"
                           onClick={handleSnapPhoto}
-                          className="px-5 py-2 rounded-full bg-purple-600 text-white font-bold text-xs shadow-lg active:scale-95"
+                          className="px-5 py-2 rounded-full bg-white text-zinc-950 font-bold text-xs shadow-lg active:scale-95"
                         >
                           Snap Photo
                         </button>
@@ -649,14 +649,14 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleStartCamera('environment')}
-                        className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-purple-500/20 bg-purple-600/10 hover:bg-purple-600/20 text-purple-200 transition"
+                        className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-amber-500/20 bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 transition"
                       >
-                        <Camera className="w-5 h-5 text-purple-400 mb-1" />
+                        <Camera className="w-5 h-5 text-amber-400 mb-1" />
                         <span className="text-xs font-semibold">Live Camera</span>
                       </button>
 
-                      <label className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-white/[0.08] bg-slate-900/40 hover:bg-slate-900 text-slate-300 transition cursor-pointer">
-                        <ImageIcon className="w-5 h-5 text-indigo-400 mb-1" />
+                      <label className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-white/[0.08] bg-zinc-900/40 hover:bg-zinc-900 text-zinc-300 transition cursor-pointer">
+                        <ImageIcon className="w-5 h-5 text-amber-400 mb-1" />
                         <span className="text-xs font-semibold">Gallery</span>
                         <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
                       </label>
@@ -737,7 +737,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               {/* 6. PDF DOCUMENT TAB */}
               {activeType === 'pdf' && (
                 <div className="space-y-3 animate-fade-in">
-                  <label className="border border-dashed border-white/[0.12] hover:border-purple-500/40 rounded-2xl p-6 text-center block cursor-pointer bg-slate-900/40 transition">
+                  <label className="border border-dashed border-white/[0.12] hover:border-white/30 rounded-2xl p-6 text-center block cursor-pointer bg-zinc-900/40 transition">
                     <input
                       type="file"
                       accept=".pdf,application/pdf"
@@ -764,8 +764,8 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                       }}
                       className="hidden"
                     />
-                    <FileCode className="w-6 h-6 mx-auto text-indigo-400 mb-1.5" />
-                    <span className="text-xs text-slate-300 font-medium">
+                    <FileCode className="w-6 h-6 mx-auto text-sky-400 mb-1.5" />
+                    <span className="text-xs text-zinc-300 font-medium">
                       {photos.length > 0 && photos[0].mime === 'application/pdf'
                         ? photos[0].name
                         : 'Choose PDF document'}
@@ -777,13 +777,13 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               {/* Category & Context Section */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 border-t border-white/[0.06]">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">
                     Category
                   </label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full glass-input rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none"
+                    className="w-full glass-input rounded-xl px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none"
                   >
                     <option value="">Auto-classify (AI)</option>
                     {CANONICAL_CATEGORIES.map((cat) => (
@@ -795,7 +795,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1">
                     User Thought / Why Saved
                   </label>
                   <input
@@ -803,7 +803,7 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                     value={userNote}
                     onChange={(e) => setUserNote(e.target.value)}
                     placeholder="Your thought on this..."
-                    className="w-full glass-input rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none"
+                    className="w-full glass-input rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -817,12 +817,12 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
             </div>
 
             {/* Modal Sticky Footer */}
-            <div className="p-4 border-t border-white/[0.06] bg-[#090d16]/80 flex items-center justify-between shrink-0 pb-safe">
+            <div className="p-4 border-t border-white/[0.06] bg-[#090a0e]/85 flex items-center justify-between shrink-0 pb-safe">
               <button
                 type="button"
                 onClick={resetForm}
                 disabled={isLoading}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition"
               >
                 Cancel
               </button>
@@ -831,16 +831,16 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
                 type="submit"
                 onClick={(e) => handleCapture(e)}
                 disabled={isLoading || isProcessingMedia}
-                className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-semibold shadow-md shadow-purple-600/30 transition-all duration-150 active:scale-95"
+                className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 disabled:opacity-40 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-white/20"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
                     <span>{loadingStep || 'Extracting...'}</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500 stroke-[2.2]" />
                     <span>Extract Knowledge</span>
                   </>
                 )}

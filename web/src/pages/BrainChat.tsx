@@ -99,33 +99,33 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
     <div className="flex flex-col h-[calc(100dvh-8rem)] sm:h-[calc(100vh-5rem)] max-w-4xl mx-auto p-3 sm:p-6 space-y-3 sm:space-y-4">
       {/* Compact Brain State Banner (Section 32) */}
       {brainState && (
-        <div className="glass-panel p-3 rounded-2xl border border-purple-500/20 bg-purple-950/20 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div className="glass-panel p-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.05] text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
-            <span className="p-1 rounded-lg bg-purple-600/30 text-purple-300">
+            <span className="p-1 rounded-lg bg-amber-500/15 text-amber-300">
               <Target className="w-3.5 h-3.5" />
             </span>
-            <span className="font-bold text-slate-200">Active Goals:</span>
-            <span className="text-purple-300 font-medium truncate max-w-md">
+            <span className="font-bold text-zinc-200">Active Goals:</span>
+            <span className="text-amber-300 font-medium truncate max-w-md">
               {brainState.current_goals?.[0] || 'Build Second Brain'}
             </span>
           </div>
 
-          <div className="flex items-center space-x-3 text-[11px] text-slate-400">
+          <div className="flex items-center space-x-3 text-[11px] text-zinc-400">
             <span>
               Projects: <strong className="text-white">{brainState.active_projects?.length || 0}</strong>
             </span>
             <span>•</span>
             <span>
               Top Interest:{' '}
-              <strong className="text-purple-300">
+              <strong className="text-amber-300">
                 {brainState.current_interests?.[0]?.topic || 'AI agents'}
               </strong>
             </span>
             <button
               onClick={handleFetchBrief}
-              className="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600 text-purple-200 hover:text-white border border-purple-500/40 text-[10px] font-bold transition flex items-center space-x-1"
+              className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-zinc-100 hover:text-white border border-white/15 text-[10px] font-semibold transition flex items-center space-x-1"
             >
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="w-3 h-3 text-amber-400" />
               <span>Evolution Brief</span>
             </button>
           </div>
@@ -135,28 +135,28 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
       {/* Evolution Brief Modal */}
       {isDailyBriefOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="relative w-full max-w-2xl bg-zinc-900 border border-zinc-700/80 rounded-2xl shadow-2xl p-6 max-h-[85vh] overflow-y-auto space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center space-x-2">
-                <span className="p-2 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30">
+                <span className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/25">
                   <Sparkles className="w-5 h-5" />
                 </span>
                 <div>
                   <h3 className="text-sm font-bold text-white">Daily Intelligence & Evolution Brief</h3>
-                  <p className="text-xs text-slate-400">Nightly cross-domain pattern matching & gap discovery</p>
+                  <p className="text-xs text-zinc-400">Nightly cross-domain pattern matching & gap discovery</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsDailyBriefOpen(false)}
-                className="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-slate-800"
+                className="text-zinc-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-zinc-800"
               >
                 ✕
               </button>
             </div>
 
             {isLoadingBrief ? (
-              <div className="p-8 text-center text-xs text-purple-300 space-y-2">
-                <Sparkles className="w-6 h-6 animate-spin mx-auto text-purple-400" />
+              <div className="p-8 text-center text-xs text-amber-300 space-y-2">
+                <Sparkles className="w-6 h-6 animate-spin mx-auto text-amber-400" />
                 <p>Synthesizing cross-source connections and knowledge evolution...</p>
               </div>
             ) : briefReport ? (
@@ -204,7 +204,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
 
       {/* Sample Question Chips */}
       <div className="flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
-        <span className="text-xs font-bold text-purple-400 flex items-center space-x-1 shrink-0">
+        <span className="text-xs font-bold text-amber-400 flex items-center space-x-1 shrink-0">
           <Flame className="w-3.5 h-3.5" />
           <span>Try:</span>
         </span>
@@ -212,7 +212,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
           <button
             key={i}
             onClick={() => handleSend(prompt)}
-            className="text-xs px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-purple-500/40 hover:bg-slate-800/80 transition whitespace-nowrap"
+            className="text-xs px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-white/20 hover:bg-zinc-800/80 transition whitespace-nowrap"
           >
             {prompt}
           </button>
@@ -233,8 +233,8 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
               <div
                 className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                   isUser
-                    ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
-                    : 'bg-slate-800 text-purple-400 border border-purple-500/20'
+                    ? 'bg-white text-zinc-950 font-bold shadow-sm'
+                    : 'bg-zinc-800 text-amber-400 border border-white/10'
                 }`}
               >
                 {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -249,8 +249,8 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                       <span>Belief Conflict Detected</span>
                     </div>
                     <div>
-                      <span className="text-slate-400">Prior Belief: </span>
-                      <span className="line-through text-slate-300">{msg.response.conflict_detected.prior_belief}</span>
+                      <span className="text-zinc-400">Prior Belief: </span>
+                      <span className="line-through text-zinc-300">{msg.response.conflict_detected.prior_belief}</span>
                     </div>
                     <div>
                       <span className="text-amber-300 font-semibold">New Evidence: </span>
@@ -265,8 +265,8 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                 <div
                   className={`p-4 rounded-2xl text-sm leading-relaxed ${
                     isUser
-                      ? 'bg-purple-600 text-white rounded-tr-none shadow-md shadow-purple-600/20'
-                      : 'glass-panel rounded-tl-none border border-slate-800 text-slate-200'
+                      ? 'bg-white text-zinc-950 rounded-tr-none shadow-sm font-medium'
+                      : 'glass-panel rounded-tl-none border border-zinc-800 text-zinc-200'
                   }`}
                 >
                   <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -274,8 +274,8 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
 
                 {/* Sources & Provenance Citations (Section 19 & 46) */}
                 {msg.response?.sources && msg.response.sources.length > 0 && (
-                  <div className="glass-panel p-3.5 rounded-xl border border-slate-800/80 space-y-2 text-xs">
-                    <div className="flex items-center space-x-1.5 text-purple-400 font-bold uppercase tracking-wider text-[10px]">
+                  <div className="glass-panel p-3.5 rounded-xl border border-zinc-800/80 space-y-2 text-xs">
+                    <div className="flex items-center space-x-1.5 text-amber-400 font-bold uppercase tracking-wider text-[10px]">
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>Knowledge Provenance & Sources ({msg.response.sources.length})</span>
                     </div>
@@ -283,11 +283,11 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                       {msg.response.sources.map((src, i) => (
                         <div
                           key={i}
-                          className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 hover:border-purple-500/30 transition space-y-1"
+                          className="p-2.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 hover:border-amber-500/30 transition space-y-1"
                         >
                           <div className="flex items-start justify-between gap-1">
-                            <span className="font-bold text-slate-200 truncate">{src.title}</span>
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-purple-300 shrink-0">
+                            <span className="font-bold text-zinc-200 truncate">{src.title}</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-amber-300 shrink-0">
                               {src.source_type}
                             </span>
                           </div>
@@ -303,7 +303,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                             </div>
                           )}
                           {src.snippet && (
-                            <p className="text-[11px] text-slate-400 line-clamp-2 italic">
+                            <p className="text-[11px] text-zinc-400 line-clamp-2 italic">
                               "{src.snippet}"
                             </p>
                           )}
@@ -312,7 +312,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                               href={src.original_url || src.raw_url || '#'}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center space-x-1 text-[10px] text-purple-400 hover:text-purple-300 font-semibold"
+                              className="inline-flex items-center space-x-1 text-[10px] text-amber-400 hover:text-amber-300 font-semibold"
                             >
                               <span>Open original</span>
                               <ExternalLink className="w-3 h-3" />
@@ -331,7 +331,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                       <span
                         key={i}
                         onClick={() => onNavigateTopic && onNavigateTopic(topic)}
-                        className="px-2 py-0.5 rounded-full bg-purple-950/40 text-purple-300 border border-purple-800/40 cursor-pointer hover:bg-purple-900/60 transition"
+                        className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 cursor-pointer hover:bg-amber-500/20 transition"
                       >
                         [[{topic}]]
                       </span>
@@ -342,7 +342,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                 {/* Suggested Questions */}
                 {msg.response?.suggested_questions && msg.response.suggested_questions.length > 0 && (
                   <div className="space-y-1 text-xs">
-                    <div className="text-slate-500 font-medium text-[11px] flex items-center space-x-1">
+                    <div className="text-zinc-500 font-medium text-[11px] flex items-center space-x-1">
                       <HelpCircle className="w-3 h-3" />
                       <span>Suggested Follow-ups:</span>
                     </div>
@@ -351,10 +351,10 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
                         <button
                           key={i}
                           onClick={() => handleSend(q)}
-                          className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-purple-500/30 text-[11px] transition"
+                          className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-white/20 text-[11px] transition"
                         >
                           <span>{q}</span>
-                          <ArrowRight className="w-2.5 h-2.5 text-purple-400" />
+                          <ArrowRight className="w-2.5 h-2.5 text-amber-400" />
                         </button>
                       ))}
                     </div>
@@ -366,7 +366,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
         })}
 
         {isLoading && (
-          <div className="flex items-center space-x-3 text-xs text-purple-400 glass-panel p-3.5 rounded-xl border border-purple-500/20 max-w-sm animate-pulse">
+          <div className="flex items-center space-x-3 text-xs text-amber-400 glass-panel p-3.5 rounded-xl border border-amber-500/20 max-w-sm animate-pulse">
             <Sparkles className="w-4 h-4 animate-spin" />
             <span>Retrieving Second Brain knowledge & synthesizing answer...</span>
           </div>
@@ -374,7 +374,7 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
       </div>
 
       {/* Input Bar */}
-      <div className="glass-panel p-2 rounded-2xl border border-slate-800 focus-within:border-purple-500/50 transition shadow-2xl">
+      <div className="glass-panel p-2 rounded-2xl border border-zinc-800 focus-within:border-white/25 transition shadow-2xl">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -387,14 +387,14 @@ export const BrainChat: React.FC<{ onNavigateTopic?: (t: string) => void }> = ({
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
             placeholder="Ask your brain (e.g. What did I learn about AI agent memory?)..."
-            className="flex-1 bg-transparent px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+            className="flex-1 bg-transparent px-4 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none"
           />
           <button
             type="submit"
             disabled={isLoading || !inputQuery.trim()}
-            className="p-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white disabled:opacity-40 transition shadow-md shadow-purple-600/30"
+            className="p-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 disabled:opacity-30 transition shadow-sm border border-white/20 active:scale-95"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4 stroke-[2.2]" />
           </button>
         </form>
       </div>

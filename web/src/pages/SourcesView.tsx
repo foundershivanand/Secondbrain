@@ -131,16 +131,16 @@ export const SourcesView: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-800 pb-2">
+      <div className="flex items-center space-x-2 border-b border-zinc-800 pb-2">
         <button
           onClick={() => setActiveTab('catalog')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === 'catalog'
-              ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white/10 text-white border border-white/15'
+              : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
-          <Layers className="w-4 h-4 text-purple-400" />
+          <Layers className="w-4 h-4 text-amber-400" />
           <span>Registered Pointers ({sources.length})</span>
         </button>
 
@@ -148,8 +148,8 @@ export const SourcesView: React.FC = () => {
           onClick={() => setActiveTab('manifest')}
           className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
             activeTab === 'manifest'
-              ? 'bg-purple-600/20 text-purple-300 border border-purple-500/30'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white/10 text-white border border-white/15'
+              : 'text-zinc-400 hover:text-zinc-200'
           }`}
         >
           <Upload className="w-4 h-4 text-emerald-400" />
@@ -162,10 +162,10 @@ export const SourcesView: React.FC = () => {
           {/* Storage Breakdown */}
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
             {['google_drive', 'terabox', 'telegram', 'discord', 'local'].map((storageKey) => (
-              <div key={storageKey} className="glass-panel p-3.5 rounded-xl border border-slate-800 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block truncate">{storageKey}</span>
+              <div key={storageKey} className="glass-panel p-3.5 rounded-xl border border-zinc-800 text-center">
+                <span className="text-[10px] uppercase font-bold text-zinc-400 block truncate">{storageKey}</span>
                 <span className="text-lg font-black text-white font-mono">{storageStats[storageKey] || 0}</span>
-                <span className="text-[10px] text-slate-500 block">pointers</span>
+                <span className="text-[10px] text-zinc-500 block">pointers</span>
               </div>
             ))}
           </div>
@@ -175,22 +175,22 @@ export const SourcesView: React.FC = () => {
             {sources.map((src) => (
               <div
                 key={src.id}
-                className="glass-panel p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs"
+                className="glass-panel p-3.5 rounded-xl border border-zinc-800 flex items-center justify-between gap-3 text-xs"
               >
                 <div className="flex items-center space-x-3 overflow-hidden">
-                  <span className="text-[10px] font-mono font-bold text-purple-400 shrink-0">
+                  <span className="text-[10px] font-mono font-bold text-amber-400 shrink-0">
                     {src.raw_id || src.id}
                   </span>
                   <div className="truncate">
-                    <span className="font-semibold text-slate-200 block truncate">{src.title}</span>
-                    <span className="text-[10px] text-slate-500 font-mono">
+                    <span className="font-semibold text-zinc-200 block truncate">{src.title}</span>
+                    <span className="text-[10px] text-zinc-500 font-mono">
                       Priority: <strong className="text-amber-400">{src.priority || 'P1'}</strong> • Status: {src.status}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3 shrink-0">
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-emerald-400 uppercase">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-emerald-400 uppercase">
                     {src.raw_storage || 'cloud'}
                   </span>
                   {(src.raw_url || src.original_url) && (
@@ -198,7 +198,7 @@ export const SourcesView: React.FC = () => {
                       href={src.raw_url || src.original_url || '#'}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-purple-400 transition"
+                      className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition"
                       title="Open Original Cloud File"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
@@ -212,20 +212,20 @@ export const SourcesView: React.FC = () => {
       )}
 
       {activeTab === 'manifest' && (
-        <div className="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+        <div className="glass-panel p-6 rounded-2xl border border-zinc-800 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-white flex items-center space-x-2">
                 <FileCode className="w-4 h-4 text-emerald-400" />
                 <span>Bulk Raw Manifest Ingest</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Paste raw files from your TeraBox, Drive, or Telegram catalogs. P0 items are extracted immediately; P1–P4 are queued progressively.
               </p>
             </div>
             <button
               onClick={handleLoadSample}
-              className="text-xs text-purple-400 hover:text-purple-300 font-semibold underline"
+              className="text-xs text-amber-400 hover:text-amber-300 font-semibold underline"
             >
               Load Sample Template
             </button>
@@ -238,7 +238,7 @@ export const SourcesView: React.FC = () => {
               value={manifestText}
               onChange={(e) => setManifestText(e.target.value)}
               placeholder='[ { "raw_id": "RAW-001", "filename": "video.mp4", "storage": "terabox", "url": "https://...", "priority": "P0" } ]'
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 font-mono text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-purple-500"
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 font-mono text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-white/30"
             />
 
             {importResult && (

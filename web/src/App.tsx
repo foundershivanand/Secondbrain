@@ -130,7 +130,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-purple-600 selection:text-white pb-16 md:pb-0">
+    <div className="min-h-screen bg-[#08090c] text-zinc-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-100 pb-16 md:pb-0">
       {/* Navigation Header */}
       <Navbar
         activeTab={activeTab}

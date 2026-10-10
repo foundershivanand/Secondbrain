@@ -13,6 +13,26 @@ export interface CategoryDef {
 
 export const CANONICAL_CATEGORIES: CategoryDef[] = [
   {
+    id: 'reels',
+    name: 'Instagram Reels',
+    icon: '🎬',
+    color: 'text-pink-400 border-pink-500/30 bg-pink-500/10',
+    keywords: [
+      'reel', 'reels', 'instagram reel', 'instagram reels', 'short', 'shorts', 'short-form',
+      'vid_', 'inshot', 'capcut', 'viral hook', 'audio sound profile', 'visual overlays'
+    ],
+  },
+  {
+    id: 'screenshots',
+    name: 'Screenshots & Images',
+    icon: '📸',
+    color: 'text-amber-400 border-amber-500/30 bg-amber-500/10',
+    keywords: [
+      'screenshot', 'screenshots', 'screen capture', 'image', 'images', 'picture', 'pictures',
+      'ui screenshot', 'play store screenshot', 'visual card', 'infographic'
+    ],
+  },
+  {
     id: 'youtube',
     name: 'YouTube',
     icon: '▶️',
@@ -23,13 +43,12 @@ export const CANONICAL_CATEGORIES: CategoryDef[] = [
     ],
   },
   {
-    id: 'content-reels',
-    name: 'Content, Reels & Creative Media',
-    icon: '🎬',
-    color: 'text-pink-400 border-pink-500/30 bg-pink-500/10',
+    id: 'content-creative',
+    name: 'Content & Creative Strategy',
+    icon: '💡',
+    color: 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10',
     keywords: [
-      'reel', 'reels', 'instagram', 'tiktok', 'short', 'shorts', 'content creator', 'video editing',
-      'capcut', 'premiere', 'audio sound', 'transcript', 'on-screen text', 'visual text',
+      'content creator', 'video editing', 'capcut', 'premiere', 'audio sound',
       'hook', 'viral', 'storytelling', 'social media', 'creator'
     ],
   },
@@ -257,6 +276,34 @@ export function resolveNoteCategory(note: {
       const yt = CANONICAL_CATEGORIES.find((c) => c.id === 'youtube');
       if (yt) return yt;
     }
+  }
+
+  // Dedicated Instagram Reels rule
+  const reelsCat = CANONICAL_CATEGORIES.find((c) => c.id === 'reels');
+  if (
+    reelsCat &&
+    (note.source_type === 'reel' ||
+      note.knowledge_type === 'reel' ||
+      note.stream === 'videos' ||
+      (note.markdown_path && (note.markdown_path.toLowerCase().includes('/videos/') || note.markdown_path.toLowerCase().includes('/reels/'))) ||
+      (note.raw_url && (note.raw_url.toLowerCase().includes('/instagram/') || note.raw_url.toLowerCase().includes('/movies/'))) ||
+      (note.title && /^(vid_|inshot_|reel)/i.test(note.title)))
+  ) {
+    return reelsCat;
+  }
+
+  // Dedicated Screenshots & Images rule
+  const screenshotsCat = CANONICAL_CATEGORIES.find((c) => c.id === 'screenshots');
+  if (
+    screenshotsCat &&
+    (note.source_type === 'screenshot' ||
+      note.knowledge_type === 'screenshot' ||
+      note.stream === 'images' ||
+      (note.markdown_path && (note.markdown_path.toLowerCase().includes('/images/') || note.markdown_path.toLowerCase().includes('/screenshots/'))) ||
+      (note.raw_url && (note.raw_url.toLowerCase().includes('/pictures/') || note.raw_url.toLowerCase().includes('/screenshots/'))) ||
+      (note.title && /^(screenshot)/i.test(note.title)))
+  ) {
+    return screenshotsCat;
   }
 
   // 1. Dedicated YouTube folder rule: all items from YouTube belong exclusively to the 'YouTube' folder

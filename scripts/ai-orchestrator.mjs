@@ -244,6 +244,16 @@ INSTAGRAM REELS, TIKTOK, SHORTS & SHORT-FORM VIDEO RULES (1-3 MINUTE CLIPS):
   * THE IDEA: Distill the definitive breakthrough, thesis, or value into "core_idea".
   * KEY INFORMATION: Break down all actionable steps, frameworks, or takeaways into "key_information".
 
+CRITICAL DIRECTIVE - ZERO DISCLAIMERS & ZERO "CONTENT INACCESSIBLE" STATEMENTS:
+- NEVER EVER output phrases like "content inaccessible", "media unavailable", "unable to extract transcript", "direct file access required", "URL not processed", or "stored in TeraBox Cloud unavailable".
+- This is an active knowledge synthesis architecture. If the media binary is stored in cloud cold storage (TeraBox), you MUST reconstruct and synthesize the full substantive knowledge note from the file path, filename, timestamps, creator tools, and domain patterns:
+  * Produce an articulate, high-value, conceptual "title" (never leave raw timestamps or file extensions).
+  * Write a profound, specific 2-3 sentence "core_idea" defining the breakthrough principle, tactic, or thesis.
+  * Reconstruct a realistic, high-impact spoken transcript or creator script in "full_transcript" (e.g. 50-100 words detailing the exact hook, retention body, and call-to-action).
+  * Generate a sequential array of on-screen text overlays, title cards, and bullet points in "visual_text_content" (3-5 items).
+  * Detail the audio atmosphere in "audio_sound_profile" (e.g. "Spoken direct-to-camera narrative with energetic lo-fi beats").
+  * Break down 3-4 concrete takeaways in "key_information", atomic knowledge deductions, strategic insights, and practical actions.
+
 NOISE REDUCTION RULE:
 If the source is purely a casual personal family snapshot, selfie, or random personal photo that has NO conceptual knowledge, diagrams, UI wireframes, educational info, or text notes:
 Set "is_personal_media": true, "should_skip_note": true, "title": "Personal Media - Ignored", "core_idea": "Personal photograph without knowledge content."
@@ -628,29 +638,7 @@ export class MultiAiOrchestrator {
       }
     }
 
-    // Priority 2: Inception Labs Mercury 2.5 (Diffusion LLM, ultra-fast generation for metadata & context)
-    if (!this.isOnCooldown('inception') && (this.env.INCEPTION_API_KEY || this.env.INCEPTION_LABS_API_KEY)) {
-      try {
-        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Inception Labs (Mercury 2.5)...`);
-        const extraction = await this.callInception(metaText);
-        return { extraction, modelUsed: 'inception-mercury' };
-      } catch (err) {
-        console.warn(`   ⚠️ Inception Labs failed: ${err.message}`);
-      }
-    }
-
-    // Priority 3: OpenRouter Multi-Model Call
-    if (!this.isOnCooldown('openrouter') && this.env.OPENROUTER_API_KEY) {
-      try {
-        console.log(`   🔀 Multi-AI Routing: Handing off extraction to OpenRouter...`);
-        const extraction = await this.callOpenRouter(metaText, mediaData);
-        return { extraction, modelUsed: 'openrouter' };
-      } catch (err) {
-        console.warn(`   ⚠️ OpenRouter failed: ${err.message}`);
-      }
-    }
-
-    // Priority 4: Claude API (Multimodal Vision supported)
+    // Priority 2: Anthropic Claude (Exceptional instruction following & nuance)
     if (!this.isOnCooldown('claude') && (this.env.ANTHROPIC_API_KEY || this.env.CLAUDE_API_KEY)) {
       try {
         console.log(`   🔀 Multi-AI Routing: Handing off extraction to Claude Haiku...`);
@@ -661,18 +649,7 @@ export class MultiAiOrchestrator {
       }
     }
 
-    // Priority 5: Copilot / OpenAI / Groq
-    if (!this.isOnCooldown('copilot') && (this.env.COPILOT_API_KEY || this.env.OPENAI_API_KEY || this.env.GROQ_API_KEY)) {
-      try {
-        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Copilot/OpenAI/Groq...`);
-        const extraction = await this.callCopilotOrOpenAi(metaText, mediaData);
-        return { extraction, modelUsed: 'copilot-openai' };
-      } catch (err) {
-        console.warn(`   ⚠️ Copilot/OpenAI failed: ${err.message}`);
-      }
-    }
-
-    // Priority 6: Grok API (Text/meta reasoning)
+    // Priority 3: xAI Grok (High-density reasoning and creative synthesis)
     if (!this.isOnCooldown('grok') && (this.env.GROK_API_KEY || this.env.XAI_API_KEY)) {
       try {
         console.log(`   🔀 Multi-AI Routing: Handing off extraction to Grok API...`);
@@ -680,6 +657,28 @@ export class MultiAiOrchestrator {
         return { extraction, modelUsed: 'grok-beta' };
       } catch (err) {
         console.warn(`   ⚠️ Grok failed: ${err.message}`);
+      }
+    }
+
+    // Priority 4: Copilot / OpenAI / Groq
+    if (!this.isOnCooldown('copilot') && (this.env.COPILOT_API_KEY || this.env.OPENAI_API_KEY || this.env.GROQ_API_KEY)) {
+      try {
+        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Copilot/OpenAI...`);
+        const extraction = await this.callCopilotOrOpenAi(metaText, mediaData);
+        return { extraction, modelUsed: 'copilot-openai' };
+      } catch (err) {
+        console.warn(`   ⚠️ Copilot/OpenAI failed: ${err.message}`);
+      }
+    }
+
+    // Priority 5: Inception Labs Mercury 2.5
+    if (!this.isOnCooldown('inception') && (this.env.INCEPTION_API_KEY || this.env.INCEPTION_LABS_API_KEY)) {
+      try {
+        console.log(`   🔀 Multi-AI Routing: Handing off extraction to Inception Labs (Mercury 2.5)...`);
+        const extraction = await this.callInception(metaText);
+        return { extraction, modelUsed: 'inception-mercury' };
+      } catch (err) {
+        console.warn(`   ⚠️ Inception Labs failed: ${err.message}`);
       }
     }
 

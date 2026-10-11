@@ -2,7 +2,7 @@
 id: MEM-CURRENT-CONTEXT
 type: memory
 category: current_context
-updated_at: 2026-10-10
+updated_at: 2026-10-11
 ---
 
 # ⚡ Current Context (Brain State)
@@ -19,6 +19,9 @@ updated_at: 2026-10-10
 - None listed
 
 ## Recent Learning
+- Before generating code with AI assistants, ensure the 8 core markdown docs exist: PRD.md, DESIGN_SYSTEM.md, ARCHITECTURE.md, DATABASE.md, SECURITY.md, CODE_STYLE.md, TESTING.md, AGENTS.md.
+- Upendra's filmography (such as 'A' and 'Om') represents canonical study material for non-linear, psychological South Indian cinema.
+- User tracks Kannada cinema recommendations and films to watch via YouTube playlists.
 - Repeated consensus on eight markdown documentation files for AI-assisted development.
 - Consistent focus on high-velocity hooks in short-form video retention.
 - Recurring friction when extracting text from image-based sources like Telegram.

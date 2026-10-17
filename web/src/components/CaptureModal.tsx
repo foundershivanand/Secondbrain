@@ -61,7 +61,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
   const [photos, setPhotos] = useState<ProcessedImage[]>([]);
   const [videoFile, setVideoFile] = useState<{ name: string; base64: string; mime: string; sizeMB: string } | null>(null);
   const [videoKeyframes, setVideoKeyframes] = useState<VideoKeyframe[]>([]);
-  const [allImagesDone, setAllImagesDone] = useState<boolean>(true);
   const [isProcessingMedia, setIsProcessingMedia] = useState(false);
   const [mediaProcessingStatus, setMediaProcessingStatus] = useState('');
 
@@ -126,9 +125,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
       setError(null);
       setSuccessToast(null);
       setIsLoading(false);
-      api.getExtractionStatus().then((st) => {
-        setAllImagesDone(st.allImagesDone);
-      }).catch(() => {});
     }
   }, [isOpen, initialType, defaultCategory]);
 
@@ -528,15 +524,6 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               {/* 1. INSTAGRAM REEL TAB */}
               {activeType === 'reel' && (
                 <div className="space-y-3 animate-fade-in">
-                  {!allImagesDone && (
-                    <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 flex items-center space-x-2.5">
-                      <Lock className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <div className="text-[11px] leading-tight">
-                        <span className="font-semibold text-zinc-100">Images prioritized first.</span> Video extractions will unlock once all screenshots and images are completed.
-                      </div>
-                    </div>
-                  )}
-
                   <div>
                     <label className="block text-[11px] font-medium text-zinc-400 mb-1">
                       Instagram Reel URL
@@ -863,18 +850,13 @@ export const CaptureModal: React.FC<CaptureModalProps> = ({
               <button
                 type="submit"
                 onClick={(e) => handleCapture(e)}
-                disabled={isLoading || isProcessingMedia || (activeType === 'reel' && !allImagesDone)}
+                disabled={isLoading || isProcessingMedia}
                 className="flex items-center space-x-1.5 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:opacity-50 text-zinc-950 font-semibold text-xs shadow-sm transition-all duration-150 active:scale-95 border border-emerald-400/20"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" />
                     <span>{loadingStep || 'Extracting...'}</span>
-                  </>
-                ) : activeType === 'reel' && !allImagesDone ? (
-                  <>
-                    <Lock className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>Images Pending</span>
                   </>
                 ) : (
                   <>

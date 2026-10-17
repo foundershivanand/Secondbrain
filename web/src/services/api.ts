@@ -54,11 +54,26 @@ export const api = {
   },
 
   async getStats(): Promise<BrainStats> {
-    const res = await fetch(`${getApiBaseUrl()}/api/stats`, {
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) throw new Error('Failed to fetch stats');
-    return res.json();
+    const [statsRes, sourcesRes] = await Promise.all([
+      fetch(`${getApiBaseUrl()}/api/stats`, { headers: getAuthHeader() }),
+      fetch(`${getApiBaseUrl()}/api/sources?limit=500`, { headers: getAuthHeader() }).catch(() => null),
+    ]);
+    if (!statsRes.ok) throw new Error('Failed to fetch stats');
+    const stats = await statsRes.json();
+    if (sourcesRes && sourcesRes.ok) {
+      try {
+        const sourcesData = await sourcesRes.json();
+        const validSources = (sourcesData.sources || []).filter(
+          (s: any) =>
+            s.raw_storage !== 'terabox' &&
+            !s.raw_url?.includes('terabox') &&
+            !s.original_url?.includes('terabox') &&
+            !s.id?.startsWith('SRC-IMAGES-')
+        );
+        stats.sourcesCount = validSources.length;
+      } catch {}
+    }
+    return stats;
   },
 
   async getBrainState(): Promise<BrainState> {
@@ -79,29 +94,16 @@ export const api = {
     canStartVideos: boolean;
     message: string;
   }> {
-    const res = await fetch(`${getApiBaseUrl()}/api/extraction`, {
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) throw new Error('Failed to fetch extraction status');
-    return res.json();
-  },
-
-  async startExtraction(): Promise<any> {
-    const res = await fetch(`${getApiBaseUrl()}/api/extraction/start`, {
-      method: 'POST',
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) throw new Error('Failed to start extraction');
-    return res.json();
-  },
-
-  async stopExtraction(): Promise<any> {
-    const res = await fetch(`${getApiBaseUrl()}/api/extraction/stop`, {
-      method: 'POST',
-      headers: getAuthHeader(),
-    });
-    if (!res.ok) throw new Error('Failed to stop extraction');
-    return res.json();
+    return {
+      status: 'idle',
+      currentStream: 'none',
+      imagesExtracted: 0,
+      totalKnownImages: 0,
+      videosExtracted: 0,
+      allImagesDone: true,
+      canStartVideos: true,
+      message: 'Extraction decommissioned',
+    };
   },
 
   async updateBrainState(state: BrainState): Promise<{ success: boolean }> {
@@ -201,11 +203,19 @@ export const api = {
   },
 
   async getSourcesList(): Promise<{ sources: SourceRecord[]; count: number }> {
-    const res = await fetch(`${getApiBaseUrl()}/api/sources`, {
+    const res = await fetch(`${getApiBaseUrl()}/api/sources?limit=500`, {
       headers: getAuthHeader(),
     });
     if (!res.ok) throw new Error('Failed to fetch sources');
-    return res.json();
+    const data = await res.json();
+    const validSources = (data.sources || []).filter(
+      (s: SourceRecord) =>
+        s.raw_storage !== 'terabox' &&
+        !s.raw_url?.includes('terabox') &&
+        !s.original_url?.includes('terabox') &&
+        !s.id?.startsWith('SRC-IMAGES-')
+    );
+    return { sources: validSources, count: validSources.length };
   },
 
   async getMemoriesList(status?: string): Promise<{ memories: MemoryRecord[]; count: number }> {

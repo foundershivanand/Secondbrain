@@ -51,16 +51,6 @@ export const SourcesView: React.FC = () => {
       summary: "Deferred authentication UI pattern"
     },
     {
-      raw_id: "RAW-019825",
-      filename: "decoupled-storage-whitepaper.pdf",
-      storage: "terabox",
-      url: "https://terabox.com/s/sample-paper",
-      size: 24000000,
-      priority: "P0",
-      title: "Decoupled Storage & Reasoning Whitepaper",
-      summary: "Architecture whitepaper for keeping database under 500 MB"
-    },
-    {
       raw_id: "RAW-019826",
       filename: "discord-customer-feedback.txt",
       storage: "discord",
@@ -146,8 +136,8 @@ export const SourcesView: React.FC = () => {
       {activeTab === 'catalog' && (
         <div className="space-y-5">
           {/* Storage Breakdown */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {['google_drive', 'terabox', 'telegram', 'discord', 'local'].map((storageKey) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {['google_drive', 'telegram', 'discord', 'local'].map((storageKey) => (
               <div key={storageKey} className="glass-panel p-3.5 rounded-xl border border-zinc-800 text-center">
                 <span className="text-[10px] uppercase font-bold text-zinc-400 block truncate">{storageKey}</span>
                 <span className="text-lg font-black text-white font-mono">{storageStats[storageKey] || 0}</span>
@@ -206,7 +196,7 @@ export const SourcesView: React.FC = () => {
                 <span>Bulk Raw Manifest Ingest</span>
               </h3>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Paste raw files from your TeraBox, Drive, or Telegram catalogs. P0 items are extracted immediately; P1–P4 are queued progressively.
+                Paste raw files from your Drive or Telegram catalogs. P0 items are extracted immediately; P1–P4 are queued progressively.
               </p>
             </div>
             <button
@@ -223,7 +213,7 @@ export const SourcesView: React.FC = () => {
               required
               value={manifestText}
               onChange={(e) => setManifestText(e.target.value)}
-              placeholder='[ { "raw_id": "RAW-001", "filename": "video.mp4", "storage": "terabox", "url": "https://...", "priority": "P0" } ]'
+              placeholder='[ { "raw_id": "RAW-001", "filename": "notes.pdf", "storage": "google_drive", "url": "https://...", "priority": "P0" } ]'
               className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 font-mono text-xs text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-white/30"
             />
 

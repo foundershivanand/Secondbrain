@@ -17,8 +17,7 @@
     "db:sync:remote": "node scripts/push-to-remote-d1.mjs",
     "scan:raw": "node scripts/scan-raw-storage.mjs",
     "brain:reset": "node scripts/reset-brain-data.mjs",
-    "terabox:import": "node scripts/terabox-importer.mjs",
-    "terabox:extract": "node scripts/terabox-importer.mjs"
+    "sync:youtube": "node scripts/sync-youtube.mjs"
   },
   "keywords": [
     "second-brain",

@@ -74,7 +74,7 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
     }
   };
 
-  const getStatusBadge = (status: SourceStatus) => {
+  const getStatusBadge = (status: SourceStatus | string) => {
     switch (status) {
       case 'DONE':
         return (
@@ -90,10 +90,25 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
             <span>FAILED</span>
           </span>
         );
-      default:
+      case 'IGNORED_PERSONAL_MEDIA':
+        return (
+          <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700">
+            <span>FILTERED</span>
+          </span>
+        );
+      case 'EXTRACTING':
+      case 'ANALYZING':
+      case 'CONNECTING':
+      case 'INDEXING':
         return (
           <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 animate-pulse">
             <Loader2 className="w-3 h-3 animate-spin" />
+            <span>{status}</span>
+          </span>
+        );
+      default:
+        return (
+          <span className="flex items-center space-x-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700">
             <span>{status}</span>
           </span>
         );

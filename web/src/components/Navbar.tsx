@@ -14,7 +14,6 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { BrainStats } from '../types';
-import { ExtractionControl } from './ExtractionControl';
 
 interface NavbarProps {
   activeTab: string;
@@ -160,10 +159,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </nav>
 
-          {/* Right Header Actions: Extraction Control + Capture Button */}
+          {/* Right Header Actions: Capture Button */}
           <div className="hidden sm:flex items-center space-x-2.5">
-            <ExtractionControl />
-
             <button
               onClick={onOpenCapture}
               className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-emerald-400/30"
@@ -254,10 +251,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <X className="w-4 h-4" />
               </button>
-            </div>
-
-            <div className="pb-1 flex justify-center">
-              <ExtractionControl />
             </div>
 
             <div className="space-y-1.5">

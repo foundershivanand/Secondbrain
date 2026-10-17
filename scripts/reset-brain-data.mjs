@@ -45,7 +45,7 @@ const CATEGORIES = [
 for (const cat of CATEGORIES) {
   const catPath = path.join(knowledgeDir, cat);
   fs.mkdirSync(catPath, { recursive: true });
-  const indexContent = `# ${cat}\n\n*Curated collection of numbered knowledge notes extracted from TeraBox, mobile media, and web captures.*\n\n| # | Note Title | Type | Core Concept | Source Link |\n|---|---|---|---|---|\n`;
+  const indexContent = `# ${cat}\n\n*Curated collection of knowledge notes from user captures and YouTube sync.*\n\n| # | Note Title | Type | Core Concept | Source Link |\n|---|---|---|---|---|\n`;
   fs.writeFileSync(path.join(catPath, '_Index.md'), indexContent, 'utf8');
 }
 console.log(`✅ Cleared and initialized 12 categorized knowledge folders in vault/01 Knowledge.`);
@@ -80,9 +80,9 @@ This blackboard memory context is shared dynamically across all AI models to ena
 - [[Artificial Intelligence]]
 - [[System Architecture]]
 
-## Collaborative Extraction Insights
-- All raw media pointers remain preserved in external TeraBox cloud storage.
-- Notes are sequentially numbered with structured YAML frontmatter, atomic ideas, insights, and actionable items.
+## Collaborative Insights
+- User uploads and YouTube liked videos form the continuous stream of inputs.
+- Notes are structured with YAML frontmatter, atomic ideas, insights, and actionable items.
 
 ## Provider Sync Status
 - **Gemini Flash:** Online (Primary Knowledge Extractor)
@@ -155,54 +155,14 @@ if (sqliteDbPath) {
       DELETE FROM processing_jobs;
       DELETE FROM brain_state;
       DELETE FROM mocs;
-      DELETE FROM sources WHERE raw_storage = 'telegram' OR source_type = 'telegram';
-      UPDATE sources SET status = 'RECEIVED', title = NULL, processed_at = NULL WHERE raw_storage = 'terabox';
+      DELETE FROM sources WHERE raw_storage = 'terabox';
       COMMIT;
     `;
     execSync(`sqlite3 "${sqliteDbPath}" "${cleanSql.replace(/"/g, '\\"')}"`, { stdio: 'pipe' });
-    console.log(`✅ SQLite D1 database cleaned: wiped Telegram data, wiped old knowledge & memories, reset TeraBox status to RECEIVED.`);
+    console.log(`✅ SQLite D1 database cleaned.`);
   } catch (err) {
     console.error('⚠️ Error cleaning SQLite database:', err.message);
   }
 }
 
-// 7. Reset terabox-progress.json and extraction.log
-const freshProgress = {
-  counter: 0,
-  processed: {},
-  skipped_duplicate: {},
-  skipped_personal: {},
-  failed: {}
-};
-fs.writeFileSync(path.resolve(ROOT_DIR, 'terabox-progress.json'), JSON.stringify(freshProgress, null, 2), 'utf8');
-fs.writeFileSync(path.resolve(ROOT_DIR, 'extraction.log'), '', 'utf8');
-
-// 8. Initialize shared-ai-memory.json
-const initialSharedMemory = {
-  counter: 0,
-  recent_concepts: [],
-  discovered_topics: [
-    'AI Agents',
-    'Autonomous Systems',
-    'Mobile UI Design',
-    'Digital Wellness',
-    'Cinema & Storytelling',
-    'Academics & Research',
-    'Business & Startups'
-  ],
-  model_stats: {
-    'gemini-3.8-flash': 0,
-    'gemini-2.5-flash': 0,
-    'gemini-3.5-flash-lite': 0,
-    'grok': 0,
-    'claude': 0,
-    'copilot': 0,
-    'semantic_engine': 0
-  },
-  last_updated: new Date().toISOString()
-};
-fs.writeFileSync(path.resolve(ROOT_DIR, 'terabox-shared-memory.json'), JSON.stringify(initialSharedMemory, null, 2), 'utf8');
-
-console.log('✅ terabox-progress.json and extraction.log reset from start.');
-console.log('✅ terabox-shared-memory.json initialized.');
-console.log('🎉 Reset complete! All data, notes, and AI memory cleared without breaking workflow.');
+console.log('🎉 Reset complete! User uploads and YouTube sync architecture active.');

@@ -23,5 +23,11 @@ export async function handleSources(request: Request, db: Database, pathParts: s
     return jsonResponse({ sources, count: sources.length });
   }
 
+  if (request.method === 'DELETE') {
+    if (!id) return errorResponse('Source ID required for deletion', 400);
+    await db.deleteSource(id);
+    return jsonResponse({ success: true, deletedId: id });
+  }
+
   return errorResponse('Method not allowed', 405);
 }

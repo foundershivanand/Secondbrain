@@ -1,3 +1,2 @@
-# Cloudflare Pages Redirects & Proxies
-/api/*  https://second-brain-api.fitt.workers.dev/api/:splat  200
+/api/*  https://second-brain-api.foundershivanand.workers.dev/api/:splat  200
 /*      /index.html                                            200

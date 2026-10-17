@@ -21,7 +21,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-const DEFAULT_API = process.env.API_BASE_URL || 'https://second-brain-api.fitt.workers.dev';
+const DEFAULT_API = process.env.API_BASE_URL || 'https://second-brain-api.foundershivanand.workers.dev';
 const AUTH_TOKEN = process.env.AUTH_TOKEN || 'secondbrain_dev_secret';
 
 async function syncVault(apiBaseUrl = DEFAULT_API) {

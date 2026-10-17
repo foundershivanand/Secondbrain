@@ -29,7 +29,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-const API_BASE = process.env.API_BASE_URL || 'https://second-brain-api.fitt.workers.dev';
+const API_BASE = process.env.API_BASE_URL || 'https://second-brain-api.foundershivanand.workers.dev';
 const AUTH_TOKEN = process.env.AUTH_TOKEN || 'secondbrain_dev_secret';
 
 const args = process.argv.slice(2);

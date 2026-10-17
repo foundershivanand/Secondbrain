@@ -77,8 +77,8 @@ Open your deployed Cloudflare PWA directly in your mobile browser:
 
 ## 🌐 3. Web Application & Cloud API
 
-- **Live Cloud App (Mobile & Web):** [https://second-brain-web-83u.pages.dev](https://second-brain-web-83u.pages.dev)
-- **Live Cloud Worker API:** [https://second-brain-api.fitt.workers.dev](https://second-brain-api.fitt.workers.dev)
+- **Live Cloud App (Mobile & Web):** [https://second-brain-web-d8x.pages.dev](https://second-brain-web-d8x.pages.dev)
+- **Live Cloud Worker API:** [https://second-brain-api.foundershivanand.workers.dev](https://second-brain-api.foundershivanand.workers.dev)
 
 ### Starting Local Development (Optional):
 ```bash

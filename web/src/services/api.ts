@@ -10,7 +10,7 @@ import {
   YouTubePlaylistItem,
 } from '../types';
 
-export const DEFAULT_WORKER_API = 'https://second-brain-api.fitt.workers.dev';
+export const DEFAULT_WORKER_API = 'https://second-brain-api.foundershivanand.workers.dev';
 export const DEFAULT_AUTH_TOKEN = 'secondbrain_dev_secret';
 
 export function getApiBaseUrl(): string {

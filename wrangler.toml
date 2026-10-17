@@ -7,12 +7,12 @@ compatibility_flags = ["nodejs_compat"]
 [[d1_databases]]
 binding = "DB"
 database_name = "second_brain"
-database_id = "da4f5160-5bdd-49b9-bd47-1da08fe1bad4"
+database_id = "7f3473d3-cb0e-4e63-8cba-dff4285306ed"
 
 [[d1_databases]]
 binding = "second_brain"
 database_name = "second_brain"
-database_id = "da4f5160-5bdd-49b9-bd47-1da08fe1bad4"
+database_id = "7f3473d3-cb0e-4e63-8cba-dff4285306ed"
 
 # Scheduled tasks trigger (Runs hourly: YouTube sync every hour, memory agent at 2:00 AM UTC)
 [triggers]

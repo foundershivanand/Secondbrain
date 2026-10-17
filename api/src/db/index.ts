@@ -92,10 +92,17 @@ export class Database {
 
   async listSources(limit: number = 50, offset: number = 0): Promise<SourceRecord[]> {
     const res = await this.db
-      .prepare(`SELECT * FROM sources ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+      .prepare(`SELECT * FROM sources WHERE raw_storage != 'terabox' AND id NOT LIKE 'SRC-IMAGES-%' ORDER BY created_at DESC LIMIT ? OFFSET ?`)
       .bind(limit, offset)
       .all<SourceRecord>();
     return res.results || [];
+  }
+
+  async deleteSource(id: string): Promise<void> {
+    try {
+      await this.db.prepare(`DELETE FROM processing_jobs WHERE source_id = ?`).bind(id).run();
+    } catch {}
+    await this.db.prepare(`DELETE FROM sources WHERE id = ?`).bind(id).run();
   }
 
   async updateSourceCapturedAt(id: string, capturedAt: string, channelId?: string): Promise<void> {
@@ -539,7 +546,7 @@ export class Database {
     relationshipsCount: number;
     mocsCount: number;
   }> {
-    const s = await this.db.prepare(`SELECT COUNT(*) as count FROM sources`).first<{ count: number }>();
+    const s = await this.db.prepare(`SELECT COUNT(*) as count FROM sources WHERE raw_storage != 'terabox' AND id NOT LIKE 'SRC-IMAGES-%'`).first<{ count: number }>();
     const k = await this.db.prepare(`SELECT COUNT(*) as count FROM knowledge`).first<{ count: number }>();
     const a = await this.db.prepare(`SELECT COUNT(*) as count FROM atomic_knowledge`).first<{ count: number }>();
     const m = await this.db.prepare(`SELECT COUNT(*) as count FROM memories`).first<{ count: number }>();

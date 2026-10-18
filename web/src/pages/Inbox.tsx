@@ -16,6 +16,7 @@ import {
   Mic,
   HardDrive,
   Film,
+  Trash2,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { SourceRecord, SourceStatus } from '../types';
@@ -42,6 +43,26 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
   useEffect(() => {
     fetchSources();
   }, []);
+
+  const handleDeleteSource = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      await api.deleteSource(id);
+      setSources((prev) => prev.filter((s) => s.id !== id));
+    } catch (err) {
+      console.error('Failed to delete source:', err);
+    }
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm('Clear all captures from your inbox?')) return;
+    try {
+      await api.clearAllSources();
+      setSources([]);
+    } catch (err) {
+      console.error('Failed to clear inbox:', err);
+    }
+  };
 
   const filteredSources = sources.filter((s) => {
     if (filter === 'ALL') return true;
@@ -134,6 +155,16 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
         </div>
 
         <div className="flex items-center space-x-2">
+          {sources.length > 0 && (
+            <button
+              onClick={handleClearAll}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-rose-400 hover:border-rose-500/30 text-xs font-medium transition"
+              title="Clear all inbox items"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear All</span>
+            </button>
+          )}
           <button
             onClick={fetchSources}
             className="p-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition"
@@ -236,6 +267,13 @@ export const Inbox: React.FC<{ onOpenCapture: () => void; onSelectKnowledge?: (i
                   <div>Storage: <span className="text-slate-300 font-mono">{source.raw_storage || 'local'}</span></div>
                 </div>
                 {getStatusBadge(source.status)}
+                <button
+                  onClick={(e) => handleDeleteSource(source.id, e)}
+                  className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                  title="Remove from Inbox"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           ))

@@ -218,6 +218,22 @@ export const api = {
     return { sources: validSources, count: validSources.length };
   },
 
+  async deleteSource(id: string): Promise<void> {
+    const res = await fetch(`${getApiBaseUrl()}/api/sources/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to delete source');
+  },
+
+  async clearAllSources(): Promise<void> {
+    const res = await fetch(`${getApiBaseUrl()}/api/sources/all`, {
+      method: 'DELETE',
+      headers: getAuthHeader(),
+    });
+    if (!res.ok) throw new Error('Failed to clear inbox sources');
+  },
+
   async getMemoriesList(status?: string): Promise<{ memories: MemoryRecord[]; count: number }> {
     const url = status
       ? `${getApiBaseUrl()}/api/memories?status=${status}`

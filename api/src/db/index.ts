@@ -105,6 +105,13 @@ export class Database {
     await this.db.prepare(`DELETE FROM sources WHERE id = ?`).bind(id).run();
   }
 
+  async deleteAllSources(): Promise<void> {
+    try {
+      await this.db.prepare(`DELETE FROM processing_jobs`).run();
+    } catch {}
+    await this.db.prepare(`DELETE FROM sources`).run();
+  }
+
   async updateSourceCapturedAt(id: string, capturedAt: string, channelId?: string): Promise<void> {
     if (channelId) {
       await this.db

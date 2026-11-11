@@ -1,4 +1,5 @@
 import { Env } from '../config';
+import { Buffer } from 'node:buffer';
 
 export interface GitHubSyncResult {
   success: boolean;
@@ -51,13 +52,7 @@ export async function syncFileToGitHub(
     }
 
     // 2. Base64 encode the markdown content
-    const encoder = new TextEncoder();
-    const data = encoder.encode(content);
-    let binary = '';
-    for (let i = 0; i < data.byteLength; i++) {
-      binary += String.fromCharCode(data[i]);
-    }
-    const base64Content = btoa(binary);
+    const base64Content = Buffer.from(content, 'utf8').toString('base64');
 
     // 3. Commit and push directly to GitHub in the cloud
     const putBody: any = {

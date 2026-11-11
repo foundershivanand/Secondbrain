@@ -12,22 +12,19 @@ export async function handleSearch(request: Request, db: Database): Promise<Resp
   try {
     const knowledge = await db.searchKnowledge(query, 15);
     const atomic = await db.searchAtomicKnowledge(query, 20);
-    const memories = await db.listMemories();
-    const matchedMemories = memories.filter((m) =>
-      m.content.toLowerCase().includes(query.toLowerCase())
-    );
+    const memories = await db.searchMemories(query, 15);
 
     return jsonResponse({
       query,
       results: {
         knowledge,
         atomic_knowledge: atomic,
-        memories: matchedMemories,
+        memories,
       },
       counts: {
         knowledge: knowledge.length,
         atomic: atomic.length,
-        memories: matchedMemories.length,
+        memories: memories.length,
       },
     });
   } catch (err: any) {

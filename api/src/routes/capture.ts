@@ -1,4 +1,5 @@
 import { Env } from '../config';
+import { Buffer } from 'node:buffer';
 import { Database } from '../db';
 import { processIngestion, IngestionInput } from '../pipeline/ingestion';
 import { jsonResponse, errorResponse } from '../utils/response';
@@ -61,12 +62,7 @@ export async function handleCapture(request: Request, env: Env, db: Database): P
         mimeType = file.type;
         fileSize = file.size;
         const arrayBuffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        base64Data = btoa(binary);
+        base64Data = Buffer.from(arrayBuffer).toString('base64');
       }
 
       let detectedType = sourceType;

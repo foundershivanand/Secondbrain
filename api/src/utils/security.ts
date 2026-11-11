@@ -11,6 +11,9 @@ export function sanitizeUntrustedInput(input: string): string {
 
 export function verifyAuth(request: Request, env: Env): boolean {
   if (!env.AUTH_TOKEN) {
+    if (env.ENVIRONMENT === 'production') {
+      console.warn('⚠️ [SECURITY ALERT] Worker running in production without AUTH_TOKEN configured! Requests are unprotected.');
+    }
     // If no AUTH_TOKEN is set in environment, allow local/dev requests
     return true;
   }

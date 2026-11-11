@@ -33,5 +33,5 @@ export interface Env {
   INCEPTION_API_KEY?: string;
 }
 
-export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
-export const FALLBACK_GEMINI_MODEL = 'gemini-2.0-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-2.0-flash';
+export const FALLBACK_GEMINI_MODEL = 'gemini-1.5-flash';

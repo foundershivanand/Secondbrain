@@ -24,7 +24,10 @@ export async function handleSources(request: Request, db: Database, pathParts: s
   }
 
   if (request.method === 'DELETE') {
-    if (!id || id === 'all') {
+    if (!id) {
+      return errorResponse('Source ID is required for deletion. Use DELETE /api/sources/:id or DELETE /api/sources/all', 400);
+    }
+    if (id === 'all') {
       await db.deleteAllSources();
       return jsonResponse({ success: true, message: 'All sources cleared from inbox' });
     }

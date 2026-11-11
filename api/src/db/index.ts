@@ -92,7 +92,7 @@ export class Database {
 
   async listSources(limit: number = 50, offset: number = 0): Promise<SourceRecord[]> {
     const res = await this.db
-      .prepare(`SELECT * FROM sources WHERE raw_storage != 'terabox' AND id NOT LIKE 'SRC-IMAGES-%' ORDER BY created_at DESC LIMIT ? OFFSET ?`)
+      .prepare(`SELECT * FROM sources WHERE status != 'ARCHIVED' ORDER BY created_at DESC LIMIT ? OFFSET ?`)
       .bind(limit, offset)
       .all<SourceRecord>();
     return res.results || [];
@@ -145,7 +145,7 @@ export class Database {
               OR original_url LIKE '%youtu.be%'
               OR raw_url LIKE '%youtube.com%'
               OR raw_url LIKE '%youtu.be%')
-             AND (title NOT LIKE 'Screenshot_%.png' AND title NOT LIKE 'Duplicate of: Screenshot_%')
+             AND status != 'ARCHIVED'
            ORDER BY captured_at DESC LIMIT ?`
         )
         .bind(limit)
@@ -155,7 +155,7 @@ export class Database {
 
     const placeholders = sourceTypes.map(() => '?').join(',');
     const res = await this.db
-      .prepare(`SELECT * FROM sources WHERE source_type IN (${placeholders}) ORDER BY captured_at DESC LIMIT ?`)
+      .prepare(`SELECT * FROM sources WHERE source_type IN (${placeholders}) AND status != 'ARCHIVED' ORDER BY captured_at DESC LIMIT ?`)
       .bind(...sourceTypes, limit)
       .all<SourceRecord>();
     return res.results || [];
@@ -173,7 +173,7 @@ export class Database {
             OR s.original_url LIKE '%youtu.be%'
             OR k.my_thought LIKE '%Category: youtube%'
             OR k.my_thought LIKE '%[youtube]%')
-           AND (k.title NOT LIKE 'Screenshot_%.png' AND k.title NOT LIKE 'Duplicate of: Screenshot_%')
+           AND (s.status IS NULL OR s.status != 'ARCHIVED')
          ORDER BY COALESCE(s.captured_at, k.created_at) DESC LIMIT ?`
       )
       .bind(limit)
@@ -280,7 +280,7 @@ export class Database {
   }
 
   async searchKnowledge(searchTerm: string, limit: number = 20): Promise<KnowledgeRecord[]> {
-    const clean = searchTerm.trim().replace(/['"%;_\\]/g, ' ').trim().slice(0, 35);
+    const clean = searchTerm.trim().slice(0, 100);
     if (!clean) return [];
     try {
       const pattern = `%${clean}%`;
@@ -300,6 +300,10 @@ export class Database {
   }
 
   async deleteKnowledge(id: string): Promise<void> {
+    const k = await this.db.prepare(`SELECT source_id FROM knowledge WHERE id = ?`).bind(id).first<{ source_id: string | null }>();
+    if (k && k.source_id) {
+      await this.db.prepare(`UPDATE sources SET status = 'ARCHIVED' WHERE id = ?`).bind(k.source_id).run();
+    }
     await this.db.prepare(`DELETE FROM atomic_knowledge WHERE knowledge_id = ?`).bind(id).run();
     await this.db.prepare(`DELETE FROM relationships WHERE from_id = ? OR to_id = ?`).bind(id, id).run();
     await this.db.prepare(`DELETE FROM knowledge WHERE id = ?`).bind(id).run();
@@ -324,7 +328,7 @@ export class Database {
   }
 
   async searchAtomicKnowledge(searchTerm: string, limit: number = 30): Promise<AtomicKnowledgeItem[]> {
-    const clean = searchTerm.trim().replace(/['"%;_\\]/g, ' ').trim().slice(0, 35);
+    const clean = searchTerm.trim().slice(0, 100);
     if (!clean) return [];
     try {
       const pattern = `%${clean}%`;
@@ -404,6 +408,26 @@ export class Database {
     query += ` ORDER BY memory_score DESC, importance DESC, created_at DESC`;
     const res = await this.db.prepare(query).bind(...params).all<MemoryRecord>();
     return res.results || [];
+  }
+
+  async searchMemories(searchTerm: string, limit: number = 20): Promise<MemoryRecord[]> {
+    const clean = searchTerm.trim().slice(0, 100);
+    if (!clean) return [];
+    try {
+      const pattern = `%${clean}%`;
+      const res = await this.db
+        .prepare(
+          `SELECT * FROM memories 
+           WHERE content LIKE ? OR evidence LIKE ?
+           ORDER BY memory_score DESC, importance DESC, created_at DESC LIMIT ?`
+        )
+        .bind(pattern, pattern, limit)
+        .all<MemoryRecord>();
+      return res.results || [];
+    } catch (err) {
+      console.warn('searchMemories query error (handled gracefully):', err);
+      return [];
+    }
   }
 
   async updateMemoryStatus(
@@ -553,7 +577,7 @@ export class Database {
     relationshipsCount: number;
     mocsCount: number;
   }> {
-    const s = await this.db.prepare(`SELECT COUNT(*) as count FROM sources WHERE raw_storage != 'terabox' AND id NOT LIKE 'SRC-IMAGES-%'`).first<{ count: number }>();
+    const s = await this.db.prepare(`SELECT COUNT(*) as count FROM sources WHERE status != 'ARCHIVED'`).first<{ count: number }>();
     const k = await this.db.prepare(`SELECT COUNT(*) as count FROM knowledge`).first<{ count: number }>();
     const a = await this.db.prepare(`SELECT COUNT(*) as count FROM atomic_knowledge`).first<{ count: number }>();
     const m = await this.db.prepare(`SELECT COUNT(*) as count FROM memories`).first<{ count: number }>();
@@ -630,7 +654,7 @@ export class Database {
          WHERE (source_type = 'youtube' 
             OR original_url LIKE '%youtube.com%' 
             OR original_url LIKE '%youtu.be%')
-           AND (title NOT LIKE 'Screenshot_%.png' AND title NOT LIKE 'Duplicate of: Screenshot_%')
+           AND status != 'ARCHIVED'
          ORDER BY captured_at DESC LIMIT ?`
       )
       .bind(limit)

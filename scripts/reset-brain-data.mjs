@@ -26,20 +26,25 @@ if (fs.existsSync(knowledgeDir)) {
   }
 }
 
-// Recreate clean structured category directories in 01 Knowledge
+// Recreate clean structured category directories in 01 Knowledge matching canonical taxonomy
 const CATEGORIES = [
-  '01 - AI & Autonomous Systems',
-  '02 - Business, Startups & SaaS',
-  '03 - Mobile Apps & UI-UX Design',
-  '04 - Tech, Engineering & DevOps',
-  '05 - Digital Wellness & Habit Systems',
-  '06 - Content, Reels & Creative Media',
-  '07 - Cinema, Storytelling & Arts',
-  '08 - Psychology, Mindset & Philosophy',
-  '09 - Academics, Education & Research',
-  '10 - Governance, History & Legal',
-  '11 - Finance, Wealth & Operations',
-  '12 - General Knowledge & Reference'
+  'YouTube',
+  'Content, Reels & Creative Media',
+  'Artificial Intelligence & LLMs',
+  'AI Agents & Autonomous Systems',
+  'Digital Wellness & Screen Time',
+  'Hardware & Embedded IoT',
+  'Mobile Apps & UI Design',
+  'Academics & Education',
+  'History, Governance & Politics',
+  'Business, Startups & SaaS',
+  'Software Architecture & Backend',
+  'Cinema, Storytelling & Film',
+  'Psychology & Mental Models',
+  'Health, Fitness & Physiology',
+  'Finance, Wealth & Crypto',
+  'Productivity & Personal Systems',
+  'General Knowledge & Reference'
 ];
 
 for (const cat of CATEGORIES) {

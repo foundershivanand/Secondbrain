@@ -40,7 +40,8 @@ export function getApiBaseUrl(): string {
 
 export function getAuthHeader(): Record<string, string> {
   const custom = typeof window !== 'undefined' ? localStorage.getItem('sb_auth_token') : null;
-  const token = (custom && custom.trim()) ? custom.trim() : DEFAULT_AUTH_TOKEN;
+  const isDev = typeof import.meta !== 'undefined' && Boolean((import.meta as any).env?.DEV);
+  const token = (custom && custom.trim()) ? custom.trim() : (isDev ? DEFAULT_AUTH_TOKEN : '');
   if (token) return { Authorization: `Bearer ${token}` };
   return {};
 }
@@ -54,26 +55,9 @@ export const api = {
   },
 
   async getStats(): Promise<BrainStats> {
-    const [statsRes, sourcesRes] = await Promise.all([
-      fetch(`${getApiBaseUrl()}/api/stats`, { headers: getAuthHeader() }),
-      fetch(`${getApiBaseUrl()}/api/sources?limit=500`, { headers: getAuthHeader() }).catch(() => null),
-    ]);
-    if (!statsRes.ok) throw new Error('Failed to fetch stats');
-    const stats = await statsRes.json();
-    if (sourcesRes && sourcesRes.ok) {
-      try {
-        const sourcesData = await sourcesRes.json();
-        const validSources = (sourcesData.sources || []).filter(
-          (s: any) =>
-            s.raw_storage !== 'terabox' &&
-            !s.raw_url?.includes('terabox') &&
-            !s.original_url?.includes('terabox') &&
-            !s.id?.startsWith('SRC-IMAGES-')
-        );
-        stats.sourcesCount = validSources.length;
-      } catch {}
-    }
-    return stats;
+    const res = await fetch(`${getApiBaseUrl()}/api/stats`, { headers: getAuthHeader() });
+    if (!res.ok) throw new Error('Failed to fetch stats');
+    return res.json();
   },
 
   async getBrainState(): Promise<BrainState> {
@@ -208,14 +192,7 @@ export const api = {
     });
     if (!res.ok) throw new Error('Failed to fetch sources');
     const data = await res.json();
-    const validSources = (data.sources || []).filter(
-      (s: SourceRecord) =>
-        s.raw_storage !== 'terabox' &&
-        !s.raw_url?.includes('terabox') &&
-        !s.original_url?.includes('terabox') &&
-        !s.id?.startsWith('SRC-IMAGES-')
-    );
-    return { sources: validSources, count: validSources.length };
+    return { sources: data.sources || [], count: (data.sources || []).length };
   },
 
   async deleteSource(id: string): Promise<void> {

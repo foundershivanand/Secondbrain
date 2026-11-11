@@ -8,12 +8,15 @@
     "deploy": "wrangler deploy",
     "db:local": "wrangler d1 execute second_brain --local --file=./schema.sql",
     "db:remote": "wrangler d1 execute second_brain --remote --file=./schema.sql",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.20241230.0",
     "typescript": "^5.7.2",
     "wrangler": "^3.114.17"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@types/node": "^26.6.6"
+  }
 }

@@ -6,8 +6,10 @@
   "scripts": {
     "dev:api": "cd api && npm run dev",
     "dev:web": "cd web && npm run dev",
+    "build": "cd web && npm run build",
     "build:web": "cd web && npm run build",
     "typecheck": "cd api && npm run typecheck",
+    "test": "vitest run",
     "db:init:local": "cd api && npx wrangler d1 execute second_brain --local --file=./schema.sql",
     "db:init:remote": "cd api && npx wrangler d1 execute second_brain --remote --file=./schema.sql",
     "seed": "node scripts/seed-demo.mjs",
@@ -34,5 +36,8 @@
     "@cloudflare/workers-types": "^4.20241230.0",
     "typescript": "^5.7.2",
     "wrangler": "^3.114.17"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.0"
   }
 }

@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.VITE_API_URL || 'https://second-brain-api.fitt.workers.dev',
+        target: process.env.VITE_API_URL || 'https://second-brain-api.foundershivanand.workers.dev',
         changeOrigin: true,
         secure: false,
       },

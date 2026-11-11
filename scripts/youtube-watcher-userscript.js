@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Second Brain - YouTube Automatic Watch & Like History Sync
-// @namespace    https://second-brain-api.fitt.workers.dev/
+// @namespace    https://second-brain-api.foundershivanand.workers.dev/
 // @version      1.1.0
 // @description  Automatically sync watched and liked YouTube videos to your Second Brain Obsidian Vault with AI-extracted atomic ideas and summaries.
 // @author       Second Brain
@@ -8,7 +8,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @connect      second-brain-api.fitt.workers.dev
+// @connect      second-brain-api.foundershivanand.workers.dev
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -16,7 +16,7 @@
   'use strict';
 
   // --- Configuration ---
-  const API_ENDPOINT = 'https://second-brain-api.fitt.workers.dev/api/capture';
+  const API_ENDPOINT = 'https://second-brain-api.foundershivanand.workers.dev/api/capture';
   const AUTH_TOKEN = 'secondbrain_dev_secret';
   const MIN_WATCH_SECONDS = 30; // Minimum seconds watched before auto-syncing
 

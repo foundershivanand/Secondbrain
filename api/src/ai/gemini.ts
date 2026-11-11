@@ -285,12 +285,46 @@ export async function callGemini(
  * Parses Gemini response, removing any accidental markdown code fences
  */
 export function cleanAndParseJson<T>(raw: string): T {
-  let cleaned = raw.trim();
-  if (cleaned.startsWith('```json')) {
-    cleaned = cleaned.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-  } else if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```\s*/, '').replace(/\s*```$/, '');
+  const trimmed = raw.trim();
+
+  // Try direct parse first
+  try {
+    return JSON.parse(trimmed) as T;
+  } catch {}
+
+  // 1. Try extracting from markdown code fences ```json ... ``` or ``` ... ```
+  const codeBlockMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    try {
+      return JSON.parse(codeBlockMatch[1].trim()) as T;
+    } catch {}
   }
+
+  // 2. Try locating the outermost JSON object { ... }
+  const firstBrace = trimmed.indexOf('{');
+  const lastBrace = trimmed.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    try {
+      const jsonCandidate = trimmed.slice(firstBrace, lastBrace + 1);
+      return JSON.parse(jsonCandidate) as T;
+    } catch {}
+  }
+
+  // 3. Try locating the outermost JSON array [ ... ]
+  const firstBracket = trimmed.indexOf('[');
+  const lastBracket = trimmed.lastIndexOf(']');
+  if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+    try {
+      const jsonCandidate = trimmed.slice(firstBracket, lastBracket + 1);
+      return JSON.parse(jsonCandidate) as T;
+    } catch {}
+  }
+
+  // Final attempt: strip any leading/trailing fences and parse
+  let cleaned = trimmed
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/, '')
+    .replace(/\s*```$/, '');
   return JSON.parse(cleaned) as T;
 }
 

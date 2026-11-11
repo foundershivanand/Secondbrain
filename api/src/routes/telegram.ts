@@ -1,4 +1,5 @@
 import { Env } from '../config';
+import { Buffer } from 'node:buffer';
 import { Database } from '../db';
 import { processIngestion, IngestionInput } from '../pipeline/ingestion';
 import { verifyTelegramWebhook } from '../utils/security';
@@ -31,13 +32,8 @@ async function getTelegramFileBase64(botToken: string, fileId: string): Promise<
     const fileRes = await fetch(fileUrl);
     const mimeType = fileRes.headers.get('content-type') || 'application/octet-stream';
     const buffer = await fileRes.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
     return {
-      base64: btoa(binary),
+      base64: Buffer.from(buffer).toString('base64'),
       mimeType,
     };
   } catch (err) {

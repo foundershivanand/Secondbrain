@@ -1,0 +1,50 @@
+name: Deploy Second Brain to Cloudflare
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-and-deploy:
+    name: Test, Build & Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install root dependencies
+        run: npm ci
+
+      - name: 📦 Install frontend dependencies
+        run: cd web && npm ci
+
+      - name: 🧪 Run Automated Unit Tests (Vitest)
+        run: npm test
+
+      - name: 🔍 TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: ☁️ Deploy Cloudflare Worker Edge API
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: 'api'
+          command: deploy
+
+      - name: 🏗️ Build Web Application Bundle
+        run: npm run build
+
+      - name: 🚀 Deploy Web App to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy web/dist --project-name=second-brain-web

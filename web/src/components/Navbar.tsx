@@ -12,6 +12,8 @@ import {
   MoreHorizontal,
   X,
   ChevronRight,
+  LayoutGrid,
+  ExternalLink,
 } from 'lucide-react';
 import { BrainStats } from '../types';
 
@@ -19,6 +21,7 @@ interface NavbarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenCapture: () => void;
+  onOpenLinks: () => void;
   stats: BrainStats | null;
   isSyncing?: boolean;
 }
@@ -27,6 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   onOpenCapture,
+  onOpenLinks,
   stats,
   isSyncing,
 }) => {
@@ -154,16 +158,41 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     );
                   })}
+
+                  <div className="pt-1 mt-1 border-t border-zinc-800">
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        onOpenLinks();
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition text-amber-300 hover:bg-amber-500/10 hover:text-amber-200"
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <LayoutGrid className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="font-semibold">All Links Hub</span>
+                      </div>
+                      <ExternalLink className="w-3 h-3 text-amber-400/70" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </nav>
 
-          {/* Right Header Actions: Capture Button */}
-          <div className="hidden sm:flex items-center space-x-2.5">
+          {/* Right Header Actions: All Links & Capture Button */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={onOpenLinks}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-amber-300 text-xs font-medium border border-zinc-700/60 shadow-sm transition-all duration-150 active:scale-95"
+              title="All Links & Connected Apps"
+            >
+              <LayoutGrid className="w-3.5 h-3.5 text-amber-400" />
+              <span className="inline">All Links</span>
+            </button>
+
             <button
               onClick={onOpenCapture}
-              className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-emerald-400/30"
+              className="hidden sm:flex items-center space-x-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95 border border-emerald-400/30"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               <span>Capture</span>
@@ -254,6 +283,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <div className="space-y-1.5">
+              <button
+                onClick={() => {
+                  setIsMoreMenuOpen(false);
+                  onOpenLinks();
+                }}
+                className="w-full flex items-center justify-between p-3 rounded-2xl transition text-left bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/25 text-amber-200"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 rounded-xl bg-zinc-950 border border-amber-500/30 text-amber-400">
+                    <LayoutGrid className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-amber-300">All Links Hub</div>
+                    <div className="text-[11px] text-zinc-400">Browse all connected ecosystem apps</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-amber-400" />
+              </button>
+
               {[...primaryNavItems, ...secondaryNavItems].map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;

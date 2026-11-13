@@ -22,11 +22,16 @@ import {
   ChevronUp,
   Shield,
   Play,
+  LayoutGrid,
 } from 'lucide-react';
 import { api } from '../services/api';
 import { YouTubePlaylistItem } from '../types';
 
-export const Settings: React.FC = () => {
+interface SettingsProps {
+  onOpenLinks?: () => void;
+}
+
+export const Settings: React.FC<SettingsProps> = ({ onOpenLinks }) => {
   const [apiEndpoint, setApiEndpoint] = useState('');
   const [authToken, setAuthToken] = useState('');
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -303,6 +308,31 @@ export const Settings: React.FC = () => {
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Ecosystem All Links Hub */}
+      <div className="glass-panel p-6 rounded-2xl border border-zinc-800 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+              <LayoutGrid className="w-4 h-4 text-amber-400" />
+              <span>Ecosystem &amp; All Links Hub</span>
+            </h3>
+            <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+              Quick access to all connected ecosystem tools across project management, reusable modules, distribution, startup ideas, and AI mentorship.
+            </p>
+          </div>
+
+          {onOpenLinks && (
+            <button
+              onClick={onOpenLinks}
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold transition active:scale-95 shrink-0"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>View All Links (8 Apps)</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Telegram Bot Setup */}

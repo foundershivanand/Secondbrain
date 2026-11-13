@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { CaptureModal } from './components/CaptureModal';
+import { AllLinksModal } from './components/AllLinksModal';
 import { BrainChat } from './pages/BrainChat';
 import { Inbox } from './pages/Inbox';
 import { KnowledgeView } from './pages/KnowledgeView';
@@ -15,6 +16,7 @@ import { BrainStats, SourceType, KnowledgeRecord } from './types';
 export function App() {
   const [activeTab, setActiveTab] = useState('brain');
   const [isCaptureOpen, setIsCaptureOpen] = useState(false);
+  const [isLinksOpen, setIsLinksOpen] = useState(false);
   const [stats, setStats] = useState<BrainStats | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string | undefined>(undefined);
   const [shareData, setShareData] = useState<{ url?: string; text?: string; title?: string } | null>(null);
@@ -136,6 +138,7 @@ export function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenCapture={() => handleOpenCapture('text')}
+        onOpenLinks={() => setIsLinksOpen(true)}
         stats={stats}
         isSyncing={isAutoSyncing}
       />
@@ -163,7 +166,7 @@ export function App() {
         {activeTab === 'ideas' && <IdeasFactory />}
         {activeTab === 'memories' && <MemoriesView />}
         {activeTab === 'sources' && <SourcesView />}
-        {activeTab === 'settings' && <Settings />}
+        {activeTab === 'settings' && <Settings onOpenLinks={() => setIsLinksOpen(true)} />}
       </main>
 
       {/* Quick Capture Modal */}
@@ -178,6 +181,12 @@ export function App() {
           setCaptureCategory(undefined);
         }}
         onSuccess={handleCaptureSuccess}
+      />
+
+      {/* All Links & Connected Apps Modal */}
+      <AllLinksModal
+        isOpen={isLinksOpen}
+        onClose={() => setIsLinksOpen(false)}
       />
     </div>
   );

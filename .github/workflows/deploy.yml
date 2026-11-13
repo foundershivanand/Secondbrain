@@ -16,11 +16,18 @@ jobs:
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            api/package-lock.json
+            web/package-lock.json
 
       - name: 📦 Install root dependencies
         run: npm ci
+
+      - name: 📦 Install backend dependencies
+        run: cd api && npm ci
 
       - name: 📦 Install frontend dependencies
         run: cd web && npm ci
@@ -31,6 +38,9 @@ jobs:
       - name: 🔍 TypeScript Typecheck
         run: npm run typecheck
 
+      - name: 🏗️ Build Web Application Bundle
+        run: npm run build
+
       - name: ☁️ Deploy Cloudflare Worker Edge API
         uses: cloudflare/wrangler-action@v3
         with:
@@ -38,9 +48,6 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: 'api'
           command: deploy
-
-      - name: 🏗️ Build Web Application Bundle
-        run: npm run build
 
       - name: 🚀 Deploy Web App to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
